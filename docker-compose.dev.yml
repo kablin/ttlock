@@ -1,0 +1,92 @@
+version: '3'
+services:
+
+
+  ttlockdb:
+      container_name: ttlock-db
+      image: postgres
+      restart: always
+      environment:
+         POSTGRES_PASSWORD:  ${DB_PASSWORD}
+      volumes:
+        - ./docker/db/:/var/lib/postgresql/data
+      ports:
+        - '5532:5432'
+      networks:
+        - ttlock-net
+
+  ttlocknginx:
+    container_name: ttlock-nginx
+    depends_on:
+      - ttlockfpm
+    build:
+      context: ./
+      dockerfile: docker/nginx.docker
+
+    volumes:
+      - ./:/var/www
+    ports:
+      - "452:443"
+      - "122:80"
+    networks:
+      - ttlock-net
+
+
+
+  ttlockpfpm:
+    container_name: ttlock-fpm
+    build:
+      context: ./
+      args:
+        USER_ID: ${USER_ID:-0}
+        GROUP_ID: ${GROUP_ID:-0}
+      dockerfile: docker/php-fpm.docker
+    volumes:
+      - ./:/var/www
+    environment:
+      - "DB_PORT=5432"
+      - "DB_HOST=ttlockdb"
+    networks:
+      - ttlock-net
+
+
+
+  ttlockcli:
+    container_name: ttlock-cli
+    restart: always
+    build:
+      context: ./
+      args:
+        USER_ID: ${USER_ID:-0}
+        GROUP_ID: ${GROUP_ID:-0}
+      dockerfile: docker/php-cli.docker
+    volumes:
+        - ./:/var/www
+        - ./docker/composer:/var/composer
+    tty: true
+    environment:
+        - "DB_PORT=5432"
+        - "DB_HOST=ttlockdb"
+        - "COMPOSER_MEMORY_LIMIT=-1"
+
+    ports:
+      - "7023:8000"
+    networks:
+      - ttlock-net
+
+  ttlockadminer:
+    image: adminer
+    restart: always
+    ports:
+      - 5002:8080
+    networks:
+      - ttlock-net
+
+
+networks:
+  ttlock-net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+
+   

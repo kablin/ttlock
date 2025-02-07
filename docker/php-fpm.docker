@@ -1,0 +1,43 @@
+FROM php:8.2-fpm
+
+ARG USER_ID
+ARG GROUP_ID
+
+
+RUN apt-get update && apt-get install -y  libmcrypt-dev libpq-dev libfreetype6-dev libjpeg62-turbo-dev libwebp-dev libpng-dev cron locales supervisor gnupg libicu-dev \
+    && docker-php-ext-install  exif \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql\
+    && docker-php-ext-configure gd --with-freetype --with-webp --with-jpeg \
+    && docker-php-ext-configure intl \
+	&& docker-php-ext-install  pdo pdo_pgsql \
+    && docker-php-ext-install -j$(nproc) gd intl \
+	&& sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen \
+	&& sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+	&& locale-gen \
+	&& update-locale LANG=ru_RU.UTF-8 \
+	&& echo "LANGUAGE=ru_RU.UTF-8" >> /etc/default/locale \
+	&& echo "LC_ALL=ru_RU.UTF-8" >> /etc/default/locale \
+
+
+# PHP
+COPY ./docker/php.ini /usr/local/etc/php/php.ini
+
+
+# User
+RUN if [ ${USER_ID:-0} -ne 0 ] && [ ${GROUP_ID:-0} -ne 0 ]; then \
+    userdel -f www-data &&\
+    if getent group www-data ; then groupdel www-data; fi &&\
+    groupadd -g ${GROUP_ID} www-data &&\
+    useradd -l -u ${USER_ID} -g www-data www-data &&\
+    install -d -m 0755 -o www-data -g www-data /var/www &&\
+    chown --changes --silent --no-dereference --recursive \
+          --from=33:33 ${USER_ID}:${GROUP_ID} \
+        /var/www \
+
+;fi
+
+WORKDIR /var/www
+
+EXPOSE 9000
+
+#CMD ["sh","-c", "cron && /usr/bin/supervisord"]

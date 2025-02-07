@@ -1,0 +1,41 @@
+FROM php:8.2-cli
+
+ARG USER_ID
+ARG GROUP_ID
+
+RUN apt-get update &&   apt-get install -y libxml2-dev  libpng-dev  libgd-dev  
+RUN apt-get update && apt-get install -y libzip-dev zip unzip libpq-dev libjpeg-dev
+RUN php -r "copy ('https://getcomposer.org/installer', '/var/composer-setup.php');" && php /var/composer-setup.php --install-dir=/usr/bin/ --filename=composer
+RUN docker-php-ext-install soap
+RUN docker-php-ext-configure pgsql -with-pgsql
+RUN docker-php-ext-install  pdo pdo_pgsql  pgsql zip
+
+
+RUN   docker-php-ext-configure gd \
+        --with-jpeg 
+RUN docker-php-ext-install gd
+RUN docker-php-ext-enable gd  
+
+
+
+RUN if [ ${USER_ID:-0} -ne 0 ] && [ ${GROUP_ID:-0} -ne 0 ]; then \
+    userdel -f www-data &&\
+    if getent group www-data ; then groupdel www-data; fi &&\
+    groupadd -g ${GROUP_ID} www-data &&\
+    useradd -l -u ${USER_ID} -g www-data www-data &&\
+    install -d -m 0755 -o www-data -g www-data /var/www &&\
+	 chown --changes --silent --no-dereference --recursive \
+              --from=33:33 ${USER_ID}:${GROUP_ID} \
+            /var/www \
+;fi
+
+RUN mkdir -p /home/www-data/.config/psysh &&\
+	chmod -R 755 /home/www-data/.config &&\
+	chown -R www-data:www-data /home/www-data
+
+USER www-data
+
+
+RUN echo 'alias pa="php artisan"' >> ~/.bashrc
+
+WORKDIR /var/www
