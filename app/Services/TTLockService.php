@@ -142,39 +142,7 @@ class TTLockService
 	}
 
 
-	public function setPassageModeOn()
-	{
 
-		$result = $this->request('/v3/lock/configPassageMode', [
-			'lockId' => $this->lock_id,
-			'passageMode' => 1,
-			'isAllDay' => 1,
-			'weekDays' => '[1,2,3,4,5,6,7]',
-			'autoUnlock' => 1,
-			'type' => 2,
-		]);
-
-		$this->openLock();
-
-
-		return  $result;
-	}
-
-
-	public function setPassageModeOff()
-	{
-		$result = $this->request('/v3/lock/configPassageMode', [
-			'lockId' => $this->lock_id,
-			'passageMode' => 2,
-
-			'type' => 2,
-		]);
-
-
-
-
-		return  $result;
-	}
 
 
 	public function changeOpenTime($time = 10)
