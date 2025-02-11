@@ -35,7 +35,7 @@ class JobsService
     {
         $uuid = $this->startLockJob();
         info($uuid->job_id);
-
+        
         CreateLockJob::dispatch()->onQueue('default')->chain([
             new SetJobStatus($uuid->id, true)
         ]);

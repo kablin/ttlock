@@ -12,3 +12,7 @@ Route::get('/user', function (Request $request) {
 Route::get('/lock_create', function (Request $request) {
     (new JobsService(1))->createLock();
 });
+
+Route::post('/callback', function (Request $request) {
+    info('callback',$request->all());
+ });

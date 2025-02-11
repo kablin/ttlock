@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class SetJobStatus implements ShouldQueue
 {
@@ -33,6 +34,14 @@ class SetJobStatus implements ShouldQueue
             $job->status = $this->status;
             $job->save();
             info('status is  Done');
+            $data['job'] = $job->job_id;
+            $data['data'] = 'status is  Done';
+
+            Http::withBody(json_encode($data), 'application/json')
+                //                ->withOptions([
+                //                    'headers' => ''
+                //                ])
+                ->post($job->user->callback);
         }
     }
 }
