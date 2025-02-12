@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\LockData\LockOption;
 
 return new class extends Migration
 {
@@ -11,13 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lock_jobs', function (Blueprint $table) {
-            $table->id();
-            $table->boolean('status')->default(false);
-            $table->uuid('job_id');
-            $table->bigInteger('user_id')->nullable();
-            $table->timestamps();
-        });
+        LockOption::create(['option_name'=>'electricQuantity']);
+        LockOption::create(['option_name'=>'lockAlias']);
+        LockOption::create(['option_name'=>'noKeyPwd']);
+        LockOption::create(['option_name'=>'timezoneRawOffset']);
+        LockOption::create(['option_name'=>'error']);
     }
 
     /**
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lock_jobs');
+        //
     }
 };

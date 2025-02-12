@@ -7,6 +7,8 @@ namespace App\Services;
 
 
 use App\Models\Lock;
+use App\Models\LockApiLog;
+use App\Models\LocksCredential;
 use App\Models\LocksToken;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
@@ -28,7 +30,7 @@ class TTLockService
 	//		public ?object $user;
 
 
-	public function __construct(private Lock $lock) {}
+	public function __construct(private ?Lock $lock = null) {}
 
 
 	/*	public function setTokens($tokens)
@@ -64,31 +66,41 @@ class TTLockService
 				return $this;
 		}
 */
-	public function auth(): array
+	public  function auth(LocksCredential $cred): array
 	{
 
+		LockApiLog::create([
+			'api_method	' => 'oauth2',
+		]);
+
 		return $this->request('/oauth2/token', [
-			'username' => (is_int($this->lock?->tocken?->credential->login)) ? '+' . $this->lock?->tocken?->credential->login : $this->lock?->tocken?->credential->login,
-			'password' => ($this->isValidMd5($this->lock?->tocken?->credential->password)) ? $this->lock?->tocken?->credential->password : md5($this->lock?->tocken?->credential->password),
+			'username' => (is_int($cred->login)) ? '+' . $cred->login : $cred->login,
+			'password' => ($this->isValidMd5($cred->password)) ? $cred->password : md5($cred->password),
 			'client_secret' => $this->client_secret,
 		]);
 	}
 
-	public function refreshToken(): array
+	public function refreshToken(LocksCredential $cred): array
 	{
+
+		LockApiLog::create([
+			'api_method	' => 'refresh_token',
+		]);
+
+
 		$request = $this->request('/oauth2/token', [
 			'grant_type' => 'refresh_token',
-			'refresh_token' => $this->lock?->token->refresh_token,
+			'refresh_token' => $cred->token->refresh_token,
 			'client_secret' => $this->client_secret,
 		]);
 
 		if ($request['status'] && isset($request['data']['access_token'])) {
-			info("У замка с id $this->lock->id обновился RefreshToken");
-			$this->lock->token->access_token = $request['data']['access_token'];
-			$this->lock->token->refresh_token = $request['data']['refresh_token'];
-			$this->lock->token->expires_in = Carbon::now()->addSeconds($request['data']['expires_in'])->toDateTimeString();
+			info("У ttlock credentional с id $cred->id обновился RefreshToken");
+			$cred->token->access_token = $request['data']['access_token'];
+			$cred->token->refresh_token = $request['data']['refresh_token'];
+			$cred->expires_in = Carbon::now()->addSeconds($request['data']['expires_in'])->toDateTimeString();
 
-			$this->lock?->token->save();
+			$cred->token->save();
 		}
 
 		return $request;
@@ -96,15 +108,17 @@ class TTLockService
 
 	public function getLockList()
 	{
-		$request = Cache::remember('lock_profile_list_' . $this->lock?->token->uid, 300, function () {
-			return $this->request('/v3/lock/list', [
-				'accessToken' => $this->lock?->token->access_token,
-				'pageNo' => 1,
-				'pageSize' => 10000,
-			]);
-		});
 
-		return $request;
+		$this->lock->api_logs()->create([
+			'api_method	' => '/v3/lock/list',
+		]);
+
+		return $this->request('/v3/lock/list', [
+			'accessToken' => $this->lock?->user->token->access_token,
+			'pageNo' => 1,
+			'pageSize' => 10000,
+		]);
+
 	}
 
 
@@ -558,7 +572,7 @@ class TTLockService
 		return strlen($md5) == 32 && ctype_xdigit($md5);
 	}
 
-/*	public function deleteLock()
+	/*	public function deleteLock()
 	{
 		$request = $this->request('/v3/lock/delete', [
 			'lockId' => $this->lock_id,

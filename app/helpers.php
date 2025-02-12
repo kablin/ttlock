@@ -8,20 +8,19 @@ use App\Services\TTLockService;
 
 
 if (!function_exists('updateRefreshToken')) {
-		function updateRefreshToken( \App\Models\Lock $lock): bool
+		function updateRefreshToken( \App\Models\LocksCredential $credential): bool
 		{
 				try {
-						if (!$lock?->credential->login || !$lock?->credential->password) {
+						if (!$credential->login || !$credential->password) {
 								return false;
 						}
                          
-                        $servise =  new TTLockService($lock);
-						$auth = $servise->auth(true);
+                        $servise =  new TTLockService();
+						$auth = $servise->auth($credential);
 						if ($auth['status']) {
 
 								$tokens = LocksToken::updateOrCreate([
-										'lock_id' => $lock->id,
-										'credential_id' => $lock?->credential->id
+										'credential_id' => $credential->id
 								], [
 										'access_token' => $auth['data']['access_token'],
 										'uid' => $auth['data']['uid'],
@@ -29,19 +28,7 @@ if (!function_exists('updateRefreshToken')) {
 										'refresh_token' => $auth['data']['refresh_token'],
 								]);
 
-								$servise->refreshToken();
-								$locks = $servise->getLockList();
-								$find_lock = [];
-
-								foreach ($locks['data']['list'] as $datum) {
-										if ($datum['lockId'] == $lock->lock_id) {
-												$find_lock['lock_alias'] = $datum['lockAlias'] ?? null;
-												$find_lock['no_key_pwd'] = $datum['noKeyPwd'] ?? null;
-												$find_lock['electric_quantity'] = $datum['electricQuantity'] ?? 0;
-										}
-								}
-
-								$lock->update($find_lock);
+							//	$servise->refreshToken($credential);  ???
 
 								return true;
 						}

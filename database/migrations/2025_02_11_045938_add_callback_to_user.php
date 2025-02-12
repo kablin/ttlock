@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+    /**  172.31.0.2/api/callback
      * Run the migrations.
      */
     public function up(): void
@@ -17,6 +17,7 @@ return new class extends Migration
 
         Schema::table('lock_jobs', function (Blueprint $table) {
             $table->json('data')->nullable();
+            $table->string('task')->nullable();
         });
 
 
@@ -33,6 +34,7 @@ return new class extends Migration
 
         Schema::table('lock_jobs', function (Blueprint $table) {
             $table->dropColumn('data');
+            $table->dropColumn('task');
         });
     }
 };

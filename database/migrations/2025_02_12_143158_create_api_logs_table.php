@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lock_jobs', function (Blueprint $table) {
+        Schema::create('lock_api_logs', function (Blueprint $table) {
             $table->id();
-            $table->boolean('status')->default(false);
-            $table->uuid('job_id');
-            $table->bigInteger('user_id')->nullable();
+            $table->bigInteger('lock_id')->nullable();
+            $table->string('api_method');
+            $table->json('params')->nullable();
             $table->timestamps();
+
+            $table->foreign('lock_id')->references('id')->on('locks')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lock_jobs');
+        Schema::dropIfExists('lock_api_logs');
     }
 };

@@ -37,7 +37,6 @@ return new class extends Migration
 
         Schema::create('locks_tokens', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('lock_id');
             $table->bigInteger('credential_id');
             $table->string('access_token');
             $table->string('uid')->nullable();

@@ -23,6 +23,10 @@ class LocksCredential extends Model
         return $this->hasOne(User::class, 'id', 'user_id');
     }
     
+    public function token()
+    {
+        return $this->hasOne(LocksToken::class, 'id', 'user_id');
+    }
 
     private function isValidMd5($md5 = '') {
         return strlen($md5) == 32 && ctype_xdigit($md5);

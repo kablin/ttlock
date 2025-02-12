@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Lock;
+use App\Models\LocksCredential;
+use App\Services\JobsService;
 use Illuminate\Console\Command;
 
 class UpdateRefreshTokenLocksCommand extends Command
@@ -28,11 +29,8 @@ class UpdateRefreshTokenLocksCommand extends Command
      */
     public function handle()
     {
-	    \App\Models\Lock::query()->get()->map(function ($l) {
-		    /** @var Lock $l */
-		    if ($l?->token?->credential) {
-			    updateRefreshToken($l);
-		    }
+	    \App\Models\LocksCredential::query()->get()->map(function ($l) {
+                (new JobsService())->refreshLockTocken($l->id);
 	    });
         return Command::SUCCESS;
     }
