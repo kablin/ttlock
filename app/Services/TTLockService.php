@@ -7,6 +7,7 @@ namespace App\Services;
 
 
 use App\Models\Lock;
+use App\Models\User;
 use App\Models\LockApiLog;
 use App\Models\LocksCredential;
 use App\Models\LocksToken;
@@ -30,7 +31,7 @@ class TTLockService
 	//		public ?object $user;
 
 
-	public function __construct(private ?Lock $lock = null) {}
+	public function __construct(private ?User $user = null) {}
 
 
 	/*	public function setTokens($tokens)
@@ -69,28 +70,27 @@ class TTLockService
 	public  function auth(LocksCredential $cred): array
 	{
 
-		LockApiLog::create([
-			'api_method	' => 'oauth2',
-		]);
-
-		return $this->request('/oauth2/token', [
+		$data = $this->request('/oauth2/token', [
 			'username' => (is_int($cred->login)) ? '+' . $cred->login : $cred->login,
 			'password' => ($this->isValidMd5($cred->password)) ? $cred->password : md5($cred->password),
 			'client_secret' => $this->client_secret,
 		]);
+
+		LockApiLog::create([
+			'api_method	' => 'oauth2',
+			'params' => $data,
+		]);
+
+		return $data;
 	}
 
 	public function refreshToken(LocksCredential $cred): array
 	{
 
-		LockApiLog::create([
-			'api_method	' => 'refresh_token',
-		]);
-
-
 		$request = $this->request('/oauth2/token', [
 			'grant_type' => 'refresh_token',
 			'refresh_token' => $cred->token->refresh_token,
+			'accessToken' => $cred->token->access_token,
 			'client_secret' => $this->client_secret,
 		]);
 
@@ -103,51 +103,67 @@ class TTLockService
 			$cred->token->save();
 		}
 
+		LockApiLog::create([
+			'api_method	' => 'refresh_token',
+			'params' => $request,
+		]);
+
 		return $request;
 	}
 
 	public function getLockList()
 	{
-
-		$this->lock->api_logs()->create([
-			'api_method	' => '/v3/lock/list',
-		]);
-
-		return $this->request('/v3/lock/list', [
-			'accessToken' => $this->lock?->user->token->access_token,
+		$data = $this->request('/v3/lock/list', [
 			'pageNo' => 1,
 			'pageSize' => 10000,
 		]);
 
+		LockApiLog::create([
+			'api_method	' => '/v3/lock/list',
+			'params	' => $data,
+			'user_id' => $this->user?->id,
+		]);
+
+		return   $data;
+	}
+
+
+	public function getLockDetails(Lock $lock)
+	{
+		$data = $this->request('/v3/lock/detail', [
+			'lockId' => $lock->lock_id,
+		]);
+
+		$lock->api_logs()->create([
+			'api_method	' => '/v3/lock/detail',
+			'params	' => $data,
+			'user_id' => $this->user?->id,
+		]);
+		return   $data;
 	}
 
 
 
-	/*
-	public function getLockDetails()
+	public function getLockEvents(Lock $lock, $count = 100, $pageNo = 1)
 	{
-		return $this->request('/v3/lock/detail', [
-			'lockId' => $this->lock_id,
+		$data = [
+			'lockId' => $lock->lock_id,
+			'pageNo' => $pageNo,
+			'pageSize' => $count,
+		];
+
+		$request =   $this->request('/v3/lockRecord/list', $data);
+
+		$lock->api_logs()->create([
+			'api_method	' => '/v3/lockRecord/list',
+			'params	' => $request,
 		]);
-		$request = Cache::remember('lock_details_' . $this->lock_id, 300, function () {
-			return $this->request('/v3/lock/detail', [
-				'lockId' => $this->lock_id,
-			]);
-		});
 
 		return $request;
 	}
 
-	public function getLockEvents($count = 100, $pageNo = 1)
-	{
-		$data = [
-			'lockId' => $this->lock_id,
-			'pageNo' => $pageNo,
-			'pageSize' => $count,
-		];
-		return $this->request('/v3/lockRecord/list', $data);
-	}
 
+	/*
 	public function openLock()
 	{
 		return $this->request('/v3/lock/unlock', [
@@ -175,14 +191,17 @@ class TTLockService
 			'lockId' => $this->lock_id,
 		]);
 	}
-
-	public function newKey($code, $name = 'Ключ от RentySoft.ru', $start = null, $end = null): array
+*/
+	public function newKey($code, Lock $lock, $begin = null, $end = null): array
 	{
-		if (is_null($start)) {
-			$start = Carbon::now()->unix();
+		$name = 'Ключ от Renty api';
+
+		if (is_null($begin)) {
+			$begin = Carbon::now()->unix();
 		} else {
-			$start = Carbon::parse($start)->unix();
+			$begin = Carbon::parse($begin)->unix();
 		}
+
 
 		if (is_null($end)) {
 			$end = Carbon::today()->endOfDay()->unix();
@@ -191,13 +210,21 @@ class TTLockService
 		}
 
 		$request = $this->request('/v3/keyboardPwd/add', [
-			'lockId' => $this->lock_id,
+			'lockId' => $lock->lock_id,
 			'keyboardPwd' => $code,
 			'addType' => 2,
 			'keyboardPwdName' => $name,
-			'startDate' => $start * 1000,
+			'startDate' => $begin * 1000,
 			'endDate' => $end * 1000,
 		]);
+
+
+		$lock->api_logs()->create([
+			'api_method	' => '/v3/keyboardPwd/add',
+			'params	' => $request,
+			'user_id' => $this->user?->id,
+		]);
+
 
 		if ($request['status']) {
 			return [
@@ -214,13 +241,13 @@ class TTLockService
 			];
 		}
 	}
-
-	public function changePeriod($keyId, $start = null, $end = null)
+	/*
+	public function changePeriod($keyId, $begin = null, $end = null)
 	{
-		if (is_null($start)) {
-			$start = Carbon::now()->unix();
+		if (is_null($begin)) {
+			$begin = Carbon::now()->unix();
 		} else {
-			$start = Carbon::parse($start)->unix();
+			$begin = Carbon::parse($begin)->unix();
 		}
 
 		if (is_null($end)) {
@@ -231,7 +258,7 @@ class TTLockService
 
 		$request = $this->request('/v3/key/changePeriod', [
 			'keyId' => $keyId,
-			'startDate' => $start * 1000,
+			'startDate' => $begin * 1000,
 			'endDate' => $end * 1000,
 		]);
 
@@ -250,12 +277,12 @@ class TTLockService
 		}
 	}
 
-	public function updateKey($pwdID, $start = null, $end = null)
+	public function updateKey($pwdID, $begin = null, $end = null)
 	{
-		if (is_null($start)) {
-			$start = Carbon::now()->unix();
+		if (is_null($begin)) {
+			$begin = Carbon::now()->unix();
 		} else {
-			$start = Carbon::parse($start)->setTimezone('Europe/Moscow')->unix();
+			$begin = Carbon::parse($begin)->setTimezone('Europe/Moscow')->unix();
 		}
 
 		if (is_null($end)) {
@@ -268,7 +295,7 @@ class TTLockService
 			'lockId' => $this->lock_id,
 			'keyboardPwdId' => $pwdID,
 			'changeType' => 2,
-			'startDate' => $start * 1000,
+			'startDate' => $begin * 1000,
 			'endDate' => $end * 1000,
 		]);
 
@@ -367,7 +394,7 @@ class TTLockService
 		if ($url[0] != '/') $url = '/' . $url;
 
 		$array = array_merge([
-			'accessToken' => $this->tokens->access_token ?? '',
+			'accessToken' => $this->user?->token?->access_token ?? '',
 			'client_id' => $this->client_id,
 			'clientId' => $this->client_id,
 			'date' => round(microtime(true) * 1000) + 1000,
@@ -383,11 +410,8 @@ class TTLockService
 
 			if (isset($data['errcode']) && $data['errcode'] != 0) {
 				$text = "у замка";
-				if ($this->lock) {
-					$text = $this->lock->is_external ? 'у наружного замка' : 'у основного замка';
-				}
 
-				$default_msg = "На объекте: {$this->lock?->apartment?->title} $text";
+				$default_msg = "";
 
 				if ($data['errcode'] == 1) {
 					$status = false;

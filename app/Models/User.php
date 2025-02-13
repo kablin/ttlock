@@ -48,6 +48,12 @@ class User extends Authenticatable
         ];
     }
 
+    public function locks() 
+    {
+        return $this->hasMany(Lock::class);
+    }
+
+
 
     public function token(): HasOneThrough
     {

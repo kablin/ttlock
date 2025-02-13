@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Models\Lock\LockData\LockOption;
+use App\Models\LockData\LockOption;
 
 trait OptionValueTrait
 {

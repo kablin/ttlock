@@ -3,17 +3,16 @@
 
 namespace App\Schedules;
 
+use App\Services\JobsService;
 use App\Models\Lock;
 
 class UpdateRefreshTokenLocks
 {
     public function __invoke()
     {
-        \App\Models\Lock::query()->get()->map(function ($l) {
-            /** @var Lock $l */
-		        if ($l?->token?->credential) {
-				        updateRefreshToken( $l);
-		        }
+
+        \App\Models\LocksCredential::query()->get()->map(function ($l) {
+            (new JobsService())->refreshLockTocken($l->id);
         });
     }
 }

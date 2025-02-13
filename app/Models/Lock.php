@@ -9,15 +9,15 @@ use App\Models\User;
 
 use App\Models\LockData\LockValue;
 use App\Models\LockApiLog;
-use App\Services\TTLockService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Traits\OptionValueTrait;
+use App\Models\LockEvent;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lock extends Model
 {
-    use HasFactory, OptionValueTrait;
+    use HasFactory, OptionValueTrait, SoftDeletes;
   
     protected $guarded = [];
     
@@ -33,11 +33,11 @@ class Lock extends Model
     }
 */
 
-  /*  public function events()
+    public function events()
     {
         return $this->hasMany(LockEvent::class, 'lock_id', 'lock_id');
     }
-*/
+
     public function values() 
     {
         return $this->hasMany(LockValue::class,'lock_id','id');
@@ -47,6 +47,8 @@ class Lock extends Model
     {
         return $this->hasMany(LockApiLog::class,'lock_id','id');
     }
+
+
 
 
 }

@@ -12,8 +12,9 @@ use App\Models\LocksToken;
 use Carbon\Carbon;
 use App\Jobs\CreateLockJob;
 use App\Jobs\GetLockListJob;
-use App\Jobs\SetJobStatus;
-use App\Jobs\RefreshLockToken;
+use App\Jobs\SetStatusJob;
+use App\Jobs\RefreshLockTokenJob;
+use App\Jobs\AddKeyToLockJob;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -39,7 +40,7 @@ class JobsService
         info($uuid->job_id);
         
         CreateLockJob::dispatch()->onQueue('default')->chain([
-            new SetJobStatus($uuid->id, true)
+            new SetStatusJob($uuid->id, true)
         ]);
 
     }
@@ -50,8 +51,8 @@ class JobsService
         $uuid = $this->startLockJob('getLockList');
         info($uuid->job_id);
         
-        GetLockListJob::dispatch()->onQueue('default')->chain([
-            new SetJobStatus($uuid->id, true)
+        GetLockListJob::dispatch($uuid->id)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id, true)
         ]);
 
     }
@@ -62,11 +63,26 @@ class JobsService
     {
         $uuid = $this->startLockJob('startLockJob');
         
-        RefreshLockToken::dispatch($id)->onQueue('default')->chain([
-            new SetJobStatus($uuid->id, true)
+        RefreshLockTokenJob::dispatch($id)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id, true)
         ]);
 
     }
+
+
+    public function addKeyToLock($lock_id,$code,$begin,$end)
+    {
+        $uuid = $this->startLockJob('startLockJob');
+        $lock = auth()->user->locks->find($lock_id);
+        AddKeyToLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0 ,$code, $begin,$end)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true: false)
+        ]);
+
+    }
+
+
+
+   
 
 
 }

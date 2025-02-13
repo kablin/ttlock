@@ -13,6 +13,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use App\Models\LockJob;
+use App\Services\TTLockService;
 
 class GetLockListJob implements ShouldQueue
 {
@@ -34,8 +35,36 @@ class GetLockListJob implements ShouldQueue
 
         if ($job = LockJob::find($this->job_id)) {
 
+
+            $servise =  new TTLockService($job->user);
+
+            $locks_data = $servise->getLockList();
+
+            //to-do   Удаляем отсутствующие
+
+
+            foreach ($job->user->locks as $lock)
+            {
+                $details = $servise->getLockDetails($lock);
+                $lock_data['lock_alias'] = $details['data']['lockAlias'] ?? null;
+                $lock_data['no_key_pwd'] = $details['data']['noKeyPwd'] ?? null;
+                $lock_data['electric_quantity'] = $details['data']['electricQuantity'] ?? 0;
+                $lock_data['lock_data'] = $details['data']['lockData'] ?? null;
+                $lock->update($lock_data);
+
+                $lock->saveOptionValueByName('error',null);
+                $lock->saveOptionValueByName('electricQuantity',$details['data']['electricQuantity'] ?? 0);
+                $lock->saveOptionValueByName('lockAlias', $details['data']['lockAlias']);
+                $lock->saveOptionValueByName('noKeyPwd',$details['data']['noKeyPwd']);
+                $lock->saveOptionValueByName('timezoneRawOffset',$details['data']['timezoneRawOffset']);								
+
+            }
+
+
+
+
             $data['job'] = $job->job_id;
-            $data['data'] = 'list is Done';
+            $data['data'] = $locks_data;
 
             Http::withBody(json_encode($data), 'application/json')
                 //                ->withOptions([

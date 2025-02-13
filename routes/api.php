@@ -9,15 +9,24 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+
+
 Route::get('/lock_create', function (Request $request) {
     (new JobsService(1))->createLock();
 });
 
 
-Route::get('/v1/get_lock_list', function (Request $request) {
+
+
+
+Route::post('/v1/get_lock_list', function (Request $request) {
     (new JobsService(1))->getLockList();
 });
 
+
+Route::post('/v1/add_code_to_lock', function (Request $request) {
+    (new JobsService(1))->addKeyToLock($request->lock_id,$request->code, $request->begin,$request->end);
+});
 
 
 

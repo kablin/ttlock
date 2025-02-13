@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('lock_api_logs', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('lock_id')->nullable();
+            $table->bigInteger('user_id')->nullable();
             $table->string('api_method');
             $table->json('params')->nullable();
             $table->timestamps();

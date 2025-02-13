@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('electric_quantity')->default(0);
             $table->string('no_key_pwd')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
 
