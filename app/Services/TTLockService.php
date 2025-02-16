@@ -54,19 +54,7 @@ class TTLockService
 
 	*/
 
-	/*	public function byToken($id = null)
-		{
-				if (is_null($id) && !empty($this->lock_id)) {
-						$this->tokens = Lock::withoutGlobalScopes()->where('lock_id', $this->lock_id)->first()?->token;
-				} else {
-						$this->tokens = LocksToken::findOr($id, fn() => null);
-				}
-        if (Carbon::parse($this->tokens?->expires_in) < Carbon::now()) {
-					$this->refreshToken();
-        }
-				return $this;
-		}
-*/
+
 	public  function auth(LocksCredential $cred): array
 	{
 
@@ -364,15 +352,24 @@ class TTLockService
 			];
 		}
 	}
-
-	public function deleteKey($pwdID, $isShortMsg = false)
+*/
+	public function deleteKey(Lock $lock, $pwdID)
 	{
 
 		$request = $this->request('/v3/keyboardPwd/delete', [
-			'lockId' => $this->lock_id,
+			'lockId' => $lock->lock_id,
 			'deleteType' => 2,
 			'keyboardPwdId' => $pwdID,
 		]);
+
+
+		$lock->api_logs()->create([
+			'api_method	' => '/v3/keyboardPwd/delete',
+			'params	' => $request,
+			'user_id' => $this->user?->id,
+		]);
+
+		return $request;
 
 		if ($request['status']) {
 			return [
@@ -383,12 +380,12 @@ class TTLockService
 		} else {
 			return [
 				'status' => false,
-				'msg' => $isShortMsg ? $request['msg'] : 'Ошибка удаления ключа. Ошибка: ' . $request['msg'],
+				'msg' =>  $request['msg'] ,
 				'type' => 'danger',
 			];
 		}
 	}
-
+/*
 	public function gatewayStatus()
 	{
 		$request = $this->request('/v3/lock/queryOpenState', [

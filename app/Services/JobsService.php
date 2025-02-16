@@ -17,6 +17,7 @@ use App\Jobs\SetPassageModeOffJob;
 use App\Jobs\SetPassageModeOnJob;
 use App\Jobs\RefreshLockTokenJob;
 use App\Jobs\AddKeyToLockJob;
+use App\Jobs\DeleteKeyJob;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -104,7 +105,15 @@ class JobsService
 
     }
 
-   
+    public function deleteKey($lock_id, $pwdID)
+    {
+        $uuid = $this->startLockJob('deleteKey');
+        $lock = auth()->user->locks->find($lock_id);
+        DeleteKeyJob::dispatch($uuid->id, $lock ? $lock?->id : 0 , $pwdID)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true: false)
+        ]);
+
+    }
 
 
 }

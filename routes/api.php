@@ -37,7 +37,9 @@ Route::post('/v1/set_lock_passage_mode_off', function (Request $request) {
     (new JobsService(1))->setPassageModeOff($request->lock_id);
 });
 
-
+Route::post('/v1/delete_code_from_lock', function (Request $request) {
+    (new JobsService(1))->deleteKey($request->lock_id,$request->code_id);
+});
 
 
 Route::post('/callback', function (Request $request) {
