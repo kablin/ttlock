@@ -13,6 +13,8 @@ use Carbon\Carbon;
 use App\Jobs\CreateLockJob;
 use App\Jobs\GetLockListJob;
 use App\Jobs\SetStatusJob;
+use App\Jobs\SetPassageModeOffJob;
+use App\Jobs\SetPassageModeOnJob;
 use App\Jobs\RefreshLockTokenJob;
 use App\Jobs\AddKeyToLockJob;
 use Illuminate\Support\Facades\App;
@@ -61,7 +63,7 @@ class JobsService
 
     public function refreshLockTocken(int $id)
     {
-        $uuid = $this->startLockJob('startLockJob');
+        $uuid = $this->startLockJob('refreshLockTocken');
         
         RefreshLockTokenJob::dispatch($id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
@@ -72,7 +74,7 @@ class JobsService
 
     public function addKeyToLock($lock_id,$code,$begin,$end)
     {
-        $uuid = $this->startLockJob('startLockJob');
+        $uuid = $this->startLockJob('addKeyToLock');
         $lock = auth()->user->locks->find($lock_id);
         AddKeyToLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0 ,$code, $begin,$end)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true: false)
@@ -81,6 +83,26 @@ class JobsService
     }
 
 
+    public function setPassageModeOn($lock_id)
+    {
+        $uuid = $this->startLockJob('setPassageModeOn');
+        $lock = auth()->user->locks->find($lock_id);
+        SetPassageModeOnJob::dispatch($uuid->id, $lock ? $lock?->id : 0 )->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true: false)
+        ]);
+
+    }
+
+
+    public function setPassageModeOff($lock_id)
+    {
+        $uuid = $this->startLockJob('setPassageModeOff');
+        $lock = auth()->user->locks->find($lock_id);
+        SetPassageModeOffJob::dispatch($uuid->id, $lock ? $lock?->id : 0 )->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true: false)
+        ]);
+
+    }
 
    
 

@@ -163,16 +163,23 @@ class TTLockService
 	}
 
 
-	/*
-	public function openLock()
+	
+	public function openLock(Lock $lock)
 	{
-		return $this->request('/v3/lock/unlock', [
-			'lockId' => $this->lock_id,
+		$result =  $this->request('/v3/lock/unlock', [
+			'lockId' => $lock->lock_id,
 		]);
+
+		$lock->api_logs()->create([
+			'api_method	' => '/v3/lock/unlock',
+			'params	' => $result,
+		]); 
+
+		return  $result;
 	}
 
 
-
+/*
 
 
 	public function changeOpenTime($time = 10)
@@ -192,6 +199,50 @@ class TTLockService
 		]);
 	}
 */
+
+
+
+	public function setPassageModeOn(Lock $lock)
+	{
+
+		$result = $this->request('/v3/lock/configPassageMode', [
+			'lockId' => $lock->lock_id,
+			'passageMode' => 1,
+			'isAllDay' => 1,
+			'weekDays' => '[1,2,3,4,5,6,7]',
+			'autoUnlock' => 1,
+			'type' => 2,
+		]);
+
+		$lock->api_logs()->create([
+			'api_method	' => '/v3/lock/configPassageMode',
+			'params	' => $result,
+		]);
+
+		$this->openLock($lock);
+
+		return  $result;
+	}
+
+
+	public function setPassageModeOff(Lock $lock)
+	{
+		$result = $this->request('/v3/lock/configPassageMode', [
+			'lockId' => $lock->lock_id,
+			'passageMode' => 2,
+			'type' => 2,
+		]);
+
+		$lock->api_logs()->create([
+			'api_method	' => '/v3/lock/configPassageMode',
+			'params	' => $result,
+		]);
+		return  $result;
+	}
+
+
+
+
 	public function newKey($code, Lock $lock, $begin = null, $end = null): array
 	{
 		$name = 'Ключ от Renty api';
