@@ -6,7 +6,7 @@ namespace App\Jobs;
 
 
 use Illuminate\Bus\Queueable;
-use APP\Models\LocksCredential;
+use App\Models\LocksCredential;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;

@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Log;
 class TTLockService
 {
 	public string $api_url = 'https://euapi.sciener.com';
-	public string $client_id = '2b900bc5aa5a44699367af2970da0672';
-	public string $client_secret = '6fa6d3c8a261022a26007bc8e8119ac8';
+	public string $client_id = '991fae7ef4174ace921bc62852d3c714';
+	public string $client_secret = 'bf7eeeba6054e6ba6ea44a9a73302336';
 
 	//		private string $login;
 	//		private string $password;
@@ -65,8 +65,8 @@ class TTLockService
 		]);
 
 		LockApiLog::create([
-			'api_method	' => 'oauth2',
-			'params' => $data,
+			'api_method' => 'oauth2',
+			'params' => json_encode($data),
 		]);
 
 		return $data;
@@ -92,8 +92,8 @@ class TTLockService
 		}
 
 		LockApiLog::create([
-			'api_method	' => 'refresh_token',
-			'params' => $request,
+			'api_method' => 'refresh_token',
+			'params' => json_encode($request),
 		]);
 
 		return $request;
@@ -107,8 +107,8 @@ class TTLockService
 		]);
 
 		LockApiLog::create([
-			'api_method	' => '/v3/lock/list',
-			'params	' => $data,
+			'api_method' => '/v3/lock/list',
+			'params' => json_encode($data),
 			'user_id' => $this->user?->id,
 		]);
 
@@ -123,8 +123,8 @@ class TTLockService
 		]);
 
 		$lock->api_logs()->create([
-			'api_method	' => '/v3/lock/detail',
-			'params	' => $data,
+			'api_method' => '/v3/lock/detail',
+			'params' => json_encode($data),
 			'user_id' => $this->user?->id,
 		]);
 		return   $data;
@@ -143,8 +143,8 @@ class TTLockService
 		$request =   $this->request('/v3/lockRecord/list', $data);
 
 		$lock->api_logs()->create([
-			'api_method	' => '/v3/lockRecord/list',
-			'params	' => $request,
+			'api_method' => '/v3/lockRecord/list',
+			'params' => json_encode($request),
 		]);
 
 		return $request;
@@ -159,8 +159,8 @@ class TTLockService
 		]);
 
 		$lock->api_logs()->create([
-			'api_method	' => '/v3/lock/unlock',
-			'params	' => $result,
+			'api_method' => '/v3/lock/unlock',
+			'params' => json_encode($result)
 		]); 
 
 		return  $result;
@@ -203,8 +203,8 @@ class TTLockService
 		]);
 
 		$lock->api_logs()->create([
-			'api_method	' => '/v3/lock/configPassageMode',
-			'params	' => $result,
+			'api_method' => '/v3/lock/configPassageMode',
+			'params' => json_encode($result),
 		]);
 
 		$this->openLock($lock);
@@ -222,8 +222,8 @@ class TTLockService
 		]);
 
 		$lock->api_logs()->create([
-			'api_method	' => '/v3/lock/configPassageMode',
-			'params	' => $result,
+			'api_method' => '/v3/lock/configPassageMode',
+			'params' => json_encode($result),
 		]);
 		return  $result;
 	}
@@ -259,8 +259,8 @@ class TTLockService
 
 
 		$lock->api_logs()->create([
-			'api_method	' => '/v3/keyboardPwd/add',
-			'params	' => $request,
+			'api_method' => '/v3/keyboardPwd/add',
+			'params' => json_encode($request),
 			'user_id' => $this->user?->id,
 		]);
 
@@ -364,8 +364,8 @@ class TTLockService
 
 
 		$lock->api_logs()->create([
-			'api_method	' => '/v3/keyboardPwd/delete',
-			'params	' => $request,
+			'api_method' => '/v3/keyboardPwd/delete',
+			'params' => json_encode($request),
 			'user_id' => $this->user?->id,
 		]);
 
@@ -440,7 +440,6 @@ class TTLockService
 	private function request($url, $array)
 	{
 		if ($url[0] != '/') $url = '/' . $url;
-
 		$array = array_merge([
 			'accessToken' => $this->user?->token?->access_token ?? '',
 			'client_id' => $this->client_id,
@@ -455,7 +454,6 @@ class TTLockService
 
 			$status = false;
 			$data = json_decode($request->body(), true);
-
 			if (isset($data['errcode']) && $data['errcode'] != 0) {
 				$text = "у замка";
 

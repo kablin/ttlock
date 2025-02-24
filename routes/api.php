@@ -14,7 +14,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::get('/lock_create', function (Request $request) {
-    (new JobsService(1))->createLock();
+    return (new JobsService(1))->createLock();
 });
 
 
@@ -57,27 +57,32 @@ Route::post('/v1/get_token', function (Request $request) {
 
 
 Route::post('/v1/get_lock_list', function (Request $request) {
-    (new JobsService(1))->getLockList();
-});
+  return  (new JobsService(1))->getLockList();
+})->middleware('auth:sanctum');;
 
 
 
 Route::post('/v1/add_code_to_lock', function (Request $request) {
-    (new JobsService(1))->addKeyToLock($request->lock_id, $request->code, $request->begin, $request->end);
-});
+    return (new JobsService(1))->addKeyToLock($request->lock_id, $request->code, $request->begin, $request->end);
+})->middleware('auth:sanctum');;
 
 
 Route::post('/v1/set_lock_passage_mode_on', function (Request $request) {
-    (new JobsService(1))->setPassageModeOn($request->lock_id);
-});
+    return  (new JobsService(1))->setPassageModeOn($request->lock_id);
+})->middleware('auth:sanctum');;
 
 Route::post('/v1/set_lock_passage_mode_off', function (Request $request) {
-    (new JobsService(1))->setPassageModeOff($request->lock_id);
-});
+    return (new JobsService(1))->setPassageModeOff($request->lock_id);
+})->middleware('auth:sanctum');;
 
 Route::post('/v1/delete_code_from_lock', function (Request $request) {
-    (new JobsService(1))->deleteKey($request->lock_id, $request->code_id);
-});
+    return (new JobsService(1))->deleteKey($request->lock_id, $request->code_id);
+})->middleware('auth:sanctum');;
+
+
+
+
+
 
 
 Route::post('/callback', function (Request $request) {

@@ -46,6 +46,8 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ]);
 
+        return json_encode(['job_id'=>$uuid->job_id]);
+
     }
 
 
@@ -57,6 +59,8 @@ class JobsService
         GetLockListJob::dispatch($uuid->id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
         ]);
+
+        return json_encode(['job_id'=>$uuid->job_id]);
 
     }
     
@@ -81,6 +85,8 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true: false)
         ]);
 
+        return json_encode(['job_id'=>$uuid->job_id]);
+
     }
 
 
@@ -91,6 +97,8 @@ class JobsService
         SetPassageModeOnJob::dispatch($uuid->id, $lock ? $lock?->id : 0 )->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true: false)
         ]);
+
+        return json_encode(['job_id'=>$uuid->job_id]);
 
     }
 
@@ -103,6 +111,8 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true: false)
         ]);
 
+        return json_encode(['job_id'=>$uuid->job_id]);
+
     }
 
     public function deleteKey($lock_id, $pwdID)
@@ -112,6 +122,8 @@ class JobsService
         DeleteKeyJob::dispatch($uuid->id, $lock ? $lock?->id : 0 , $pwdID)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true: false)
         ]);
+
+        return json_encode(['job_id'=>$uuid->job_id]);
 
     }
 

@@ -55,8 +55,15 @@ class User extends Authenticatable
 
 
 
+    public function credential() 
+    {
+        return $this->hasOne(LocksCredential::class);
+    }
+
+
+
     public function token(): HasOneThrough
     {
-        return $this->hasOneThrough(LocksToken::class, LocksCredential::class);
+        return $this->hasOneThrough(LocksToken::class, LocksCredential::class,'user_id','credential_id');
     }
 }

@@ -37,9 +37,7 @@ class GetLockListJob implements ShouldQueue
 
 
             $servise =  new TTLockService($job->user);
-
             $locks_data = $servise->getLockList();
-
             //to-do   Удаляем отсутствующие
 
 
