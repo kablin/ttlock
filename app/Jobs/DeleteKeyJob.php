@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use App\Models\LockJob;
 use App\Models\Lock;
+use App\Models\LockPinCode;
 use App\Services\TTLockService;
 
 class DeleteKeyJob implements ShouldQueue
@@ -26,7 +27,7 @@ class DeleteKeyJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $job_id, private int $lock_id,, private int  $pwdID) {}
+    public function __construct(private int $job_id, private int $lock_id, private int  $pwdID) {}
 
     /**
      * Execute the job.
@@ -52,7 +53,9 @@ class DeleteKeyJob implements ShouldQueue
 
             $servise =  new TTLockService($job->user);
 
-            $rezult = $servise->deleteKey( $lock,$pwdID);
+            $rezult = $servise->deleteKey( $lock,$this->pwdID);
+            if($rezult['status']==true) 
+            LockPinCode::where('pin_code_id',$this->pwdID)->delete();
 
 
             $data['job'] = $job->job_id;

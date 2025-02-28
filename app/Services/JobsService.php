@@ -76,11 +76,12 @@ class JobsService
 
     }
 
-
+    
     public function addKeyToLock($lock_id,$code,$begin,$end)
     {
         $uuid = $this->startLockJob('addKeyToLock');
-        $lock = auth()->user->locks->find($lock_id);
+        $lock = auth()->user()->locks->where('lock_id',$lock_id)->first();
+   
         AddKeyToLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0 ,$code, $begin,$end)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true: false)
         ]);
@@ -93,7 +94,7 @@ class JobsService
     public function setPassageModeOn($lock_id)
     {
         $uuid = $this->startLockJob('setPassageModeOn');
-        $lock = auth()->user->locks->find($lock_id);
+        $lock = auth()->user()->locks->where('lock_id',$lock_id)->first();
         SetPassageModeOnJob::dispatch($uuid->id, $lock ? $lock?->id : 0 )->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true: false)
         ]);
@@ -106,7 +107,7 @@ class JobsService
     public function setPassageModeOff($lock_id)
     {
         $uuid = $this->startLockJob('setPassageModeOff');
-        $lock = auth()->user->locks->find($lock_id);
+        $lock = auth()->user()->locks->where('lock_id',$lock_id)->first();
         SetPassageModeOffJob::dispatch($uuid->id, $lock ? $lock?->id : 0 )->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true: false)
         ]);
@@ -118,7 +119,7 @@ class JobsService
     public function deleteKey($lock_id, $pwdID)
     {
         $uuid = $this->startLockJob('deleteKey');
-        $lock = auth()->user->locks->find($lock_id);
+        $lock = auth()->user()->locks->where('lock_id',$lock_id)->first();
         DeleteKeyJob::dispatch($uuid->id, $lock ? $lock?->id : 0 , $pwdID)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true: false)
         ]);

@@ -21,7 +21,6 @@ Route::get('/lock_create', function (Request $request) {
 
 
 
-
 Route::post('/v1/set_callback', function (Request $request) {
     try {
         $callback = json_decode($request->getContent())->callback;
@@ -63,7 +62,10 @@ Route::post('/v1/get_lock_list', function (Request $request) {
 
 
 Route::post('/v1/add_code_to_lock', function (Request $request) {
-    return (new JobsService(1))->addKeyToLock($request->lock_id, $request->code, $request->begin, $request->end);
+
+    isset(json_decode($request->getContent())->begin) ? $begin= json_decode($request->getContent())->begin : $begin = null;
+    isset(json_decode($request->getContent())->end) ? $end= json_decode($request->getContent())->end : $end = null;
+    return (new JobsService(1))->addKeyToLock( json_decode($request->getContent())->lock_id, json_decode($request->getContent())->code, $begin,$end);
 })->middleware('auth:sanctum');;
 
 

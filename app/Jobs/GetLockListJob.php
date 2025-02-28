@@ -13,6 +13,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use App\Models\LockJob;
+use App\Models\Lock;
 use App\Services\TTLockService;
 
 class GetLockListJob implements ShouldQueue
@@ -38,10 +39,34 @@ class GetLockListJob implements ShouldQueue
 
             $servise =  new TTLockService($job->user);
             $locks_data = $servise->getLockList();
-            //to-do   Удаляем отсутствующие
+
+            $mylocks = [];
+            if ($locks_data['status'] == true) {
+                foreach ($locks_data['data']['list'] as $data) {
+                    $lock = [];
+                    $lock['user_id'] = $job->user->id;
+                    $lock['lock_id'] = $data['lockId'];
+                    $lock['lock_name'] = $data['lockName'];
+                    $lock['lock_alias'] = $data['lockAlias'];
+                    $lock['status'] = true;
+                    $lock['electric_quantity'] = $data['electricQuantity'];
+                    $lock['no_key_pwd'] = $data['noKeyPwd'];
+
+                    $model = Lock::query()->updateOrCreate(['lock_id' => $data['lockId']], $lock);
+
+                    $mylocks[] =  $model->id;
+
+                    $model->saveOptionValueByName('error', null);
+                    $model->saveOptionValueByName('electricQuantity', $data['electricQuantity'] ?? 0);
+                    $model->saveOptionValueByName('lockAlias', $data['lockAlias']);
+                    $model->saveOptionValueByName('noKeyPwd', $data['noKeyPwd']);
+                    $model->saveOptionValueByName('timezoneRawOffset', $data['timezoneRawOffset']);
+                }
+                Lock::where('user_id', $job->user->id)->whereNotIn('id', $mylocks)->delete();
+            }
 
 
-            foreach ($job->user->locks as $lock)
+            /* foreach ($job->user->locks as $lock)
             {
                 $details = $servise->getLockDetails($lock);
                 $lock_data['lock_alias'] = $details['data']['lockAlias'] ?? null;
@@ -56,15 +81,15 @@ class GetLockListJob implements ShouldQueue
                 $lock->saveOptionValueByName('noKeyPwd',$details['data']['noKeyPwd']);
                 $lock->saveOptionValueByName('timezoneRawOffset',$details['data']['timezoneRawOffset']);								
 
-            }
+            }*/
 
 
 
 
-            $data['job'] = $job->job_id;
-            $data['data'] = $locks_data;
+            $result['job'] = $job->job_id;
+            $result['data'] = $locks_data;
 
-            Http::withBody(json_encode($data), 'application/json')
+            Http::withBody(json_encode($result), 'application/json')
                 //                ->withOptions([
                 //                    'headers' => ''
                 //                ])
