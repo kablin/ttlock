@@ -18,7 +18,7 @@ services:
   ttlocknginx:
     container_name: ttlock-nginx
     depends_on:
-      - ttlockfpm
+      - ttlockpfpm
     build:
       context: ./
       dockerfile: docker/nginx.docker
