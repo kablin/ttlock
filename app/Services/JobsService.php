@@ -128,5 +128,20 @@ class JobsService
 
     }
 
+    public function createCredential($user, $password)
+    {
+        $uuid = $this->startLockJob('createCredential');
+        $user_id = auth()->user()->id;
+        CreateCredentialJob::dispatch($uuid->id, $user  ,$password,$user_id)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,true)
+        ]);
+
+        return json_encode(['job_id'=>$uuid->job_id]);
+
+    }
+
+
+    
+
 
 }

@@ -83,6 +83,12 @@ Route::post('/v1/delete_code_from_lock', function (Request $request) {
 
 
 
+Route::post('/v1/create_credential', function (Request $request) {
+    return (new JobsService(1))->createCredential($request->user, $request->password);
+})->middleware('auth:sanctum');;
+
+
+
 
 
 
