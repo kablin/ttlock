@@ -16,4 +16,4 @@ Route::get('/tokens/create', function () {
 });
 //token	"1|silpjkiQSCrv3kMTOPrJJZ7UaDS11DsbUIl0XkfU26e44c97"
 
-Route::post('/ttlock/{code}', TTLockWebHook::class)->name('webhook.ttlock-code');
+Route::post('callback/ttlock/{code}', TTLockWebHook::class)->name('webhook.ttlock-code');
