@@ -38,7 +38,7 @@ class TTLockWebHook extends Controller
           ]);
 
 
-          Http::withBody(json_encode($request), 'application/json')
+          Http::withBody(json_encode($request->all()), 'application/json')
           //                ->withOptions([
           //                    'headers' => ''
           //                ])
