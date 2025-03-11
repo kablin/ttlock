@@ -13,7 +13,7 @@ class TTLockWebHook extends Controller
 {
   public function __invoke(Request $request)
   {
-    info('callback', $request->all());
+    info('webhook', $request->all());
     try {
       if (isset($request->notifyType) && isset($request->admin)) {
         $lock = Lock::where([
@@ -38,7 +38,7 @@ class TTLockWebHook extends Controller
           ]);
 
 
-          Http::withBody(json_encode($request), 'application/json')
+          Http::withBody(($request), 'application/json')
           //                ->withOptions([
           //                    'headers' => ''
           //                ])
