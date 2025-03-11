@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Lock;
 //use App\Models\LockPinCode;
+use Illuminate\Support\Facades\Http;
 
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class TTLockWebHook extends Controller
 {
   public function __invoke(Request $request)
   {
-
+    info('callback', $request->all());
     try {
       if (isset($request->notifyType) && isset($request->admin)) {
         $lock = Lock::where([
@@ -36,18 +37,17 @@ class TTLockWebHook extends Controller
             'is_webhook' => true
           ]);
 
-          //Тут надо найти с таким статусом бронь и изменить
-     /*     $lockPinCode = LockPinCode::where([
-            'pin_code' => $info?->keyboardPwd,
-            'apartment_id' => $lock->apartment_id
-          ])->first();
-*/
+
+          Http::withBody(json_encode($request), 'application/json')
+          //                ->withOptions([
+          //                    'headers' => ''
+          //                ])
+          ->post($lock->user->callback);
+
         }
       }
-//					echo '"success"';
-      //return response('success', 200);
+
     } catch (\Exception $exception) {
-   //   logChannel('ttlock-webhook', $exception->getMessage());
 
     }
 

@@ -5,6 +5,7 @@ namespace App\Schedules;
 
 use App\Models\Lock;
 use App\Services\TTLockService;
+use Illuminate\Support\Facades\Http;
 
 class GetLockEventsSchedule
 {
@@ -30,6 +31,15 @@ class GetLockEventsSchedule
 															'lock_date' => $event['lockDate'],
 															'server_date' => $event['serverDate'],
 														]);
+
+
+														Http::withBody(json_encode($event), 'application/json')
+														//                ->withOptions([
+														//                    'headers' => ''
+														//                ])
+														->post($lock->user->callback);
+
+
 												}
 										}
 								}
