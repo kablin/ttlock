@@ -12,6 +12,7 @@ use App\Models\LocksToken;
 use Carbon\Carbon;
 use App\Jobs\CreateLockJob;
 use App\Jobs\GetLockListJob;
+use App\Jobs\CreateCredentialJob;
 use App\Jobs\SetStatusJob;
 use App\Jobs\SetPassageModeOffJob;
 use App\Jobs\SetPassageModeOnJob;
