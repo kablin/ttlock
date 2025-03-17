@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Schedules\GetLockEventsSchedule;
+use App\Schedules\GetLockListSchedule;
 use App\Schedules\UpdateRefreshTokenLocks;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -17,8 +18,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-		    $schedule->job((new UpdateRefreshTokenLocks()))->weekly();
+		  //  $schedule->job((new UpdateRefreshTokenLocks()))->weekly();
             $schedule->job((new GetLockEventsSchedule()))->everySixHours();
+            $schedule->job((new GetLockListSchedule()))->hourly();
 
     }
 

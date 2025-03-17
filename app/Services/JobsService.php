@@ -8,6 +8,7 @@ namespace App\Services;
 
 use App\Models\Lock;
 use App\Models\LockJob;
+use App\Models\User;
 use App\Models\LocksToken;
 use Carbon\Carbon;
 use App\Jobs\CreateLockJob;
@@ -27,28 +28,49 @@ use Illuminate\Support\Facades\Log;
 
 class JobsService
 {
-    public function __construct( private int $user_id = 0 ) {}
+    public function __construct(private int $user_id = 0) {}
 
 
 
-    private function startLockJob(string $task) 
+    private function startLockJob(string $task)
     {
-       return LockJob::create(['user_id'=>$this->user_id,'task'=>$task]);
-
+        return LockJob::create(['user_id' => $this->user_id, 'task' => $task]);
     }
+
+
+    public function getDelay()
+    {
+        if ($this->user_id) {
+            $user = User::find($this->user_id);
+            if ($user) {
+                $t1 = new Carbon($user->last_query);
+                $now = now();
+                if ($t1->getTimestamp() >= $now->getTimestamp()) {
+                    $user->last_query = $t1->addSeconds(2);
+                    $user->save();
+                    return  new Carbon($user->last_query);
+                } else {
+                    $user->last_query = $now;
+                    $user->save();
+                }
+            }
+        }
+
+        return $now;
+    }
+
 
 
     public function createLock()
     {
         $uuid = $this->startLockJob('createLock');
         info($uuid->job_id);
-        
+
         CreateLockJob::dispatch()->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
         ]);
 
-        return json_encode(['job_id'=>$uuid->job_id]);
-
+        return json_encode(['job_id' => $uuid->job_id]);
     }
 
 
@@ -56,93 +78,81 @@ class JobsService
     {
         $uuid = $this->startLockJob('getLockList');
         info($uuid->job_id);
-        
+
         GetLockListJob::dispatch($uuid->id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
-        ]);
+        ])->delay($this->getDelay());
 
-        return json_encode(['job_id'=>$uuid->job_id]);
-
+        return json_encode(['job_id' => $uuid->job_id]);
     }
-    
+
 
 
     public function refreshLockTocken(int $id)
     {
         $uuid = $this->startLockJob('refreshLockTocken');
-        
+
         RefreshLockTokenJob::dispatch($id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
         ]);
-
     }
 
-    
-    public function addKeyToLock($lock_id,$code,$begin,$end)
+
+    public function addKeyToLock($lock_id, $code, $begin, $end)
     {
         $uuid = $this->startLockJob('addKeyToLock');
-        $lock = auth()->user()->locks->where('lock_id',$lock_id)->first();
-   
-        AddKeyToLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0 ,$code, $begin,$end)->onQueue('default')->chain([
-            new SetStatusJob($uuid->id,  $lock ? true: false)
-        ]);
+        $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
-        return json_encode(['job_id'=>$uuid->job_id]);
+        AddKeyToLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0, $code, $begin, $end)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());
 
+        return json_encode(['job_id' => $uuid->job_id]);
     }
 
 
     public function setPassageModeOn($lock_id)
     {
         $uuid = $this->startLockJob('setPassageModeOn');
-        $lock = auth()->user()->locks->where('lock_id',$lock_id)->first();
-        SetPassageModeOnJob::dispatch($uuid->id, $lock ? $lock?->id : 0 )->onQueue('default')->chain([
-            new SetStatusJob($uuid->id,  $lock ? true: false)
-        ]);
+        $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
+        SetPassageModeOnJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());
 
-        return json_encode(['job_id'=>$uuid->job_id]);
-
+        return json_encode(['job_id' => $uuid->job_id]);
     }
 
 
     public function setPassageModeOff($lock_id)
     {
         $uuid = $this->startLockJob('setPassageModeOff');
-        $lock = auth()->user()->locks->where('lock_id',$lock_id)->first();
-        SetPassageModeOffJob::dispatch($uuid->id, $lock ? $lock?->id : 0 )->onQueue('default')->chain([
-            new SetStatusJob($uuid->id,  $lock ? true: false)
-        ]);
+        $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
+        SetPassageModeOffJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());
 
-        return json_encode(['job_id'=>$uuid->job_id]);
-
+        return json_encode(['job_id' => $uuid->job_id]);
     }
 
     public function deleteKey($lock_id, $pwdID)
     {
         $uuid = $this->startLockJob('deleteKey');
-        $lock = auth()->user()->locks->where('lock_id',$lock_id)->first();
-        DeleteKeyJob::dispatch($uuid->id, $lock ? $lock?->id : 0 , $pwdID)->onQueue('default')->chain([
-            new SetStatusJob($uuid->id,  $lock ? true: false)
-        ]);
+        $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
+        DeleteKeyJob::dispatch($uuid->id, $lock ? $lock?->id : 0, $pwdID)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());
 
-        return json_encode(['job_id'=>$uuid->job_id]);
-
+        return json_encode(['job_id' => $uuid->job_id]);
     }
 
     public function createCredential($user, $password)
     {
         $uuid = $this->startLockJob('createCredential');
         $user_id = auth()->user()->id;
-        CreateCredentialJob::dispatch($uuid->id, $user  ,$password,$user_id)->onQueue('default')->chain([
-            new SetStatusJob($uuid->id,true)
-        ]);
+        CreateCredentialJob::dispatch($uuid->id, $user, $password, $user_id)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id, true)
+        ])->delay($this->getDelay());
 
-        return json_encode(['job_id'=>$uuid->job_id]);
-
+        return json_encode(['job_id' => $uuid->job_id]);
     }
-
-
-    
-
-
 }
