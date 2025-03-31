@@ -13,9 +13,9 @@ class GetLockEventsSchedule
 		{
 				Lock::query()->get()->map(function ($lock) {
 						info($lock->events()->where('is_webhook',true)->latest()->first());
-						if (now()->diffInMinutes($lock->events()->where('is_webhook',true)->latest()->first()?->created_at) > 30) {
+						if (abs(now()->diffInMinutes($lock->events()->where('is_webhook',true)->latest()->first()?->created_at)) > 30) {
 								/** @var Lock $lock */
-								$service = (new TTLockService($lock->lock_id));
+								$service = (new TTLockService());
 								$events = $service->getLockEvents($lock,10);
 
 								if (isset($events['data']['list'])) {

@@ -29,8 +29,8 @@ if (!function_exists('updateRefreshToken')) {
 								]);
 
 								info("У ttlock credentional с id $credential->id обновился Token");
-                                // рефреш не нужен только auth 
-								//$servise->refreshToken($credential);  
+                            
+								$servise->refreshToken($credential);  
 
 								return true;
 						}

@@ -4,7 +4,7 @@ namespace App\Console;
 
 use App\Schedules\GetLockEventsSchedule;
 use App\Schedules\GetLockListSchedule;
-use App\Schedules\UpdateRefreshTokenLocks;
+use App\Console\Commands\TestLockHook;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
 		  //  $schedule->job((new UpdateRefreshTokenLocks()))->weekly();
             $schedule->job((new GetLockEventsSchedule()))->everySixHours();
             $schedule->job((new GetLockListSchedule()))->hourly();
+            $schedule->command(TestLockHook::class)->everyFifteenMinutes();
 
     }
 
