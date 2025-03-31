@@ -151,7 +151,7 @@ class TTLockService
 	}
 
 
-	
+
 	public function openLock(Lock $lock)
 	{
 		$result =  $this->request('/v3/lock/unlock', [
@@ -161,13 +161,13 @@ class TTLockService
 		$lock->api_logs()->create([
 			'api_method' => '/v3/lock/unlock',
 			'params' => json_encode($result)
-		]); 
+		]);
 
 		return  $result;
 	}
 
 
-/*
+	/*
 
 
 	public function changeOpenTime($time = 10)
@@ -380,12 +380,12 @@ class TTLockService
 		} else {
 			return [
 				'status' => false,
-				'msg' =>  $request['msg'] ,
+				'msg' =>  $request['msg'],
 				'type' => 'danger',
 			];
 		}
 	}
-/*
+	/*
 	public function gatewayStatus()
 	{
 		$request = $this->request('/v3/lock/queryOpenState', [
@@ -448,10 +448,35 @@ class TTLockService
 		], $array);
 
 		try {
-			$request = Http::accept('application/json')->asForm()->withHeaders([
+
+
+            // пытаемся выполнить запрос два раза
+			$request = retry(2, function ($attempt) use ($url, $array) {
+				$array['accessToken'] = $this->user?->token?->access_token ?? '';
+				$r = Http::accept('application/json')->asForm()->withHeaders([
+					'Content-Type' => 'application/x-www-form-urlencoded',
+				])->post($this->api_url . $url, $array);
+				$data = json_decode($r->body(), true);
+                // если ошибка токена, то пробуем его обновить
+				if (isset($data['errcode']) && $data['errcode'] != 0) {
+					if ($data['errcode'] == 10003) {
+						if ($credential = $this->user?->credential)
+						    // обновляем
+							updateRefreshToken($credential);
+						// перечитываем модель	
+						if ($this->user) $this->user = $this->user->fresh();
+						// вываливаем эксепшн, что бы ретрай еще раз запустилось
+						throw new \Exception("refreshtoken");
+					}
+				}
+				return $r;
+			}, 3000);
+
+
+			/*$request = Http::accept('application/json')->asForm()->withHeaders([
 				'Content-Type' => 'application/x-www-form-urlencoded',
 			])->post($this->api_url . $url, $array);
-
+*/
 			$status = false;
 			$data = json_decode($request->body(), true);
 			if (isset($data['errcode']) && $data['errcode'] != 0) {
