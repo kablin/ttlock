@@ -37,10 +37,10 @@ Route::middleware(['throttle:5,1'])->group(function () {
             if ($callback) {
                 $request->user()->callback = $callback;
                 $request->user()->save();
-                return json_encode(['status' => true]);
-            } else   return json_encode(['status' => false]);
+                return response()->json(['status' => true],200);
+            } else  return response()->json(['status' => false],200);
         } catch (Exception $e) {
-            return json_encode(['status' => false]);
+            return response()->json(['status' => false],200);
         }
     })->middleware('auth:sanctum');
 
@@ -54,10 +54,10 @@ Route::middleware(['throttle:5,1'])->group(function () {
 
             if (Auth::attempt($credentials)) {
                 $token = auth()->user()->createToken('ttlock');
-                return json_encode(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id]);
-            } else   return json_encode(['status' => false]);
+                return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id],200);
+            } else   return response()->json(['status' => false],200);
         } catch (Exception $e) {
-            return json_encode(['status' => false]);
+            return response()->json(['status' => false],200);
         }
     });
 });

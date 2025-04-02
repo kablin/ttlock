@@ -70,7 +70,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ]);
 
-        return json_encode(['job_id' => $uuid->job_id]);
+        return response()->json(['job_id' => $uuid->job_id],200);
     }
 
 
@@ -83,7 +83,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
 
-        return json_encode(['job_id' => $uuid->job_id]);
+        return response()->json(['job_id' => $uuid->job_id],200);
     }
 
 
@@ -107,7 +107,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return json_encode(['job_id' => $uuid->job_id]);
+        return response()->json(['job_id' => $uuid->job_id],200);
     }
 
 
@@ -119,7 +119,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return json_encode(['job_id' => $uuid->job_id]);
+        return response()->json(['job_id' => $uuid->job_id],200);
     }
 
 
@@ -131,7 +131,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return json_encode(['job_id' => $uuid->job_id]);
+        return response()->json(['job_id' => $uuid->job_id],200);
     }
 
     public function deleteKey($lock_id, $pwdID)
@@ -142,7 +142,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return json_encode(['job_id' => $uuid->job_id]);
+        return response()->json(['job_id' => $uuid->job_id],200);
     }
 
     public function createCredential($user, $password)
@@ -153,6 +153,6 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
 
-        return json_encode(['job_id' => $uuid->job_id]);
+        return response()->json(['job_id' => $uuid->job_id],200);
     }
 }
