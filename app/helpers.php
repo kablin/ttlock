@@ -42,3 +42,25 @@ if (!function_exists('updateRefreshToken')) {
 				}
 		}
 }
+
+
+
+if (!function_exists('testCredential')) {
+	function testCredential( string $login, string $password ): bool
+	{
+			try {
+
+					 
+					$servise =  new TTLockService();
+					$auth = $servise->testAuth($login,$password);
+					if ($auth['status']) {
+							return true;
+					}
+
+					return false;
+			} catch (\Exception $exception) {
+					info($exception->getMessage());
+					return false;
+			}
+	}
+}

@@ -72,6 +72,27 @@ class TTLockService
 		return $data;
 	}
 
+
+	public  function testAuth(string $login, string $password ): array
+	{
+
+		$data = $this->request('/oauth2/token', [
+			'username' =>$login,
+			'password' => $password,
+			'client_secret' => $this->client_secret,
+		]);
+
+		LockApiLog::create([
+			'api_method' => 'oauth2test',
+			'params' => json_encode($data),
+		]);
+
+		return $data;
+	}
+
+
+
+
 	public function refreshToken(LocksCredential $cred): array
 	{
 

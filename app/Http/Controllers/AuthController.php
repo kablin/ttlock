@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\LocksCredential;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -19,8 +20,19 @@ class AuthController extends Controller
             $validated = $request->validate([
 
                 'email' => 'required|string|email|max:255',
-                'password' => 'required|string|min:8',
+                'password' => 'required|string',
             ]);
+
+
+
+            if (!testCredential($validated['email'], $validated['password'])) {
+
+                return response()->json([
+                    'status' => false,
+                    'error'=> 1,
+                    'message' => 'Error login to TTLock',
+                ], 200);
+            }
 
             $user = User::firstOrCreate([
                 'email' => $validated['email']
@@ -33,20 +45,35 @@ class AuthController extends Controller
             $credentials['email'] = $validated['email'];
             $credentials['password'] = $validated['password'];
 
-            if (!Auth::attempt($credentials))
+
+            $credential = LocksCredential::updateOrCreate(['user_id' => $user->id], ['login' => $validated['email'], 'password' => $validated['password']]);
+            if (updateRefreshToken($credential))
+
+
+
+                return response()->json([
+                    'status' => true,
+                    'error'=> 0,
+                    'message' => 'User created successfully',
+                ], 200);
+
+            else
+
+                return response()->json([
+                    'status' => false,
+                    'error'=> 2,
+                    'message' => 'Error to set TTLock credential',
+                ], 200);
+
+
+
+            /* if (!Auth::attempt($credentials))
             {
                 return response()->json(['status' => false,'message' => 'Incorrect email or password',],200);
 
-            }
-
-            return response()->json([
-                'status' => true,
-                'message' => 'User created successfully',
-            ], 200); 
-
- 
+            }*/
         } catch (\Exception $e) {
-            return  response()->json(['status' => false],200);
+            return  response()->json(['status' => false, 'error'=> 3,], 200);
         }
     }
 }
