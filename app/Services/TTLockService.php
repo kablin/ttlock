@@ -78,7 +78,7 @@ class TTLockService
 
 		$data = $this->request('/oauth2/token', [
 			'username' =>$login,
-			'password' => $password,
+			'password' => ($this->isValidMd5($password)) ? $password : md5($password),
 			'client_secret' => $this->client_secret,
 		]);
 
