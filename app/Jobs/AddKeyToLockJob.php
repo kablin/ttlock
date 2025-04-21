@@ -65,6 +65,7 @@ class AddKeyToLockJob implements ShouldQueue
                 ]);
             }
             $data['job'] = $job->job_id;
+            $data['method'] = 'add_code_to_lock';
             $data['data'] =  $key;
 
             Http::withBody(json_encode($data), 'application/json')

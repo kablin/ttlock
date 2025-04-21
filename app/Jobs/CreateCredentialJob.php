@@ -37,6 +37,7 @@ class CreateCredentialJob implements ShouldQueue
 
 
             $result['job'] = $job->job_id;
+            $data['method'] = 'create_credential';
             $result['data'] = ['status'=>$status];
             Http::withBody(json_encode($result), 'application/json')
                 //                ->withOptions([

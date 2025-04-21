@@ -59,6 +59,7 @@ class DeleteKeyJob implements ShouldQueue
 
 
             $data['job'] = $job->job_id;
+            $data['method'] = 'delete_code_from_lock';
             $data['data'] =  $rezult;
 
             Http::withBody(json_encode($data), 'application/json')

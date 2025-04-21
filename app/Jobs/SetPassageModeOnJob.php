@@ -56,6 +56,7 @@ class SetPassageModeOnJob implements ShouldQueue
 
 
             $data['job'] = $job->job_id;
+            $data['method'] = 'set_lock_passage_mode_on';
             $data['data'] =  $rezult;
 
             Http::withBody(json_encode($data), 'application/json')

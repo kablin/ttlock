@@ -80,6 +80,9 @@ Route::middleware(['throttle:20,1'])->group(function () {
 
         isset(json_decode($request->getContent())->begin) ? $begin = json_decode($request->getContent())->begin : $begin = null;
         isset(json_decode($request->getContent())->end) ? $end = json_decode($request->getContent())->end : $end = null;
+
+        if (!isset(json_decode($request->getContent())->code))     return response()->json(['status' => false, 'msg'=>"code is required"],200);
+        if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg'=>"lock_id is required"],200);
         return (new JobsService(auth()->user()->id))->addKeyToLock(json_decode($request->getContent())->lock_id, json_decode($request->getContent())->code, $begin, $end);
     })->middleware('auth:sanctum');;
 
