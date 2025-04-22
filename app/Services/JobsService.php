@@ -162,10 +162,10 @@ class JobsService
     public static function getLockEvents($lock_id, $lock_type, $record_type)
     {
         
-        $evets = LockEvent::select('lock_id','record_type_from_lock','record_type','success','username','keyboard_pwd','lock_date')->where('lock_id',$lock_id);
+        $evets = LockEvent::select('id','lock_id','record_type_from_lock','record_type','success','username','keyboard_pwd','lock_date')->where('lock_id',$lock_id);
         if ($lock_type) $evets = $evets->where('record_type_from_lock',$lock_type);
         if ($record_type) $evets = $evets->where('record_type',$record_type);
-        return  $evets->take(100)->get();
+        return  $evets->orderBy('id','DESC')->take(100)->get();
         
     }
 
