@@ -106,7 +106,7 @@ Route::middleware(['throttle:20,1'])->group(function () {
     })->middleware('auth:sanctum');
 
 
-    Route::post('/v1/getLockEvents', function (Request $request) {
+    Route::post('/v1/get_lock_events', function (Request $request) {
 
         isset(json_decode($request->getContent())->lock_record_type) ? $lock_record_type = json_decode($request->getContent())->lock_record_type : $lock_record_type = null;
         isset(json_decode($request->getContent())->record_type) ? $record_type = json_decode($request->getContent())->record_type : $record_type = null;
