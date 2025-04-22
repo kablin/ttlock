@@ -20,6 +20,7 @@ use App\Jobs\SetPassageModeOnJob;
 use App\Jobs\RefreshLockTokenJob;
 use App\Jobs\AddKeyToLockJob;
 use App\Jobs\DeleteKeyJob;
+use App\Models\LockEvent;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -155,4 +156,20 @@ class JobsService
 
         return response()->json(['job_id' => $uuid->job_id],200);
     }
+
+
+
+    public static function getLockEvents($lock_id, $lock_type, $record_type)
+    {
+        
+        $evets = LockEvent::select('lock_id','record_type_from_lock','record_type','success','username','keyboard_pwd','lock_date')->where('lock_id',$lock_id);
+        if ($lock_type) $evets = $evets->where('record_type_from_lock',$lock_type);
+        if ($record_type) $evets = $evets->where('record_type',$record_type);
+        return  $evets->take(100)->get();
+        
+    }
+
+
+
+
 }
