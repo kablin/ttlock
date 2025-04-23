@@ -38,6 +38,18 @@ class Lock extends Model
         return $this->hasMany(LockEvent::class, 'lock_id', 'lock_id');
     }
 
+    public function pincodes()
+    {
+        return $this->hasMany(LockPinCode::class);
+    }
+
+
+    public function allpincodes()
+    {
+        return $this->hasMany(LockPinCode::class)->withTrashed();
+    }
+
+
     public function values() 
     {
         return $this->hasMany(LockValue::class,'lock_id','id');

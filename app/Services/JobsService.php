@@ -159,12 +159,19 @@ class JobsService
 
 
 
-    public static function getLockEvents($lock_id, $lock_type, $record_type)
+    public static function getLockEvents($lock_id, $lock_type, $record_type,$personal)
     {
         
         $evets = LockEvent::select('id','lock_id','record_type_from_lock','record_type','success','username','keyboard_pwd','lock_date')->where('lock_id',$lock_id);
         if ($lock_type) $evets = $evets->where('record_type_from_lock',$lock_type);
-        if ($record_type) $evets = $evets->where('record_type',$record_type);
+        if ($record_type && !$personal) $evets = $evets->where('record_type',$record_type);
+
+        if($personal)
+        {
+            $lock = Lock::where('lock_id',$lock_id)->first();
+            $pins = $lock->allpincodes->pluck('pin_code')->unique()->toArray();
+            $evets = $evets->where('success',true)->whereNotIn('keyboard_pwd',$pins)->where('record_type',4);
+        }
         return  $evets->orderBy('id','DESC')->take(100)->get();
         
     }
