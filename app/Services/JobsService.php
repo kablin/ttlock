@@ -71,7 +71,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ]);
 
-        return response()->json(['job_id' => $uuid->job_id],200);
+        return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
 
@@ -84,7 +84,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id],200);
+        return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
 
@@ -108,7 +108,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id],200);
+        return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
 
@@ -120,7 +120,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id],200);
+        return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
 
@@ -132,7 +132,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id],200);
+        return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
     public function deleteKey($lock_id, $pwdID)
@@ -143,7 +143,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id],200);
+        return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
     public function createCredential($user, $password)
@@ -154,29 +154,64 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id],200);
+        return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
 
 
-    public static function getLockEvents($lock_id, $lock_type, $record_type,$personal)
+    public static function getLockEvents($lock_id, $lock_type, $record_type, $personal)
     {
-        
-        $evets = LockEvent::select('id','lock_id','record_type_from_lock','record_type','success','username','keyboard_pwd','lock_date')->where('lock_id',$lock_id);
-        if ($lock_type) $evets = $evets->where('record_type_from_lock',$lock_type);
-        if ($record_type && !$personal) $evets = $evets->where('record_type',$record_type);
 
-        if($personal)
-        {
-            $lock = Lock::where('lock_id',$lock_id)->first();
+        $evets = LockEvent::select('id', 'lock_id', 'record_type_from_lock', 'record_type', 'success', 'username', 'keyboard_pwd', 'lock_date')->where('lock_id', $lock_id);
+        if ($lock_type) $evets = $evets->where('record_type_from_lock', $lock_type);
+        if ($record_type && !$personal) $evets = $evets->where('record_type', $record_type);
+
+        if ($personal) {
+            $lock = Lock::where('lock_id', $lock_id)->first();
             $pins = $lock->allpincodes->pluck('pin_code')->unique()->toArray();
-            $evets = $evets->where('success',true)->whereNotIn('keyboard_pwd',$pins)->where('record_type',4);
+            $evets = $evets->where('success', true)->whereNotIn('keyboard_pwd', $pins)->where('record_type', 4);
         }
-        return  $evets->orderBy('id','DESC')->take(100)->get();
-        
+        return  $evets->orderBy('id', 'DESC')->take(100)->get();
     }
 
 
 
+    public static function getLockEvents2($lock_ids, $type, $code)
+    {
 
+        $locks_ = explode(',', $lock_ids);
+        foreach ($locks_ as $l) {
+            $lock = auth()->user()->locks->where('lock_id', $l)->first();
+            if (!$lock) return ['status' => false, 'msg' => "unknown lock"];
+        }
+
+
+        if ($type == 1) {
+            if ($code) {
+                $event = LockEvent::select('id', 'lock_id', 'record_type_from_lock', 'record_type', 'success', 'username', 'keyboard_pwd', 'lock_date')->whereIn('lock_id', $locks_)
+                    ->where('keyboard_pwd', $code)->where('success', true)->where('record_type_from_lock', 4)->orderBy('lock_date', 'ASC')->first();
+
+                return $event;
+            } else return '';
+        } else   if ($type == 2) {
+
+            $allpins = [];
+            foreach ($locks_ as $l) {
+                $lock = Lock::where('lock_id', $l)->first();
+                $pins = $lock->allpincodes->pluck('pin_code')->unique()->toArray();
+
+                $allpins = array_merge($allpins, $pins);
+            }
+
+            $events = LockEvent::select('id', 'lock_id', 'record_type_from_lock', 'record_type', 'success', 'username', 'keyboard_pwd', 'lock_date')->whereIn('lock_id', $locks_)
+                ->where('success', true)->whereNotIn('keyboard_pwd', $allpins)->where('record_type', 4)->orderBy('id', 'DESC')->take(100)->get();
+
+            return $events;
+        } else {
+            $events = LockEvent::select('id', 'lock_id', 'record_type_from_lock', 'record_type', 'success', 'username', 'keyboard_pwd', 'lock_date')->whereIn('lock_id', $locks_)
+                ->orderBy('id', 'DESC')->take(100)->get();
+
+            return $events;
+        }
+    }
 }
