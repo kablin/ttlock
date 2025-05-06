@@ -146,6 +146,10 @@ Route::middleware(['throttle:20,1'])->group(function () {
 
 
 
+    Route::post('/v1/open_lock', function (Request $request) {
+        if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
+        return (new JobsService(auth()->user()->id))->openLock($request->lock_id);
+    })->middleware('auth:sanctum');
 
 
 

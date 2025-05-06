@@ -20,6 +20,7 @@ use App\Jobs\SetPassageModeOnJob;
 use App\Jobs\RefreshLockTokenJob;
 use App\Jobs\AddKeyToLockJob;
 use App\Jobs\DeleteKeyJob;
+use App\Jobs\OpenLockJob;
 use App\Models\LockEvent;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
@@ -213,5 +214,18 @@ class JobsService
 
             return $events;
         }
+    }
+
+
+
+    public function openLock($lock_id)
+    {
+        $uuid = $this->startLockJob('openLock');
+        $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
+        OpenLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());
+
+        return response()->json(['job_id' => $uuid->job_id], 200);
     }
 }
