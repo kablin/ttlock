@@ -176,6 +176,16 @@ class JobsService
     }
 
 
+    public static function getCodeEvents($lock_id, $code)
+    {
+
+        $evets = LockEvent::select('id', 'lock_id', 'record_type_from_lock', 'record_type', 'success', 'username', 'keyboard_pwd', 'lock_date')->where('lock_id', $lock_id)
+        ->where('keyboard_pwd', $code);
+   
+
+        return  $evets->orderBy('id', 'DESC')->take(100)->get();
+    }
+
 
     public static function getLockEvents2($lock_ids, $type, $code)
     {

@@ -144,6 +144,21 @@ Route::middleware(['throttle:20,1'])->group(function () {
     })->middleware('auth:sanctum');
 
 
+    
+
+    Route::post('/v1/get_events_by_code', function (Request $request) {
+
+      
+        if (!isset(json_decode($request->getContent())->code))     return response()->json(['status' => false, 'msg' => "code is required"], 200);
+        if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
+
+        $lock = auth()->user()->locks->where('lock_id', json_decode($request->getContent())->lock_id)->first();
+
+        if (!$lock) return response()->json(['status' => false, 'msg' => "unknown lock"], 200);
+
+        return response()->json(JobsService::getCodeEvents(json_decode($request->getContent())->lock_id,  json_decode($request->getContent())->code), 200);
+    })->middleware('auth:sanctum');
+
 
 
     Route::post('/v1/open_lock', function (Request $request) {
