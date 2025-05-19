@@ -43,7 +43,6 @@ class BookingDeleteCode implements ShouldQueue
 
 	public function handle()
 	{
-		info('%%%%%%%%%%%55');
 		try {
 			if (now() > $this->pincode->end) {
 				$this->delete();
