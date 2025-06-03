@@ -51,41 +51,38 @@ class AddKeyToLockJob implements ShouldQueue
             }
 
 
-  
 
 
-            if (!$job->user->code_packet()->exists())
-            {
+
+            if (!$job->user->code_packet()->exists()) {
                 $data['job'] = $job->job_id;
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "no codes";
 
                 Http::withBody(json_encode($data), 'application/json')
-                ->post($job->user->callback);
+                    ->post($job->user->callback);
                 return;
             }
 
-            if ($job->user->code_packet->end < now())
-            {
+            if ($job->user->code_packet->end < now()) {
                 $data['job'] = $job->job_id;
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "codes expired";
 
                 Http::withBody(json_encode($data), 'application/json')
-                ->post($job->user->callback);
+                    ->post($job->user->callback);
                 return;
             }
-            if ($job->user->code_packet->count < 1 )
-            {
+            if ($job->user->code_packet->count < 1 &&  $job->user->code_packet->count != -100) {
                 $data['job'] = $job->job_id;
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "no codes";
 
                 Http::withBody(json_encode($data), 'application/json')
-                ->post($job->user->callback);
+                    ->post($job->user->callback);
                 return;
             }
 
@@ -105,8 +102,10 @@ class AddKeyToLockJob implements ShouldQueue
                     'end' => $this->end,
                 ]);
 
-                $job->user->code_packet->count = $job->user->code_packet->count - 1;
-                $job->user->code_packet->save();
+                if ($job->user->code_packet->count != -100) {
+                    $job->user->code_packet->count = $job->user->code_packet->count - 1;
+                    $job->user->code_packet->save();
+                }
             }
             $data['job'] = $job->job_id;
             $data['method'] = 'add_code_to_lock';

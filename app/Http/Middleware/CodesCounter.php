@@ -24,7 +24,7 @@ class CodesCounter
         if (auth()->user()->code_packet->end < now() ) 
         return response()->json(['codes_error'=> true,'status' => false, 'msg' => "codes expired"], 200);
 
-        if (auth()->user()->code_packet->count < 1)
+        if (auth()->user()->code_packet->count < 1 && auth()->user()->code_packet->count != -100)
         return response()->json(['codes_error'=> true,'status' => false, 'msg' => "no codes"], 200);
 
 

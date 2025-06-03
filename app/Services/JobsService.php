@@ -232,7 +232,8 @@ class JobsService
 
         $code_packet = CodePacket::firstOrCreate(['user_id'=>auth()->user()->id]);
         $code_packet->refresh() ;
-        $code_packet->count = $code_packet->count + $codes_count;
+        if ($codes_count==-1) $code_packet->count = -100 ;
+        else $code_packet->count = $code_packet->count + $codes_count;
         $code_packet->end = $expired_at;
         $code_packet->save();
         return ['status'=>true, 'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
