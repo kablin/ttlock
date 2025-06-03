@@ -88,18 +88,18 @@ Route::middleware(['throttle:20,1'])->group(function () {
 
     Route::middleware([CodesCounter::class])->group(function () {
 
-        Route::middleware([CodesDec::class])->group(function () {
 
-            Route::post('/v1/add_code_to_lock', function (Request $request) {
 
-                isset(json_decode($request->getContent())->begin) ? $begin = json_decode($request->getContent())->begin : $begin = null;
-                isset(json_decode($request->getContent())->end) ? $end = json_decode($request->getContent())->end : $end = null;
+        Route::post('/v1/add_code_to_lock', function (Request $request) {
 
-                if (!isset(json_decode($request->getContent())->code))     return response()->json(['status' => false, 'msg' => "code is required"], 200);
-                if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
-                return (new JobsService(auth()->user()->id))->addKeyToLock(json_decode($request->getContent())->lock_id, json_decode($request->getContent())->code, $begin, $end);
-            })->middleware('auth:sanctum');
-        });
+            isset(json_decode($request->getContent())->begin) ? $begin = json_decode($request->getContent())->begin : $begin = null;
+            isset(json_decode($request->getContent())->end) ? $end = json_decode($request->getContent())->end : $end = null;
+
+            if (!isset(json_decode($request->getContent())->code))     return response()->json(['status' => false, 'msg' => "code is required"], 200);
+            if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
+            return (new JobsService(auth()->user()->id))->addKeyToLock(json_decode($request->getContent())->lock_id, json_decode($request->getContent())->code, $begin, $end);
+        })->middleware('auth:sanctum');
+
 
         Route::post('/v1/set_lock_passage_mode_on', function (Request $request) {
             if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
@@ -187,7 +187,7 @@ Route::middleware(['throttle:20,1'])->group(function () {
         if (!isset(json_decode($request->getContent())->expired_at))     return response()->json(['status' => false, 'msg' => "expired_at is required"], 200);
 
         if (!DateTime::createFromFormat('Y-m-d H:i:s', json_decode($request->getContent())->expired_at) !== false) {
-            return response()->json(['status' => false, 'msg' => "expired_at is not date"], 200);
+            return response()->json(['status' => false, 'msg' => "expired_at is not valid date"], 200);
         }
 
 
