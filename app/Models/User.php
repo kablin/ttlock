@@ -61,6 +61,11 @@ class User extends Authenticatable
         return $this->hasOne(LocksCredential::class);
     }
 
+    public function code_packet() 
+    {
+        return $this->hasOne(CodePacket::class);
+    }
+
 
 
     public function token(): HasOneThrough

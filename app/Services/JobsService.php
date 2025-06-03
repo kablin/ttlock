@@ -9,6 +9,7 @@ namespace App\Services;
 use App\Models\Lock;
 use App\Models\LockJob;
 use App\Models\User;
+use App\Models\CodePacket;
 use App\Models\LocksToken;
 use Carbon\Carbon;
 use App\Jobs\CreateLockJob;
@@ -180,8 +181,8 @@ class JobsService
     {
 
         $evets = LockEvent::select('id', 'lock_id', 'record_type_from_lock', 'record_type', 'success', 'username', 'keyboard_pwd', 'lock_date')->where('lock_id', $lock_id)
-        ->where('keyboard_pwd', $code);
-   
+            ->where('keyboard_pwd', $code);
+
 
         return  $evets->orderBy('id', 'DESC')->take(100)->get();
     }
@@ -224,6 +225,25 @@ class JobsService
 
             return $events;
         }
+    }
+
+
+    public static function addCodesCount($codes_count, $expired_at) {
+
+        $code_packet = CodePacket::firstOrCreate(['user_id'=>auth()->user()->id]);
+        $code_packet->refresh() ;
+        $code_packet->count = $code_packet->count + $codes_count;
+        $code_packet->end = $expired_at;
+        $code_packet->save();
+        return ['status'=>true, 'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
+
+    }
+
+
+    public static function getCodesCount() {
+        $code_packet = CodePacket::firstOrCreate(['user_id'=>auth()->user()->id]);
+        $code_packet->refresh() ;
+        return ['status'=>true, 'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
     }
 
 
