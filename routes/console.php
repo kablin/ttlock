@@ -19,5 +19,4 @@ Artisan::command('inspire', function () {
 Schedule::job((new GetLockEventsSchedule()))->everySixHours();
 Schedule::job((new GetLockListSchedule()))->hourly();
 Schedule::job((new DeleteLockPinCodesSchedule()))->daily();
-Schedule::job((new DeleteLockPinCodesSchedule()))->everyMinute();
-Schedule::command(TestLockHook::class)->everyFifteenMinutes();
+//Schedule::command(TestLockHook::class)->everyFifteenMinutes();
