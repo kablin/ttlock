@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\CodePacket;
 use App\Models\LocksCredential;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,7 @@ class AuthController extends Controller
 
                 return response()->json([
                     'status' => false,
-                    'error'=> 1,
+                    'error' => 1,
                     'message' => 'Error login to TTLock',
                 ], 200);
             }
@@ -42,26 +43,32 @@ class AuthController extends Controller
             ]);
 
 
+
             $credentials['email'] = $validated['email'];
             $credentials['password'] = $validated['password'];
 
 
             $credential = LocksCredential::updateOrCreate(['user_id' => $user->id], ['login' => $validated['email'], 'password' => $validated['password']]);
-            if (updateRefreshToken($credential))
+            if (updateRefreshToken($credential)) {
 
+                $code_packet = CodePacket::firstOrCreate(['user_id'=>$user->id]);
+                $code_packet->refresh();
+                $code_packet->count = 10;
 
+                $code_packet->end = $code_packet->created_at->addYear();
+                $code_packet->save();
 
                 return response()->json([
                     'status' => true,
-                    'error'=> 0,
+                    'error' => 0,
                     'message' => 'User created successfully',
                 ], 200);
 
-            else
+            } else
 
                 return response()->json([
                     'status' => false,
-                    'error'=> 2,
+                    'error' => 2,
                     'message' => 'Error to set TTLock credential',
                 ], 200);
 
@@ -73,7 +80,7 @@ class AuthController extends Controller
 
             }*/
         } catch (\Exception $e) {
-            return  response()->json(['status' => false, 'error'=> 3,], 200);
+            return  response()->json(['status' => false, 'error' => 3,'message' => 'something wrong',], 200);
         }
     }
 }
