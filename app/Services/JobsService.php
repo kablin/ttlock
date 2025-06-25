@@ -243,7 +243,7 @@ class JobsService
 
     public static function SetCodesCount($codes_count) {
 
-        $code_packet = CodePacket::first(['user_id'=>auth()->user()->id]);
+        $code_packet = CodePacket::where(['user_id'=>auth()->user()->id])->first();
         if (!$code_packet)   return ['status'=>false, ];
         $code_packet->refresh() ;
         if ($codes_count==-1) $code_packet->count = -100 ;
