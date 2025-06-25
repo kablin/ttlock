@@ -241,6 +241,19 @@ class JobsService
     }
 
 
+    public static function SetCodesCount($codes_count, $expired_at) {
+
+        $code_packet = CodePacket::first(['user_id'=>auth()->user()->id]);
+        if (!$code_packet)   return ['status'=>false, ];
+        $code_packet->refresh() ;
+        if ($codes_count==-1) $code_packet->count = -100 ;
+        else $code_packet->count = $codes_count;
+        $code_packet->save();
+        return ['status'=>true, 'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
+
+    }
+
+
     public static function getCodesCount() {
         $code_packet = CodePacket::firstOrCreate(['user_id'=>auth()->user()->id]);
         $code_packet->refresh() ;

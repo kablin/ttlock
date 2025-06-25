@@ -197,6 +197,17 @@ Route::middleware(['throttle:20,1'])->group(function () {
 
 
 
+    Route::post('/v1/set_code_packet', function (Request $request) {
+
+        if (!isset(json_decode($request->getContent())->codes_count))     return response()->json(['status' => false, 'msg' => "codes_count is required"], 200);
+
+        return response()->json(JobsService::setCodesCount(json_decode($request->getContent())->codes_count), 200);
+    })->middleware('auth:sanctum');
+
+
+
+
+
     Route::post('/v1/get_codes_count', function (Request $request) {
         return response()->json(JobsService::getCodesCount(), 200);
     })->middleware('auth:sanctum');
