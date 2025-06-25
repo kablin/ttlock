@@ -241,7 +241,7 @@ class JobsService
     }
 
 
-    public static function SetCodesCount($codes_count, $expired_at) {
+    public static function SetCodesCount($codes_count) {
 
         $code_packet = CodePacket::first(['user_id'=>auth()->user()->id]);
         if (!$code_packet)   return ['status'=>false, ];
