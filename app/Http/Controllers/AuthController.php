@@ -51,19 +51,19 @@ class AuthController extends Controller
             $credential = LocksCredential::updateOrCreate(['user_id' => $user->id], ['login' => $validated['email'], 'password' => $validated['password']]);
             if (updateRefreshToken($credential)) {
 
-                $code_packet = CodePacket::firstOrCreate(['user_id'=>$user->id]);
-                $code_packet->refresh();
-                $code_packet->count = 10;
+                if ($user->wasRecentlyCreated) {
+                    $code_packet = CodePacket::firstOrCreate(['user_id' => $user->id]);
+                    $code_packet->refresh();
+                    $code_packet->count = 10;
 
-                $code_packet->end = $code_packet->created_at->addYear();
-                $code_packet->save();
-
+                    $code_packet->end = $code_packet->created_at->addYear();
+                    $code_packet->save();
+                }
                 return response()->json([
                     'status' => true,
                     'error' => 0,
                     'message' => 'User created successfully',
                 ], 200);
-
             } else
 
                 return response()->json([
@@ -80,7 +80,7 @@ class AuthController extends Controller
 
             }*/
         } catch (\Exception $e) {
-            return  response()->json(['status' => false, 'error' => 3,'message' => 'something wrong',], 200);
+            return  response()->json(['status' => false, 'error' => 3, 'message' => 'something wrong',], 200);
         }
     }
 }
