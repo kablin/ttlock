@@ -29,10 +29,10 @@
 <p>{<br />"lock_id":"12345"<br />}</p>
 <p>&nbsp;</p>
 <p><strong>api/v1/add_code_to_lock</strong></p>
-<p><strong>**</strong> Добавить код в замок<br />{<br />"begin":"timestamp",<br />"end":"timestamp",<br />"code": "1234",<br />"lock_id" :"1234566"<br />}</p>
+<p><strong>**</strong> Добавить код в замок. В случае неудачи запускается заново через 20 минут в течение 5 раз.<br />{<br />"begin":"timestamp",<br />"end":"timestamp",<br />"code": "1234",<br />"lock_id" :"1234566"<br />}</p>
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/delete_code_from_lock</strong></p>
-<p><strong>*</strong> Удалить код из замка<br />{<br />"lock_id":"12345",<br />"code_id":"123456",<br />}</p>
+<p><strong>*</strong> Удалить код из замка В случае неудачи запускается заново через 20 минут в течение 5 раз.<br />{<br />"lock_id":"12345",<br />"code_id":"123456",<br />}</p>
 <p>&nbsp;</p>
 <p><strong>api/v1/set_lock_passage_mode_on</strong></p>
 <p><strong>*</strong> Включить режим свободного прохода<br /><br /></p>
