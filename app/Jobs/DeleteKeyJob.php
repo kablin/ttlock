@@ -27,7 +27,7 @@ class DeleteKeyJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $job_id, private int $lock_id, private int  $pwdID) {}
+    public function __construct(private int $counter,private int $job_id, private int $lock_id, private int  $pwdID) {}
 
     /**
      * Execute the job.
@@ -41,6 +41,7 @@ class DeleteKeyJob implements ShouldQueue
             if (!$this->lock_id) {
                 $data['job'] = $job->job_id;
                 $data['data'] = 'Lock not found';
+                $data['msg'] = 'Замок не найден';
 
                 Http::withBody(json_encode($data), 'application/json')
                     //                ->withOptions([
@@ -61,6 +62,27 @@ class DeleteKeyJob implements ShouldQueue
             $data['job'] = $job->job_id;
             $data['method'] = 'delete_code_from_lock';
             $data['data'] =  $rezult;
+            if($rezult['status']==true) 
+            {
+                $data['msg'] = "Ключ успешно удален";
+
+            }
+            else if ($this->counter>=5)
+            {
+                $data['msg'] = "Ошибка удаления ключа. ".$rezult['msg'].' Количество попыток исчерпано';
+
+            }
+
+            else
+            {
+                $data['msg'] = "Ошибка удаления ключа. ".$rezult['msg'].' Следеющая попытка удаления ключа чере 20 минут';
+                DeleteKeyJob::dispatch($this->counter++, $this->job_id, $this->lock_id,  $this->pwdID)->onQueue('default')
+                ->chain([
+                    new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
+                ])
+                ->delay(now()->addMinutes(20));
+            }
+
 
             Http::withBody(json_encode($data), 'application/json')
                 //                ->withOptions([

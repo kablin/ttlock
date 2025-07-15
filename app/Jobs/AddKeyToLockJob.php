@@ -27,7 +27,7 @@ class AddKeyToLockJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $job_id, private int $lock_id, private int $code, private $begin = null, private $end = null) {}
+    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code, private $begin = null, private $end = null) {}
 
     /**
      * Execute the job.
@@ -40,6 +40,7 @@ class AddKeyToLockJob implements ShouldQueue
             if (!$this->lock_id) {
                 $data['job'] = $job->job_id;
                 $data['data'] = 'Lock not found';
+                $data['msg'] = 'Замок не найден';
 
                 Http::withBody(json_encode($data), 'application/json')
                     //                ->withOptions([
@@ -52,13 +53,11 @@ class AddKeyToLockJob implements ShouldQueue
 
 
 
-
-
             if (!$job->user->code_packet()->exists()) {
                 $data['job'] = $job->job_id;
                 $data['status'] = false;
                 $data['codes_error'] = true;
-                $data['msg'] = "no codes";
+                $data['msg'] = "Нет оплаченного пакета кодов";
 
                 Http::withBody(json_encode($data), 'application/json')
                     ->post($job->user->callback);
@@ -69,7 +68,7 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['job'] = $job->job_id;
                 $data['status'] = false;
                 $data['codes_error'] = true;
-                $data['msg'] = "codes expired";
+                $data['msg'] = "Окончилась дата действия пакета кодов";
 
                 Http::withBody(json_encode($data), 'application/json')
                     ->post($job->user->callback);
@@ -79,7 +78,7 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['job'] = $job->job_id;
                 $data['status'] = false;
                 $data['codes_error'] = true;
-                $data['msg'] = "no codes";
+                $data['msg'] = "Закончился пакет кодов";
 
                 Http::withBody(json_encode($data), 'application/json')
                     ->post($job->user->callback);
@@ -110,6 +109,21 @@ class AddKeyToLockJob implements ShouldQueue
             $data['job'] = $job->job_id;
             $data['method'] = 'add_code_to_lock';
             $data['data'] =  $key;
+            if ($key['status'])
+                $data['msg'] = "Ключ успешно загружен";
+            else if ($this->counter>=5)
+            {
+                $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Количество попыток исчерпано';
+            }
+            else
+            {
+                $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Следеющая попытка загрузки ключа чере 20 минут';
+                AddKeyToLockJob::dispatch($this->counter++, $this->job_id, $this->lock_id,$this->code,  $this->begin, $this->end)->onQueue('default')
+                ->chain([
+                    new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
+                ])
+                ->delay(now()->addMinutes(20));
+            }
 
             Http::withBody(json_encode($data), 'application/json')
                 //                ->withOptions([

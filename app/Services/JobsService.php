@@ -106,7 +106,7 @@ class JobsService
         $uuid = $this->startLockJob('addKeyToLock');
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
-        AddKeyToLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0, $code, $begin, $end)->onQueue('default')->chain([
+        AddKeyToLockJob::dispatch(1,$uuid->id, $lock ? $lock?->id : 0, $code, $begin, $end)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
@@ -141,7 +141,7 @@ class JobsService
     {
         $uuid = $this->startLockJob('deleteKey');
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
-        DeleteKeyJob::dispatch($uuid->id, $lock ? $lock?->id : 0, $pwdID)->onQueue('default')->chain([
+        DeleteKeyJob::dispatch(1,$uuid->id, $lock ? $lock?->id : 0, $pwdID)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
