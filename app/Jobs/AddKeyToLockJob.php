@@ -119,7 +119,7 @@ class AddKeyToLockJob implements ShouldQueue
             else
             {
                 $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Следеющая попытка загрузки ключа чере 20 минут';
-                AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,$this->code,  $this->begin, $this->end)->onQueue('default')
+                AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,$this->code, $this->code_name, $this->begin, $this->end)->onQueue('default')
                 ->chain([
                     new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                 ])

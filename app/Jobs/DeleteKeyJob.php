@@ -76,7 +76,7 @@ class DeleteKeyJob implements ShouldQueue
             else
             {
                 $data['msg'] = "Ошибка удаления ключа. ".$rezult['msg'].' Следеющая попытка удаления ключа чере 20 минут';
-                DeleteKeyJob::dispatch($this->counter++, $this->job_id, $this->lock_id,  $this->pwdID)->onQueue('default')
+                DeleteKeyJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,  $this->pwdID)->onQueue('default')
                 ->chain([
                     new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                 ])
