@@ -101,12 +101,12 @@ class JobsService
     }
 
 
-    public function addKeyToLock($lock_id, $code, $begin, $end)
+    public function addKeyToLock($lock_id, $code, $code_name ,$begin, $end)
     {
         $uuid = $this->startLockJob('addKeyToLock');
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
-        AddKeyToLockJob::dispatch(1,$uuid->id, $lock ? $lock?->id : 0, $code, $begin, $end)->onQueue('default')->chain([
+        AddKeyToLockJob::dispatch(1,$uuid->id, $lock ? $lock?->id : 0, $code,$code_name, $begin, $end)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 

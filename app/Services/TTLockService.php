@@ -252,9 +252,8 @@ class TTLockService
 
 
 
-	public function newKey($code, Lock $lock, $begin = null, $end = null): array
+	public function newKey($code, Lock $lock, $code_name, $begin = null, $end = null): array
 	{
-		$name = 'Ключ от Renty api';
 
 		if (is_null($begin)) {
 			$begin = Carbon::now()->unix();
@@ -273,7 +272,7 @@ class TTLockService
 			'lockId' => $lock->lock_id,
 			'keyboardPwd' => $code,
 			'addType' => 2,
-			'keyboardPwdName' => $name,
+			'keyboardPwdName' => $code_name,
 			'startDate' => $begin * 1000,
 			'endDate' => $end * 1000,
 		]);

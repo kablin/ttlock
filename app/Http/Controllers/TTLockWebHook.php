@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 use App\Models\Lock;
+use App\Models\LockPinCode;
 //use App\Models\LockPinCode;
 use Illuminate\Support\Facades\Http;
 
@@ -38,21 +40,24 @@ class TTLockWebHook extends Controller
           ]);
 
 
-          Http::withBody(json_encode($request->all()), 'application/json')
-          //                ->withOptions([
-          //                    'headers' => ''
-          //                ])
-          ->post($lock->user->callback);
+          if ($info->recordTypeFromLock && $info->keyboardPwd ) {
+            $pin = LockPinCode::where('lock_id',$lock->id)->where('pin_code',$info->keyboardPwd)->first();
+            $msg = get_msg_by_type($info->recordTypeFromLock);
+            $code_name = '';
+            if ($pin) $code_name = $pin->code_name;
 
+            Http::withBody(json_encode(['msg' => $msg, 'record_type_from_lock' =>  $info->recordTypeFromLock, 'code'=>$info->keyboardPwd,
+              'code_name'=>$code_name]), 'application/json')
+              //                ->withOptions([
+              //                    'headers' => ''
+              //                ])
+              ->post($lock->user->callback);
+          }
         }
       }
-
     } catch (\Exception $exception) {
-
     }
 
     return response('success')->setStatusCode(200);
-
-
   }
 }

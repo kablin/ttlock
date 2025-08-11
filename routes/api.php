@@ -97,7 +97,9 @@ Route::middleware(['throttle:20,1'])->group(function () {
 
             if (!isset(json_decode($request->getContent())->code))     return response()->json(['status' => false, 'msg' => "code is required"], 200);
             if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
-            return (new JobsService(auth()->user()->id))->addKeyToLock(json_decode($request->getContent())->lock_id, json_decode($request->getContent())->code, $begin, $end);
+            
+            !isset(json_decode($request->getContent())->code_name) ? $code_name = 'Ключ от Renty api' :  $code_name = json_decode($request->getContent())->code_name;
+            return (new JobsService(auth()->user()->id))->addKeyToLock(json_decode($request->getContent())->lock_id, json_decode($request->getContent())->code,  $code_name,$begin, $end,);
         })->middleware('auth:sanctum');
 
 

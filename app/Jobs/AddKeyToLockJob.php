@@ -27,7 +27,7 @@ class AddKeyToLockJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code, private $begin = null, private $end = null) {}
+    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code, private string $code_name,private $begin = null, private $end = null) {}
 
     /**
      * Execute the job.
@@ -90,7 +90,7 @@ class AddKeyToLockJob implements ShouldQueue
 
             $servise =  new TTLockService($job->user);
 
-            $key = $servise->newKey($this->code, $lock, $this->begin, $this->end);
+            $key = $servise->newKey($this->code, $lock, $this->code_name,$this->begin, $this->end);
 
             if ($key['status']) {
                 LockPinCode::create([
@@ -99,6 +99,7 @@ class AddKeyToLockJob implements ShouldQueue
                     'lock_id' => $lock->id,
                     'start' =>  $this->begin,
                     'end' => $this->end,
+                    'code_name' => $this->code_name,
                 ]);
 
                 if ($job->user->code_packet->count != -100) {
@@ -118,12 +119,14 @@ class AddKeyToLockJob implements ShouldQueue
             else
             {
                 $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Следеющая попытка загрузки ключа чере 20 минут';
-                AddKeyToLockJob::dispatch($this->counter++, $this->job_id, $this->lock_id,$this->code,  $this->begin, $this->end)->onQueue('default')
+                AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,$this->code,  $this->begin, $this->end)->onQueue('default')
                 ->chain([
                     new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                 ])
                 ->delay(now()->addMinutes(20));
             }
+
+            info('Load key result', $key);
 
             Http::withBody(json_encode($data), 'application/json')
                 //                ->withOptions([
