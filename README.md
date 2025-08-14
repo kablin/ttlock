@@ -1,12 +1,12 @@
 <h1>Команды АПИ</h1>
 <p>&nbsp;</p>
 <p><strong>&nbsp; api/v1/create_user</strong></p>
-<p>Создать пользователя. На вход логин и пароль от учетной записи ттлока<br /><br />{<br />"email" : "xxxx@rambler.ru",<br />"password" : "************"<br />}</p>
+<p>Создать пользователя. На вход логин и пароль от учетной записи ттлока<br /><br />{<br />"email" : "xxxx@rambler.ru",<br />"password" : "************",<br />"source":"bitrix"}</p>
 <hr />
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/get_token</strong></p>
 <p>Получение токена авторозации<br /><br /></p>
-<p>{<br />"email":"qqq@qq.qq",<br />"password":"123456"<br />"source":"bitrix"</p>
+<p>{<br />"email":"qqq@qq.qq",<br />"password":"123456"</p>
 <p>}<br />В ответ bearer токен авторизации для всех остальных запросов</p>
 <p>&nbsp;</p>
 <hr />
