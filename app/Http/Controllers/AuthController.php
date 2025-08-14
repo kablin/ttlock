@@ -41,7 +41,7 @@ class AuthController extends Controller
             ], [
                 'name' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'source' => json_decode($request->getContent())->source ?? null,
+                'source' => json_decode($request->getContent())->source ?? 'bitrix',
             ]);
 
 
