@@ -6,7 +6,7 @@
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/get_token</strong></p>
 <p>Получение токена авторозации<br /><br /></p>
-<p>{<br />"email":"qqq@qq.qq",<br />"password":"123456"</p>
+<p>{<br />"email":"qqq@qq.qq",<br />"password":"123456"<br />"source":"bitrix"</p>
 <p>}<br />В ответ bearer токен авторизации для всех остальных запросов</p>
 <p>&nbsp;</p>
 <hr />
