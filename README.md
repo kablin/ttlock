@@ -1,7 +1,7 @@
 <h1>Команды АПИ</h1>
 <p>&nbsp;</p>
 <p><strong>&nbsp; api/v1/create_user</strong></p>
-<p>Создать пользователя. На вход логин и пароль от учетной записи ттлока<br /><br />{<br />"email" : "xxxx@rambler.ru",<br />"password" : "************",<br />"source":"bitrix"}</p>
+<p>Создать пользователя. На вход логин и пароль от учетной записи ттлока<br /><br />{<br />"email" : "xxxx@rambler.ru",<br />"password" : "************",<br />"source":"bitrix"<br />}</p>
 <hr />
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/get_token</strong></p>
