@@ -87,7 +87,7 @@ class GetLockListJob implements ShouldQueue
 
 
             $result['job'] = $job->job_id;
-            $data['method'] = 'get_lock_list';
+            $result['method'] = 'get_lock_list';
             $result['data'] = $locks_data;
 
             Http::withBody(json_encode($result), 'application/json')
