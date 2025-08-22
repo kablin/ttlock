@@ -34,11 +34,16 @@ class AddKeyToLockJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $data['method'] = 'add_code_to_lock';
+        
         if ($job = LockJob::find($this->job_id)) {
+
+            $data['job'] = $job->job_id;
+            $data['tag'] = $job->tag;
+            $data['method'] = 'add_code_to_lock';
+
             $lock = Lock::find($this->lock_id);
             if (!$this->lock_id) {
-                $data['job'] = $job->job_id;
+
                 $data['data'] = 'Lock not found';
                 $data['msg'] = 'Замок не найден';
 
@@ -54,7 +59,6 @@ class AddKeyToLockJob implements ShouldQueue
 
 
             if (!$job->user->code_packet()->exists()) {
-                $data['job'] = $job->job_id;
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "Нет оплаченного пакета кодов";
@@ -65,7 +69,7 @@ class AddKeyToLockJob implements ShouldQueue
             }
 
             if ($job->user->code_packet->end < now()) {
-                $data['job'] = $job->job_id;
+
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "Окончилась дата действия пакета кодов";
@@ -75,7 +79,6 @@ class AddKeyToLockJob implements ShouldQueue
                 return;
             }
             if ($job->user->code_packet->count < 1 &&  $job->user->code_packet->count != -100) {
-                $data['job'] = $job->job_id;
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "Закончился пакет кодов";
@@ -107,8 +110,6 @@ class AddKeyToLockJob implements ShouldQueue
                     $job->user->code_packet->save();
                 }
             }
-            $data['job'] = $job->job_id;
-            $data['method'] = 'add_code_to_lock';
             $data['data'] =  $key;
             if ($key['status'])
                 $data['msg'] = "Ключ успешно загружен";

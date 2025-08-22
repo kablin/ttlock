@@ -17,7 +17,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::get('/lock_create', function (Request $request) {
-    return (new JobsService(auth()->user()->id))->createLock();
+    return (new JobsService(auth()->user()->id))->createLock( json_decode($request->getContent())->tag);
 })->middleware('auth:sanctum');
 
 
@@ -73,14 +73,14 @@ Route::middleware(['throttle:20,1'])->group(function () {
 
 
     Route::post('/v1/get_lock_list', function (Request $request) {
-        return (new JobsService(auth()->user()->id))->getLockList();
+        return (new JobsService(auth()->user()->id))->getLockList(json_decode($request->getContent())->tag);
     })->middleware('auth:sanctum');;
 
 
 
 
     Route::post('/v1/create_credential', function (Request $request) {
-        return (new JobsService(auth()->user()->id))->createCredential($request->user, $request->password);
+        return (new JobsService(auth()->user()->id))->createCredential($request->user, $request->password,json_decode($request->getContent())->tag);
     })->middleware('auth:sanctum');
 
 
@@ -99,18 +99,18 @@ Route::middleware(['throttle:20,1'])->group(function () {
             if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
             
             !isset(json_decode($request->getContent())->code_name) ? $code_name = 'Ключ от Renty api' :  $code_name = json_decode($request->getContent())->code_name;
-            return (new JobsService(auth()->user()->id))->addKeyToLock(json_decode($request->getContent())->lock_id, json_decode($request->getContent())->code,  $code_name,$begin, $end,);
+            return (new JobsService(auth()->user()->id))->addKeyToLock(json_decode($request->getContent())->lock_id, json_decode($request->getContent())->code,  $code_name,$begin, $end,json_decode($request->getContent())->tag);
         })->middleware('auth:sanctum');
 
 
         Route::post('/v1/set_lock_passage_mode_on', function (Request $request) {
             if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
-            return (new JobsService(auth()->user()->id))->setPassageModeOn($request->lock_id);
+            return (new JobsService(auth()->user()->id))->setPassageModeOn($request->lock_id,json_decode($request->getContent())->tag);
         })->middleware('auth:sanctum');
 
         Route::post('/v1/set_lock_passage_mode_off', function (Request $request) {
             if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
-            return (new JobsService(auth()->user()->id))->setPassageModeOff($request->lock_id);
+            return (new JobsService(auth()->user()->id))->setPassageModeOff($request->lock_id,json_decode($request->getContent())->tag);
         })->middleware('auth:sanctum');
 
         Route::post('/v1/delete_code_from_lock', function (Request $request) {
@@ -118,7 +118,7 @@ Route::middleware(['throttle:20,1'])->group(function () {
             if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
             if (!isset(json_decode($request->getContent())->code_id))     return response()->json(['status' => false, 'msg' => "code_id is required"], 200);
 
-            return (new JobsService(auth()->user()->id))->deleteKey($request->lock_id, $request->code_id);
+            return (new JobsService(auth()->user()->id))->deleteKey($request->lock_id, $request->code_id,json_decode($request->getContent())->tag);
         })->middleware('auth:sanctum');
 
 
@@ -175,7 +175,7 @@ Route::middleware(['throttle:20,1'])->group(function () {
 
         Route::post('/v1/open_lock', function (Request $request) {
             if (!isset(json_decode($request->getContent())->lock_id))     return response()->json(['status' => false, 'msg' => "lock_id is required"], 200);
-            return (new JobsService(auth()->user()->id))->openLock($request->lock_id);
+            return (new JobsService(auth()->user()->id))->openLock($request->lock_id,json_decode($request->getContent())->tag);
         })->middleware('auth:sanctum');
     });
 

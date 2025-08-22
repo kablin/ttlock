@@ -35,9 +35,9 @@ class JobsService
 
 
 
-    private function startLockJob(string $task)
+    private function startLockJob(string $task,  $tag='')
     {
-        return LockJob::create(['user_id' => $this->user_id, 'task' => $task]);
+        return LockJob::create(['user_id' => $this->user_id, 'task' => $task, 'tag' => $tag]);
     }
 
 
@@ -64,9 +64,9 @@ class JobsService
 
 
 
-    public function createLock()
+    public function createLock($tag)
     {
-        $uuid = $this->startLockJob('createLock');
+        $uuid = $this->startLockJob('createLock', $tag);
         info($uuid->job_id);
 
         CreateLockJob::dispatch()->onQueue('default')->chain([
@@ -77,9 +77,9 @@ class JobsService
     }
 
 
-    public function getLockList()
+    public function getLockList($tag)
     {
-        $uuid = $this->startLockJob('getLockList');
+        $uuid = $this->startLockJob('getLockList',$tag);
         info($uuid->job_id);
 
         GetLockListJob::dispatch($uuid->id)->onQueue('default')->chain([
@@ -91,9 +91,9 @@ class JobsService
 
 
 
-    public function refreshLockTocken(int $id)
+    public function refreshLockTocken(int $id,$tag)
     {
-        $uuid = $this->startLockJob('refreshLockTocken');
+        $uuid = $this->startLockJob('refreshLockTocken',$tag);
 
         RefreshLockTokenJob::dispatch($id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
@@ -101,9 +101,9 @@ class JobsService
     }
 
 
-    public function addKeyToLock($lock_id, $code, $code_name ,$begin, $end)
+    public function addKeyToLock($lock_id, $code, $code_name ,$begin, $end,$tag)
     {
-        $uuid = $this->startLockJob('addKeyToLock');
+        $uuid = $this->startLockJob('addKeyToLock',$tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
         AddKeyToLockJob::dispatch(1,$uuid->id, $lock ? $lock?->id : 0, $code,$code_name, $begin, $end)->onQueue('default')->chain([
@@ -114,9 +114,9 @@ class JobsService
     }
 
 
-    public function setPassageModeOn($lock_id)
+    public function setPassageModeOn($lock_id,$tag)
     {
-        $uuid = $this->startLockJob('setPassageModeOn');
+        $uuid = $this->startLockJob('setPassageModeOn',$tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
         SetPassageModeOnJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
@@ -126,9 +126,9 @@ class JobsService
     }
 
 
-    public function setPassageModeOff($lock_id)
+    public function setPassageModeOff($lock_id,$tag)
     {
-        $uuid = $this->startLockJob('setPassageModeOff');
+        $uuid = $this->startLockJob('setPassageModeOff',$tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
         SetPassageModeOffJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
@@ -137,9 +137,9 @@ class JobsService
         return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
-    public function deleteKey($lock_id, $pwdID)
+    public function deleteKey($lock_id, $pwdID,$tag)
     {
-        $uuid = $this->startLockJob('deleteKey');
+        $uuid = $this->startLockJob('deleteKey',$tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
         DeleteKeyJob::dispatch(1,$uuid->id, $lock ? $lock?->id : 0, $pwdID)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
@@ -148,9 +148,9 @@ class JobsService
         return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
-    public function createCredential($user, $password)
+    public function createCredential($user, $password,$tag)
     {
-        $uuid = $this->startLockJob('createCredential');
+        $uuid = $this->startLockJob('createCredential',$tag);
         $user_id = auth()->user()->id;
         CreateCredentialJob::dispatch($uuid->id, $user, $password, $user_id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
@@ -262,9 +262,9 @@ class JobsService
 
 
 
-    public function openLock($lock_id)
+    public function openLock($lock_id,$tag)
     {
-        $uuid = $this->startLockJob('openLock');
+        $uuid = $this->startLockJob('openLock',$tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
         OpenLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
