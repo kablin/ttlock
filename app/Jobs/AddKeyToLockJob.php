@@ -38,7 +38,7 @@ class AddKeyToLockJob implements ShouldQueue
         if ($job = LockJob::find($this->job_id)) {
 
             $data['job'] = $job->job_id;
-            $data['tag'] = $job->tag;
+            $data['tag'] = json_decode($job->tag);
             $data['method'] = 'add_code_to_lock';
 
             $lock = Lock::find($this->lock_id);

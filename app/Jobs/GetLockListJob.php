@@ -87,7 +87,7 @@ class GetLockListJob implements ShouldQueue
 
 
             $result['job'] = $job->job_id;
-            $result['tag'] = $job->tag;
+            $result['tag'] = json_decode($job->tag);
             $result['method'] = 'get_lock_list';
             $result['data'] = $locks_data;
 

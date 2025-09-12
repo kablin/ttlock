@@ -56,7 +56,7 @@ class OpenLockJob implements ShouldQueue
 
 
             $data['job'] = $job->job_id;
-            $data['tag'] = $job->tag;
+            $data['tag'] = json_decode($job->tag);
             $data['method'] = 'open_lock';
             $data['data'] =  $rezult;
 

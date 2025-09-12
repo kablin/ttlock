@@ -35,9 +35,9 @@ class JobsService
 
 
 
-    private function startLockJob(string $task,  $tag='')
+    private function startLockJob(string $task,  $tag=null)
     {
-        return LockJob::create(['user_id' => $this->user_id, 'task' => $task, 'tag' => $tag]);
+        return LockJob::create(['user_id' => $this->user_id, 'task' => $task, 'tag' => $tag ? json_encode($tag):""]);
     }
 
 

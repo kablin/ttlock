@@ -37,7 +37,7 @@ class DeleteKeyJob implements ShouldQueue
         $data['method'] = 'delete_code_from_lock';
         if ($job = LockJob::find($this->job_id)) {
 
-            $data['tag'] = $job->tag;
+            $data['tag'] = json_decode($job->tag);
             
             $lock = Lock::find($this->lock_id);
             if (!$this->lock_id) {

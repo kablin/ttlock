@@ -71,7 +71,7 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => false,
                     'error' => 2,
-                    'message' => 'Error to set TTLock credential',
+                    'message' => 'Failed to set TTLock credential',
                 ], 200);
 
 
@@ -82,7 +82,7 @@ class AuthController extends Controller
 
             }*/
         } catch (\Exception $e) {
-            return  response()->json(['status' => false, 'error' => 3, 'message' => 'something wrong',], 200);
+            return  response()->json(['status' => false, 'error' => 3, 'message' => 'Something wrong',], 200);
         }
     }
 }

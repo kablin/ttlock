@@ -40,9 +40,9 @@ Route::middleware(['throttle:5,1'])->group(function () {
                 $request->user()->callback = $callback;
                 $request->user()->save();
                 return response()->json(['status' => true], 200);
-            } else  return response()->json(['status' => false], 200);
+            } else  return response()->json(['status' => false, 'error' => 3, 'message' => 'Something wrong'], 200);
         } catch (Exception $e) {
-            return response()->json(['status' => false], 200);
+            return response()->json(['status' => false, 'error' => 3, 'message' => 'Something wrong'], 200);
         }
     })->middleware('auth:sanctum');
 
@@ -57,9 +57,9 @@ Route::middleware(['throttle:5,1'])->group(function () {
             if (Auth::attempt($credentials)) {
                 $token = auth()->user()->createToken('ttlock');
                 return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id], 200);
-            } else   return response()->json(['status' => false], 200);
+            } else   return response()->json(['status' => false, 'error' => 3, 'message' => 'Something wrong'], 200);
         } catch (Exception $e) {
-            return response()->json(['status' => false], 200);
+            return response()->json(['status' => false, 'error' => 3, 'message' => 'Something wrong'], 200);
         }
     });
 });

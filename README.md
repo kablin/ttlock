@@ -2,6 +2,16 @@
 <p>&nbsp;</p>
 <p><strong>&nbsp; api/v1/create_user</strong></p>
 <p>Создать пользователя. На вход логин и пароль от учетной записи ттлока<br /><br />{<br />"email" : "xxxx@rambler.ru",<br />"password" : "************",<br />"source":"bitrix"<br />}</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "0",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "User created successfully"</span><br />}</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>Не получилось залогиниться&nbsp; в облако TTLOCK</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "1",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Error login to TTLock"</span><br />}</p>
+<p>&nbsp;</p>
+<p>Не получилось запистаь данные для авторизации в TTLCOK</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "2",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Failed to set TTLock credential"</span><br />}</p>
+<p>Неизвестная ошибка</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "3",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Something wrong"</span><br />}</p>
 <hr />
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/get_token</strong></p>
@@ -9,12 +19,23 @@
 <p>{<br />"email":"qqq@qq.qq",<br />"password":"123456"</p>
 <p>}<br />В ответ bearer токен авторизации для всех остальных запросов</p>
 <p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'token" : "xxxxxxx",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "user_id" : "123"</span><br />}</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "3",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Something wrong"</span><br />}</p>
+<p>&nbsp;</p>
 <hr />
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/set_callback</strong></p>
 <p>Установить коллбэк для пользователя<br /><br /></p>
 <p>{<br />"callback":"http://xxx.com/callback"<br />}</p>
 <p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br /><br />}</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "3",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Something wrong"</span><br />}</p>
 <p>&nbsp;</p>
 <hr />
 <p>&nbsp;</p>
@@ -80,18 +101,10 @@
 <p>GetLockListSchedule - каждый час - получение параметров замков<br /><br />DeleteLockPinCodesSchedule - ежедневно, удаление страрых ключей</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
-
-
-
-<hr />
-<hr />
-
-
-
+<hr /><hr />
 <p>Использование API</p>
 <p>Все запросы вызываются методом POST</p>
-
-<p>1.  Создать пользователя   - api/v1/create_user </p>
-<p>2.  Получить Bearer токен авторизации, который используется во всех остальных запросах   -  api/v1/get_token </p>
-<p>3.  Установить адрес обратного вызова, на который будет приходить ответ от API при работе с замками   - api/v1/set_callback </p>
-<p>4.  Выполнять остальные запросы к апи</p>
+<p>1. Создать пользователя - api/v1/create_user</p>
+<p>2. Получить Bearer токен авторизации, который используется во всех остальных запросах - api/v1/get_token</p>
+<p>3. Установить адрес обратного вызова, на который будет приходить ответ от API при работе с замками - api/v1/set_callback</p>
+<p>4. Выполнять остальные запросы к апи</p>
