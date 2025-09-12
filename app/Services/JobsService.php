@@ -194,7 +194,7 @@ class JobsService
         $locks_ = explode(',', $lock_ids);
         foreach ($locks_ as $l) {
             $lock = auth()->user()->locks->where('lock_id', $l)->first();
-            if (!$lock) return ['status' => false, 'msg' => "unknown lock"];
+            if (!$lock) return ['status' => false, 'msg' => "Неизветсный замок"];
         }
 
 

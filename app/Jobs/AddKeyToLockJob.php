@@ -45,7 +45,8 @@ class AddKeyToLockJob implements ShouldQueue
             if (!$this->lock_id) {
 
                 $data['data'] = 'Lock not found';
-                $data['msg'] = 'Замок не найден';
+                $data['msg'] = 'Неизвестный замок';
+                $data['status'] = false;
 
                 Http::withBody(json_encode($data), 'application/json')
                     //                ->withOptions([
@@ -111,14 +112,18 @@ class AddKeyToLockJob implements ShouldQueue
                 }
             }
             $data['data'] =  $key;
-            if ($key['status'])
+            if ($key['status']) {
+                $data['status'] = true;
                 $data['msg'] = "Ключ успешно загружен";
+            }
             else if ($this->counter>=5)
             {
-                $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Количество попыток исчерпано';
+                $data['status'] = false;
+                $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Количество попыток исчерпано.';
             }
             else
             {
+                 $data['status'] = false;
                 $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Следеющая попытка загрузки ключа чере 20 минут';
                 AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,$this->code, $this->code_name, $this->begin, $this->end)->onQueue('default')
                 ->chain([

@@ -43,7 +43,8 @@ class DeleteKeyJob implements ShouldQueue
             if (!$this->lock_id) {
                 $data['job'] = $job->job_id;
                 $data['data'] = 'Lock not found';
-                $data['msg'] = 'Замок не найден';
+                $data['msg'] = 'Неизвестный замок';
+                $data['status'] = false;
 
                 Http::withBody(json_encode($data), 'application/json')
                     //                ->withOptions([
@@ -64,6 +65,7 @@ class DeleteKeyJob implements ShouldQueue
             $data['job'] = $job->job_id;
             $data['method'] = 'delete_code_from_lock';
             $data['data'] =  $rezult;
+            $data['status'] =  $rezult['status'];
             if($rezult['status']==true) 
             {
                 $data['msg'] = "Ключ успешно удален";

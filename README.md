@@ -1,17 +1,17 @@
 <h1>Команды АПИ</h1>
 <p>&nbsp;</p>
 <p><strong>&nbsp; api/v1/create_user</strong></p>
-<p>Создать пользователя. На вход логин и пароль от учетной записи ттлока<br /><br />{<br />"email" : "xxxx@rambler.ru",<br />"password" : "************",<br />"source":"bitrix"<br />}</p>
+<p>Создать пользователя. На вход логин и пароль от учетной записи ттлока. source-текстовое поле, название системы из которой создается пользователь.</p>
+<p>{<br />"email" : "xxxx@rambler.ru",<br />"password" : "************",<br />"source":"bitrix"<br />}</p>
 <p><span style="text-decoration: underline;">Ответ</span>:</p>
-<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "0",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "User created successfully"</span><br />}</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "0",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Пользователь успешно создан"</span><br />}</p>
 <p><span style="text-decoration: underline;">Ошибки</span>:</p>
-<p>Не получилось залогиниться&nbsp; в облако TTLOCK</p>
-<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "1",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Error login to TTLock"</span><br />}</p>
 <p>&nbsp;</p>
-<p>Не получилось запистаь данные для авторизации в TTLCOK</p>
-<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "2",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Failed to set TTLock credential"</span><br />}</p>
-<p>Неизвестная ошибка</p>
-<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "3",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Something wrong"</span><br />}</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "1",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не удалось залогиниться&nbsp; в облако TTLOCK"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "2",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не получилось запистать данные для авторизации в TTLOCK"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "3",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестная ошибка"</span><br />}</p>
 <hr />
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/get_token</strong></p>
@@ -23,7 +23,7 @@
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'token" : "xxxxxxx",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "user_id" : "123"</span><br />}</p>
 <p><span style="text-decoration: underline;">Ошибки</span>:</p>
 <p>&nbsp;</p>
-<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "3",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Something wrong"</span><br />}</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестная ошибка"</span><br />}</p>
 <p>&nbsp;</p>
 <hr />
 <p>&nbsp;</p>
@@ -33,35 +33,79 @@
 <p>&nbsp;</p>
 <p><span style="text-decoration: underline;">Ответ</span>:</p>
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br /><br />}</p>
-<p><span style="text-decoration: underline;">Ошибки</span>:</p>
 <p>&nbsp;</p>
-<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "3",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "message" : "Something wrong"</span><br />}</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестная ошибка"</span><br />}</p>
 <p>&nbsp;</p>
 <hr />
 <p>&nbsp;</p>
-<h3>Запросы к апи которые возвращают job_id с уникальным номером запроса. После выполнения запроса к облаку TTLOCK вызвается коллбэк пользователя куда передается job_id и результат запроса</h3>
+<h3>Запросы к апи которые возвращают job_id с уникальным номером запроса. После выполнения запроса к облаку TTLOCK вызвается коллбэк пользователя куда передается job_id и результат запроса. Во всех этих запросах есть необязательное поле tag, куда можно записать произвольный json, и это поле будет возвращено с результатом</h3>
+<p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/get_lock_list</strong></p>
 <p><strong>*</strong> Получить список всех замков пользователя<br /><br /></p>
+<p>{<br />"tag":{}<br />}</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span></p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br />"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "method" : "get_lock_list",<br /> 'data" : {//ответ ttlock},</span></p>
+<p><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/open_lock</strong></p>
 <p><strong>* </strong>Открыть замок</p>
-<p>{<br />"lock_id":"12345"<br />}</p>
+<p>{<br />"lock_id":"12345",<br />"tag":{}<br />}</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br />"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "method" : "open_lock",<br /> 'data" : {//ответ ttlock},</span><br /><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не указан lock_id"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",<br /> "method" : "open_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестный замок"</span><br />}</p>
 <p>&nbsp;</p>
 <p><strong>api/v1/add_code_to_lock</strong></p>
-<p><strong>**</strong> Добавить код в замок. В случае неудачи запускается заново через 20 минут в течение 5 раз.<br />{<br />"begin":"timestamp",<br />"end":"timestamp",<br />"code": "1234",<br />"code_name": "Персонал",<br />"lock_id" :"1234566"<br />}</p>
+<p><strong>**</strong> Добавить код в замок. В случае неудачи запускается заново через 20 минут в течение 5 раз.<br />{<br />"begin":"timestamp",<br />"end":"timestamp",<br />"code": "1234",<br />"code_name": "Персонал",<br />"lock_id" :"1234566",<br />"tag":{}<br />}</p>
 <p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br />"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "method" : "add_code_to_lock",<br /> 'data" : {//ответ ttlock},<br /> "msg" : "Ключ успешно загружен" </span><br /><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не указан lock_id" || "Не указан code"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "add_code_to_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестный замок"</span><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "add_code_to_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",<br />"codes_error'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Нет оплаченного пакета кодов" || "Окончилась дата действия пакета кодов" || "Закончился пакет кодов"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "add_code_to_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Ошибка загрузки ключа. Количество попыток исчерпано." || Ошибка загрузки ключа. Следеющая попытка загрузки ключа чере 20 минут" </span><br />}&nbsp;</p>
 <p><strong>&nbsp;api/v1/delete_code_from_lock</strong></p>
-<p><strong>*</strong> Удалить код из замка В случае неудачи запускается заново через 20 минут в течение 5 раз.<br />{<br />"lock_id":"12345",<br />"code_id":"123456",<br />}</p>
+<p><strong>*</strong> Удалить код из замка В случае неудачи запускается заново через 20 минут в течение 5 раз.<br />{<br />"lock_id":"12345",<br />"code_id":"123456",<br />"tag":{}<br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br />"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "method" : "delete_code_from_lock",<br /> 'data" : {//ответ ttlock},<br /> "msg": "Ключ успешно удален"</span><br /><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не указан lock_id" || "Не указан code_id"</span><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "add_code_to_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Ошибка удаления ключа. Количество попыток исчерпано." || Ошибка удаления ключа. Следеющая попытка удвления ключа чере 20 минут" || "Неизвестный замок"</span><br />}&nbsp;</p>
 <p>&nbsp;</p>
 <p><strong>api/v1/set_lock_passage_mode_on</strong></p>
 <p><strong>*</strong> Включить режим свободного прохода<br /><br /></p>
-<p>{<br />"lock_id":"12345",<br />}</p>
+<p>{<br />"lock_id":"12345",</p>
+<p>"tag":{}<br />}</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/set_lock_passage_mode_off</strong></p>
-<p><strong>*</strong> Выключить режим свободного прохода<br />{<br />"lock_id":"12345",<br />}</p>
+<p><strong>*</strong> Выключить режим свободного прохода<br />{<br />"lock_id":"12345",<br />"tag":{}<br />}</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>

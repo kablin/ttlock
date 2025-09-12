@@ -39,8 +39,10 @@ class OpenLockJob implements ShouldQueue
             $lock = Lock::find($this->lock_id);
             if (!$this->lock_id) {
                 $data['job'] = $job->job_id;
+                $data['tag'] = json_decode($job->tag);
                 $data['data'] = 'Lock not found';
-
+                $data['status'] = false;
+                $data['msg'] = 'Неизвестный замок';
                 Http::withBody(json_encode($data), 'application/json')
                     //                ->withOptions([
                     //                    'headers' => ''
@@ -58,6 +60,7 @@ class OpenLockJob implements ShouldQueue
             $data['job'] = $job->job_id;
             $data['tag'] = json_decode($job->tag);
             $data['method'] = 'open_lock';
+            $data['status'] = $rezult['status'];
             $data['data'] =  $rezult;
 
             Http::withBody(json_encode($data), 'application/json')

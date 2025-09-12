@@ -32,6 +32,7 @@ class AuthController extends Controller
                     'status' => false,
                     'error' => 1,
                     'message' => 'Error login to TTLock',
+                    'msg' => 'Не удалось залогиниться в облако TTLock',
                 ], 200);
             }
 
@@ -65,6 +66,7 @@ class AuthController extends Controller
                     'status' => true,
                     'error' => 0,
                     'message' => 'User created successfully',
+                    'msg' => 'Пользовтаель успешно создан',
                 ], 200);
             } else
 
@@ -72,6 +74,7 @@ class AuthController extends Controller
                     'status' => false,
                     'error' => 2,
                     'message' => 'Failed to set TTLock credential',
+                    'msg' => 'Не получилось запистать данные для авторизации в TTLOCK',
                 ], 200);
 
 
@@ -82,7 +85,7 @@ class AuthController extends Controller
 
             }*/
         } catch (\Exception $e) {
-            return  response()->json(['status' => false, 'error' => 3, 'message' => 'Something wrong',], 200);
+            return  response()->json(['status' => false, 'error' => 3, 'msg' => 'Неизвестная ошибка', 'message' => 'Something wrong',], 200);
         }
     }
 }
