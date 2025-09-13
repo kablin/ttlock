@@ -236,7 +236,7 @@ class JobsService
         else $code_packet->count = $code_packet->count + $codes_count;
         $code_packet->end = $expired_at;
         $code_packet->save();
-        return ['status'=>true, 'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
+        return ['status'=>true, 'msg'=>"Пакет кодов успешно добавлен",'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
 
     }
 
@@ -249,7 +249,7 @@ class JobsService
         if ($codes_count==-1) $code_packet->count = -100 ;
         else $code_packet->count = $codes_count;
         $code_packet->save();
-        return ['status'=>true, 'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
+        return ['status'=>true,  'msg'=>"Пакет кодов успешно установлен",'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
 
     }
 

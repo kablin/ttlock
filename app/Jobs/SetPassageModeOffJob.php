@@ -40,6 +40,10 @@ class SetPassageModeOffJob implements ShouldQueue
             if (!$this->lock_id) {
                 $data['job'] = $job->job_id;
                 $data['data'] = 'Lock not found';
+                $data['msg'] = 'Неизвестный замок';
+                $data['status'] = false;
+                $data['method'] = 'set_lock_passage_mode_off';
+                $data['tag'] = json_decode($job->tag);
 
                 Http::withBody(json_encode($data), 'application/json')
                     //                ->withOptions([
@@ -58,6 +62,8 @@ class SetPassageModeOffJob implements ShouldQueue
             $data['job'] = $job->job_id;
             $data['tag'] = json_decode($job->tag);
             $data['method'] = 'set_lock_passage_mode_off';
+            $data['status'] =  $rezult['status'];
+            $data['msg'] = 'Режим свободного прохода выключен';
             $data['data'] =  $rezult;
 
             Http::withBody(json_encode($data), 'application/json')
