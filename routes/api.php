@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use App\Services\JobsService;
 use App\Http\Middleware\CodesCounter;
-use App\Http\Middleware\CodesDec;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
