@@ -49,6 +49,18 @@ services:
     networks:
       - ttlock-net
 
+  ttlocknode:
+    container_name:  ttlock-node
+    image: node:23
+    tty: true
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    ports:
+      - "8004:8000"
+      - "5186:5186"
+    networks:
+      - ttlock-net
 
 
   ttlockcli:

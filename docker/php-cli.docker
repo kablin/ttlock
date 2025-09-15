@@ -36,6 +36,6 @@ RUN mkdir -p /home/www-data/.config/psysh &&\
 USER www-data
 
 
-RUN echo 'alias pa="php artisan"' >> ~/.bashrc
+#RUN echo 'alias pa="php artisan"' >> ~/.bashrc
 
 WORKDIR /var/www

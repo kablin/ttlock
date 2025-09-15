@@ -1,19 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TTLockWebHook;
-use Illuminate\Http\Request;
-
+use Inertia\Inertia;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return Inertia::render('Welcome');
+})->name('home');
 
-Route::get('/tokens/create', function () {
-    $token = App\Models\User::find(1)->createToken('test');
+Route::get('dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-    return ['token' => $token->plainTextToken];
-});
-//token	"1|silpjkiQSCrv3kMTOPrJJZ7UaDS11DsbUIl0XkfU26e44c97"
-
-Route::post('callback/ttlock/{code}', TTLockWebHook::class)->name('webhook.ttlock-code');
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
