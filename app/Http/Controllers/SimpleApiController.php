@@ -122,7 +122,73 @@ class SimpleApiController extends Controller
 
 
 
+    public function getLockEvents2(Request $request)
+    {
+        try {
+            //2025-08-28 15:43
+            $validator = Validator::make($request->all(), [
+                'type' => 'required|integer',
+                'code' => 'integer',
+                'lock_ids' => 'required',
+            ], [
+                'type.required' => 'Не указан type.',
+                'lock_ids.required' => 'Не указан lock_ids.',
+                'type.integer' => 'type не число.',
+                'code.integer' => 'code не число.',
+            ]);
 
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only(['type', 'lock_ids', 'code']);
+
+            $code = $validated['code'] ?? null;
+
+            if ($validated['type'] == 1 &&  !$code) return response()->json(['status' => false, 'msg' => "Не указан code"], 200);
+
+            return response()->json(JobsService::getLockEvents2($validated['lock_ids'],   $validated['type'], $code), 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
+
+
+
+    public function getEventsByCode(Request $request)
+    {
+        try {
+            //2025-08-28 15:43
+            $validator = Validator::make($request->all(), [
+                'code' => 'required',
+                'lock_id' => 'required|integer',
+            ], [
+                'code.required' => 'Не указан code.',
+                'lock_id.required' => 'Не указан lock_id.',
+                'lock_id.integer' => 'lock_id не число.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only(['code', 'lock_id']);
+
+            $lock = auth()->user()->locks->where('lock_id', $validated['lock_id'])->first();
+
+            if (!$lock) return response()->json(['status' => false, 'msg' => "Неизвестный замок"], 200);
+
+            return response()->json(JobsService::getCodeEvents($validated['lock_id'],   $validated['code']), 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
 
 
     public function addCodePacket(Request $request)
@@ -148,7 +214,49 @@ class SimpleApiController extends Controller
             $validated = $validator->safe()->only(['codes_count', 'expired_at']);
 
             return response()->json(JobsService::addCodesCount($validated['codes_count'],  $validated['expired_at']), 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
 
+
+
+
+
+
+
+    public function setCodePacket(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'codes_count' => 'required|integer',
+            ], [
+                'codes_count.required' => 'Не указан codes_count.',
+                'codes_count.integer' => 'codes_count не число.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only(['codes_count', 'expired_at']);
+
+            return response()->json(JobsService::setCodesCount($validated['codes_count']), 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
+
+
+
+
+    public function getCodesCount(Request $request)
+    {
+        try {
+            return response()->json(JobsService::getCodesCount(), 200);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }
