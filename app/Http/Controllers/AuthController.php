@@ -9,11 +9,27 @@ use App\Models\LocksCredential;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use Inertia\Inertia;
 
 
 class AuthController extends Controller
 {
+
+
+    public function refreshToken(Request $request)
+    {
+
+        return Inertia::render('RefreshToken');
+    }
+
+    public function getToken(Request $request)
+    {
+        $token = auth()->user()->createToken('ttlock');
+        return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id], 200);
+    }
+
+
+
     public function CreateUser(Request $request)
     {
         try {
