@@ -16,6 +16,7 @@ use App\Jobs\CreateLockJob;
 use App\Jobs\GetLockListJob;
 use App\Jobs\CreateCredentialJob;
 use App\Jobs\SetStatusJob;
+use App\Jobs\ChangeCodeJob;
 use App\Jobs\SetPassageModeOffJob;
 use App\Jobs\SetPassageModeOnJob;
 use App\Jobs\RefreshLockTokenJob;
@@ -35,9 +36,9 @@ class JobsService
 
 
 
-    private function startLockJob(string $task,  $tag=null)
+    private function startLockJob(string $task,  $tag = null)
     {
-        return LockJob::create(['user_id' => $this->user_id, 'task' => $task, 'tag' => $tag ? json_encode($tag):""]);
+        return LockJob::create(['user_id' => $this->user_id, 'task' => $task, 'tag' => $tag ? json_encode($tag) : ""]);
     }
 
 
@@ -79,7 +80,7 @@ class JobsService
 
     public function getLockList($tag)
     {
-        $uuid = $this->startLockJob('getLockList',$tag);
+        $uuid = $this->startLockJob('getLockList', $tag);
         info($uuid->job_id);
 
         GetLockListJob::dispatch($uuid->id)->onQueue('default')->chain([
@@ -91,9 +92,9 @@ class JobsService
 
 
 
-    public function refreshLockTocken(int $id,$tag)
+    public function refreshLockTocken(int $id, $tag)
     {
-        $uuid = $this->startLockJob('refreshLockTocken',$tag);
+        $uuid = $this->startLockJob('refreshLockTocken', $tag);
 
         RefreshLockTokenJob::dispatch($id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
@@ -101,12 +102,12 @@ class JobsService
     }
 
 
-    public function addKeyToLock($lock_id, $code, $code_name ,$begin, $end,$tag)
+    public function addKeyToLock($lock_id, $code, $code_name, $begin, $end, $tag)
     {
-        $uuid = $this->startLockJob('addKeyToLock',$tag);
+        $uuid = $this->startLockJob('addKeyToLock', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
-        AddKeyToLockJob::dispatch(1,$uuid->id, $lock ? $lock?->id : 0, $code,$code_name, $begin, $end)->onQueue('default')->chain([
+        AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
@@ -114,9 +115,23 @@ class JobsService
     }
 
 
-    public function setPassageModeOn($lock_id,$tag)
+    public function changeCode($lock_id, $code_id, $code_name, $begin, $end, $tag)
     {
-        $uuid = $this->startLockJob('setPassageModeOn',$tag);
+        $uuid = $this->startLockJob('addKeyToLock', $tag);
+        $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
+
+        ChangeCodeJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code_id, $code_name, $begin, $end)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());
+
+        return response()->json(['job_id' => $uuid->job_id], 200);
+    }
+
+
+
+    public function setPassageModeOn($lock_id, $tag)
+    {
+        $uuid = $this->startLockJob('setPassageModeOn', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
         SetPassageModeOnJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
@@ -126,9 +141,9 @@ class JobsService
     }
 
 
-    public function setPassageModeOff($lock_id,$tag)
+    public function setPassageModeOff($lock_id, $tag)
     {
-        $uuid = $this->startLockJob('setPassageModeOff',$tag);
+        $uuid = $this->startLockJob('setPassageModeOff', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
         SetPassageModeOffJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
@@ -137,20 +152,20 @@ class JobsService
         return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
-    public function deleteKey($lock_id, $pwdID,$tag)
+    public function deleteKey($lock_id, $pwdID, $tag)
     {
-        $uuid = $this->startLockJob('deleteKey',$tag);
+        $uuid = $this->startLockJob('deleteKey', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
-        DeleteKeyJob::dispatch(1,$uuid->id, $lock ? $lock?->id : 0, $pwdID)->onQueue('default')->chain([
+        DeleteKeyJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $pwdID)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
         return response()->json(['job_id' => $uuid->job_id], 200);
     }
 
-    public function createCredential($user, $password,$tag)
+    public function createCredential($user, $password, $tag)
     {
-        $uuid = $this->startLockJob('createCredential',$tag);
+        $uuid = $this->startLockJob('createCredential', $tag);
         $user_id = auth()->user()->id;
         CreateCredentialJob::dispatch($uuid->id, $user, $password, $user_id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
@@ -228,43 +243,44 @@ class JobsService
     }
 
 
-    public static function addCodesCount($codes_count, $expired_at) {
+    public static function addCodesCount($codes_count, $expired_at)
+    {
 
-        $code_packet = CodePacket::firstOrCreate(['user_id'=>auth()->user()->id]);
-        $code_packet->refresh() ;
-        if ($codes_count==-1) $code_packet->count = -100 ;
+        $code_packet = CodePacket::firstOrCreate(['user_id' => auth()->user()->id]);
+        $code_packet->refresh();
+        if ($codes_count == -1) $code_packet->count = -100;
         else $code_packet->count = $code_packet->count + $codes_count;
         $code_packet->end = $expired_at;
         $code_packet->save();
-        return ['status'=>true, 'msg'=>"Пакет кодов успешно добавлен",'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
-
+        return ['status' => true, 'msg' => "Пакет кодов успешно добавлен", 'codes_count' => $code_packet->count, 'expired_at' => $code_packet->end];
     }
 
 
-    public static function SetCodesCount($codes_count) {
+    public static function SetCodesCount($codes_count)
+    {
 
-        $code_packet = CodePacket::where(['user_id'=>auth()->user()->id])->first();
-        if (!$code_packet)   return ['status'=>false, ];
-        $code_packet->refresh() ;
-        if ($codes_count==-1) $code_packet->count = -100 ;
+        $code_packet = CodePacket::where(['user_id' => auth()->user()->id])->first();
+        if (!$code_packet)   return ['status' => false,];
+        $code_packet->refresh();
+        if ($codes_count == -1) $code_packet->count = -100;
         else $code_packet->count = $codes_count;
         $code_packet->save();
-        return ['status'=>true,  'msg'=>"Пакет кодов успешно установлен",'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
-
+        return ['status' => true,  'msg' => "Пакет кодов успешно установлен", 'codes_count' => $code_packet->count, 'expired_at' => $code_packet->end];
     }
 
 
-    public static function getCodesCount() {
-        $code_packet = CodePacket::firstOrCreate(['user_id'=>auth()->user()->id]);
-        $code_packet->refresh() ;
-        return ['status'=>true, 'codes_count'=>$code_packet->count, 'expired_at'=>$code_packet->end];
-    }
-
-
-
-    public function openLock($lock_id,$tag)
+    public static function getCodesCount()
     {
-        $uuid = $this->startLockJob('openLock',$tag);
+        $code_packet = CodePacket::firstOrCreate(['user_id' => auth()->user()->id]);
+        $code_packet->refresh();
+        return ['status' => true, 'codes_count' => $code_packet->count, 'expired_at' => $code_packet->end];
+    }
+
+
+
+    public function openLock($lock_id, $tag)
+    {
+        $uuid = $this->startLockJob('openLock', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
         OpenLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)

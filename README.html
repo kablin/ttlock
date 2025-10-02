@@ -79,11 +79,29 @@
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не указан lock_id" || "Не указан code"</span><br />}</p>
 <p>&nbsp;</p>
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "add_code_to_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестный замок"</span><br />}</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
+<p>&nbsp;&nbsp;</p>
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "add_code_to_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",<br />"codes_error'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Нет оплаченного пакета кодов" || "Окончилась дата действия пакета кодов" || "Закончился пакет кодов"</span><br />}</p>
 <p>&nbsp;</p>
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "add_code_to_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Ошибка загрузки ключа. Количество попыток исчерпано." || Ошибка загрузки ключа. Следеющая попытка загрузки ключа чере 20 минут" </span><br />}&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>api/v1/change_code</strong></p>
+<p><strong>**</strong>&nbsp;Обсновить время действия ключа. В случае неудачи запускается заново через 20 минут в течение 5 раз.&nbsp; ВРЕМЯ <strong>UTC</strong><br />{<br />"begin":"2025-08-28 15:43",<br />"end":"2025-08-28 15:43",<br />"code_id": "12345678",<br />"lock_id" :"1234566",<br />"tag":{}<br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br />"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "method" : "change_code",<br /> 'data" : {//ответ ttlock},<br /> "msg" : "Ключ успешно обновлен" </span><br /><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не указан lock_id" || "Не указан code"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "change_code",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестный замок" || "У замка отсутствует данный ключ"</span><br />}</p>
+<p>&nbsp;&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "change_code",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",<br />"codes_error'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Нет оплаченного пакета кодов" || "Окончилась дата действия пакета кодов" || "Закончился пакет кодов"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},<br /> "method" : "change_code",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Ошибка обновления ключа. Количество попыток исчерпано." || Ошибка обновления ключа. Следеющая попытка загрузки ключа чере 20 минут" </span><br />}&nbsp;</p>
+<p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/delete_code_from_lock</strong></p>
