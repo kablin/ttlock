@@ -49,6 +49,8 @@ Route::middleware(['throttle:20,1'])->group(function () {
 
         Route::post('/v1/add_code_to_lock', [CallbackApiController::class, 'addCodeToLock'])->middleware('auth:sanctum');
 
+        Route::post('/v1/change_code', [CallbackApiController::class, 'changeCode'])->middleware('auth:sanctum');
+
         Route::post('/v1/set_lock_passage_mode_on', [CallbackApiController::class, 'passageModeOn'])->middleware('auth:sanctum');
 
         Route::post('/v1/set_lock_passage_mode_off', [CallbackApiController::class, 'passageModeOff'])->middleware('auth:sanctum');

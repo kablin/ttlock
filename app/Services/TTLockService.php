@@ -300,6 +300,7 @@ class TTLockService
 			];
 		}
 	}
+	
 	/*
 	public function changePeriod($keyId, $begin = null, $end = null)
 	{
@@ -335,8 +336,9 @@ class TTLockService
 			];
 		}
 	}
+		*/
 
-	public function updateKey($pwdID, $begin = null, $end = null)
+	public function updateKey($pwdID, Lock $lock, $begin = null, $end = null)
 	{
 		if (is_null($begin)) {
 			$begin = Carbon::now()->unix();
@@ -351,12 +353,20 @@ class TTLockService
 		}
 
 		$request = $this->request('/v3/keyboardPwd/change', [
-			'lockId' => $this->lock_id,
+			'lockId' => $lock->lock_id,
 			'keyboardPwdId' => $pwdID,
 			'changeType' => 2,
 			'startDate' => $begin * 1000,
 			'endDate' => $end * 1000,
 		]);
+
+
+		$lock->api_logs()->create([
+			'api_method' => '/v3/keyboardPwd/change',
+			'params' => json_encode($request),
+			'user_id' => $this->user?->id,
+		]);
+
 
 		if ($request['status']) {
 			return [
@@ -372,7 +382,7 @@ class TTLockService
 			];
 		}
 	}
-*/
+
 	public function deleteKey(Lock $lock, $pwdID)
 	{
 
