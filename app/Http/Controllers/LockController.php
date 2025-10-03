@@ -17,6 +17,8 @@ class LockController extends Controller
 {
     public function lockList(Request $request)
     {
-         return Inertia::render('Locks');
+        $locks = auth()->user()->locks;
+
+        return Inertia::render('Locks', ['locks' => $locks]);
     }
 }

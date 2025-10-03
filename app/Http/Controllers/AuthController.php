@@ -15,21 +15,6 @@ use Inertia\Inertia;
 class AuthController extends Controller
 {
 
-
-    public function refreshToken(Request $request)
-    {
-
-        return Inertia::render('RefreshToken');
-    }
-
-    public function getToken(Request $request)
-    {
-        $token = auth()->user()->createToken('ttlock');
-        return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id], 200);
-    }
-
-
-
     public function CreateUser(Request $request)
     {
         try {
@@ -82,7 +67,7 @@ class AuthController extends Controller
                     'status' => true,
                     'error' => 0,
                     'message' => 'User created successfully',
-                    'msg' => 'Пользовтаель успешно создан',
+                    'msg' => 'Пользователь успешно создан',
                 ], 200);
             } else
 
