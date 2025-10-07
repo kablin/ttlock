@@ -18,6 +18,26 @@ class CallbackApiController extends Controller
 {
 
 
+
+
+    public function getJobResult($job_id)
+    {
+        try {
+
+            $job = auth()->user()->jobs()->where('job_id', $job_id)->first();
+
+            if ($job && $job->status) {
+                return response()->json(['status' => true, 'data' => $job->data], 200);
+            }
+
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
+
+
+
     public function getLockList(Request $request)
     {
         try {
@@ -63,7 +83,7 @@ class CallbackApiController extends Controller
     }
 
 
-     public function changeCode(Request $request)
+    public function changeCode(Request $request)
     {
         try {
             //2025-08-28 15:43
@@ -97,7 +117,7 @@ class CallbackApiController extends Controller
         }
     }
 
-    
+
 
 
     public function passageModeOn(Request $request)
@@ -155,7 +175,7 @@ class CallbackApiController extends Controller
 
 
 
-     public function openLock(Request $request)
+    public function openLock(Request $request)
     {
         try {
             //2025-08-28 15:43
@@ -179,7 +199,6 @@ class CallbackApiController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }
-
     }
 
 
@@ -204,12 +223,11 @@ class CallbackApiController extends Controller
                 ], 200);
             }
 
-            $validated = $validator->safe()->only(['lock_id','code_id', 'tag']);
+            $validated = $validator->safe()->only(['lock_id', 'code_id', 'tag']);
 
             return (new JobsService(auth()->user()->id))->deleteKey($validated['lock_id'], $validated['code_id'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }
-      
     }
 }

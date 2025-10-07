@@ -101,13 +101,13 @@ const saveTtlockCredential = async () => {
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  items-center justify-center gap-4">
                 <div class="flex  gap-4 mx-3 ">
                     <Label class="w-full min-w-[160px]">Учетная запись ttlock</Label>
-                    <Input v-model="credential_login" class="min-w-[230px]" type="email"
+                    <Input v-model="credential_login" class="min-w-[260px]" type="email"
                         placeholder="name@example.ru" />
                 </div>
                 <div class="flex  gap-4 mx-3 ">
 
                     <Label class="w-full min-w-[140px]">Пароль</Label>
-                    <Input :type="showPassword ? 'text' : 'password'" class="min-w-[100px]" type="password"
+                    <Input :type="showPassword ? 'text' : 'password'" class="min-w-[210px]" type="password"
                         placeholder="пароль" v-model="credential_password" />
                     <Button @click="togglePassword">
 

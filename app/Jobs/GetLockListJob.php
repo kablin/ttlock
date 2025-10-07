@@ -92,11 +92,17 @@ class GetLockListJob implements ShouldQueue
             $result['data'] = $locks_data;
             $result['status'] = $locks_data['status'];
 
-            Http::withBody(json_encode($result), 'application/json')
-                //                ->withOptions([
-                //                    'headers' => ''
-                //                ])
-                ->post($job->user->callback);
+
+            $job->data = json_encode($result);
+            $job->save();
+
+            if ($job->user->callback) {
+                Http::withBody(json_encode($result), 'application/json')
+                    //                ->withOptions([
+                    //                    'headers' => ''
+                    //                ])
+                    ->post($job->user->callback);
+            }
         }
     }
 }
