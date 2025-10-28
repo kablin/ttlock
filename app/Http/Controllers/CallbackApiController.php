@@ -34,14 +34,16 @@ class CallbackApiController extends Controller
         try {
             //2025-08-28 15:43
             $validator = Validator::make($request->all(), [
-                'begin' => 'date_format:Y-m-d H:i:s',
-                'end' => 'date_format:Y-m-d H:i:S',
+                'begin' => 'date_format:Y-m-d H:i',
+                'end' => 'date_format:Y-m-d H:i',
                 'code' => 'required',
+                'code_name' => 'nullable|string', 
+                'tag' => 'nullable',
                 'lock_id' => 'required|integer',
 
             ], [
-                'begin.date_format' => 'Не верный формат даты -  "2025-07-23 18:07:00".',
-                'end.date_format' => 'Не верный формат даты -  "2025-07-23 18:07:00". ',
+                'begin.date_format' => 'Не верный формат даты -  "2025-07-23 18:07".',
+                'end.date_format' => 'Не верный формат даты -  "2025-07-23 18:07". ',
                 'lock_id.integer' => 'lock_id не число.',
                 'lock_id.required' => 'Не указан lock_id.',
                 'code.required' => 'Не указан code.',
@@ -55,7 +57,6 @@ class CallbackApiController extends Controller
             }
 
             $validated = $validator->safe()->only(['code', 'lock_id', 'begin', 'end', 'code_name', 'tag']);
-
             return (new JobsService(auth()->user()->id))->addKeyToLock($validated['lock_id'], $validated['code'], $validated['code_name'] ??  'Ключ от Renty api', $validated['begin'] ?? null, $validated['end'] ?? null, $validated['tag'] ?? '');
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
@@ -63,19 +64,20 @@ class CallbackApiController extends Controller
     }
 
 
-     public function changeCode(Request $request)
+    public function changeCode(Request $request)
     {
         try {
             //2025-08-28 15:43
             $validator = Validator::make($request->all(), [
-                'begin' => 'date_format:Y-m-d H:i:s',
-                'end' => 'date_format:Y-m-d H:i:S',
+                'begin' => 'date_format:Y-m-d H:i',
+                'end' => 'date_format:Y-m-d H:i',
                 'code_id' => 'required|integer',
                 'lock_id' => 'required|integer',
+                'tag' => 'nullable',
 
             ], [
-                'begin.date_format' => 'Не верный формат даты -  "2025-07-23 18:07:00".',
-                'end.date_format' => 'Не верный формат даты -  "2025-07-23 18:07:00". ',
+                'begin.date_format' => 'Не верный формат даты -  "2025-07-23 18:07".',
+                'end.date_format' => 'Не верный формат даты -  "2025-07-23 18:07". ',
                 'lock_id.integer' => 'lock_id не число.',
                 'lock_id.required' => 'Не указан lock_id.',
                 'code_id.required' => 'Не указан code.',
@@ -97,7 +99,7 @@ class CallbackApiController extends Controller
         }
     }
 
-    
+
 
 
     public function passageModeOn(Request $request)
@@ -106,6 +108,7 @@ class CallbackApiController extends Controller
             //2025-08-28 15:43
             $validator = Validator::make($request->all(), [
                 'lock_id' => 'required|integer',
+                'tag' => 'nullable',
             ], [
                 'lock_id.integer' => 'lock_id не число.',
                 'lock_id.required' => 'Не указан lock_id.',
@@ -133,6 +136,7 @@ class CallbackApiController extends Controller
             //2025-08-28 15:43
             $validator = Validator::make($request->all(), [
                 'lock_id' => 'required|integer',
+                'tag' => 'nullable',
             ], [
                 'lock_id.integer' => 'lock_id не число.',
                 'lock_id.required' => 'Не указан lock_id.',
@@ -155,12 +159,13 @@ class CallbackApiController extends Controller
 
 
 
-     public function openLock(Request $request)
+    public function openLock(Request $request)
     {
         try {
             //2025-08-28 15:43
             $validator = Validator::make($request->all(), [
                 'lock_id' => 'required|integer',
+                'tag' => 'nullable',
             ], [
                 'lock_id.integer' => 'lock_id не число.',
                 'lock_id.required' => 'Не указан lock_id.',
@@ -179,7 +184,6 @@ class CallbackApiController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }
-
     }
 
 
@@ -190,6 +194,7 @@ class CallbackApiController extends Controller
             $validator = Validator::make($request->all(), [
                 'lock_id' => 'required|integer',
                 'code_id' => 'required|integer',
+                'tag' => 'nullable',
             ], [
                 'lock_id.integer' => 'lock_id не число.',
                 'lock_id.required' => 'Не указан lock_id.',
@@ -204,12 +209,11 @@ class CallbackApiController extends Controller
                 ], 200);
             }
 
-            $validated = $validator->safe()->only(['lock_id','code_id', 'tag']);
+            $validated = $validator->safe()->only(['lock_id', 'code_id', 'tag']);
 
             return (new JobsService(auth()->user()->id))->deleteKey($validated['lock_id'], $validated['code_id'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }
-      
     }
 }

@@ -196,7 +196,7 @@
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><strong>api/v1/add_code_packet</strong></p>
-<p>Добавить пакет кодов<br /><br />{<br />"codes_count" : "100",<br />"" : "Y-m-d H:i:s" //формат важен!<br />}</p>
+<p>Добавить пакет кодов<br /><br />{<br />"codes_count" : "100",<br />"" : "Y-m-d H:i" //формат важен!<br />}</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><span style="text-decoration: underline;">Ответ</span>:</p>
@@ -209,7 +209,7 @@
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><strong>api/v1/set_code_packet</strong></p>
-<p>Установить пакет кодов,&nbsp; используется для разработки<br /><br />{<br />"codes_count" : "100",<br />"" : "Y-m-d H:i:s" //формат важен!<br />}</p>
+<p>Установить пакет кодов,&nbsp; используется для разработки<br /><br />{<br />"codes_count" : "100",<br />"" : "Y-m-d H:i" //формат важен!<br />}</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><span style="text-decoration: underline;">Ответ</span>:</p>

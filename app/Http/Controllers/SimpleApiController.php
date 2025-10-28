@@ -95,6 +95,8 @@ class SimpleApiController extends Controller
             $validator = Validator::make($request->all(), [
                 'personal' => 'boolean',
                 'lock_id' => 'required|integer',
+                'lock_record_type' => 'nullable|integer', 
+                'record_type' => 'nullable|integer',
             ], [
                 'personal.boolean' => 'personal не boolean.',
                 'lock_id.required' => 'Не указан lock_id.',
@@ -195,10 +197,10 @@ class SimpleApiController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'expired_at' => 'required|date_format:Y-m-d H:i:s',
+                'expired_at' => 'required|date_format:Y-m-d H:i',
                 'codes_count' => 'required|integer',
             ], [
-                'expired_at.date_format' => 'Не верный формат даты -  "2025-07-23 18:07:00".',
+                'expired_at.date_format' => 'Не верный формат даты -  "2025-07-23 18:07".',
                 'expired_at.required' => 'Не указан expired_at.',
                 'codes_count.required' => 'Не указан codes_count.',
                 'codes_count.integer' => 'codes_count не число.',
@@ -230,6 +232,7 @@ class SimpleApiController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'codes_count' => 'required|integer',
+                 'expired_at' => 'nullable|date_format:Y-m-d H:i',
             ], [
                 'codes_count.required' => 'Не указан codes_count.',
                 'codes_count.integer' => 'codes_count не число.',
