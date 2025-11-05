@@ -44,7 +44,7 @@ class JobsService
 
     public function getDelay()
     {
-        if ($this->user_id) {
+      /*  if ($this->user_id) {
             $user = User::find($this->user_id);
             if ($user) {
                 $t1 = new Carbon($user->last_query);
@@ -58,9 +58,9 @@ class JobsService
                     $user->save();
                 }
             }
-        }
+        }*/
 
-        return $now;
+        return now();
     }
 
 

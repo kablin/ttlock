@@ -24,7 +24,7 @@ Route::get('/lock_create', function (Request $request) {
 
 
 
-Route::middleware(['throttle:5,1'])->group(function () {
+Route::middleware(['throttle:500,1'])->group(function () {
 
     Route::post('/v1/create_user', [AuthController::class, 'CreateUser']);
 
@@ -36,7 +36,7 @@ Route::middleware(['throttle:5,1'])->group(function () {
 
 
 
-Route::middleware(['throttle:20,1'])->group(function () {
+Route::middleware(['throttle:500,1'])->group(function () {
 
     /*Route::post('/v1/create_credential', function (Request $request) {
         return (new JobsService(auth()->user()->id))->createCredential($request->user, $request->password, json_decode($request->getContent())->tag ?? '');
