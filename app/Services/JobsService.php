@@ -45,7 +45,7 @@ class JobsService
 
     public function getDelay()
     {
-      /*  if ($this->user_id) {
+        if ($this->user_id) {
             $user = User::find($this->user_id);
             if ($user) {
                 $t1 = new Carbon($user->last_query);
@@ -59,7 +59,7 @@ class JobsService
                     $user->save();
                 }
             }
-        }*/
+        }
 
         return now();
     }
@@ -118,7 +118,7 @@ class JobsService
 
     public function getCodesList($lock_id, $page_number, $page_size, $tag)
     {
-        $uuid = $this->startLockJob('addKeyToLock', $tag);
+        $uuid = $this->startLockJob('getCodesList', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
         GetCodesListJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $page_number, $page_size)->onQueue('default')->chain([
