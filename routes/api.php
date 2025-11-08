@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Services\JobsService;
 use App\Http\Middleware\CodesCounter;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SimpleApiController;
@@ -50,6 +49,8 @@ Route::middleware(['throttle:500,1'])->group(function () {
         Route::post('/v1/add_code_to_lock', [CallbackApiController::class, 'addCodeToLock'])->middleware('auth:sanctum');
 
         Route::post('/v1/change_code', [CallbackApiController::class, 'changeCode'])->middleware('auth:sanctum');
+
+        Route::post('/v1/get_codes_list', [CallbackApiController::class, 'getCodesList'])->middleware('auth:sanctum');
 
         Route::post('/v1/set_lock_passage_mode_on', [CallbackApiController::class, 'passageModeOn'])->middleware('auth:sanctum');
 

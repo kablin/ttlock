@@ -115,6 +115,21 @@ class JobsService
     }
 
 
+    public function getCodesList($lock_id, $page_number, $page_size, $tag)
+    {
+        $uuid = $this->startLockJob('addKeyToLock', $tag);
+        $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
+
+        GetCodesListJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $page_number, $page_size)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());
+
+        return response()->json(['job_id' => $uuid->job_id], 200);
+    }
+
+
+    
+
     public function changeCode($lock_id, $code_id, $begin, $end, $tag)
     {
         $uuid = $this->startLockJob('addKeyToLock', $tag);

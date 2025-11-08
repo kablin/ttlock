@@ -28,6 +28,44 @@ class CallbackApiController extends Controller
     }
 
 
+ public function getCodesList(Request $request)
+    {
+        try {
+            //2025-08-28 15:43
+            $validator = Validator::make($request->all(), [
+                'page_number' => 'required|integer',
+               // 'page_size' => 'required|integer',
+                'lock_id' => 'required|integer',
+                'tag' => 'nullable',
+
+            ], [
+                'page_number.integer' => 'page_number не число.',
+                'page_number.required' => 'Не указан page_number.',
+               // 'page_size.integer' => 'page_size не число.',
+              //  'page_size.required' => 'Не указан page_size.',
+                'lock_id.integer' => 'lock_id не число.',
+                'lock_id.required' => 'Не указан lock_id.',
+
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            //$validated = $validator->safe()->only(['lock_id', 'page_number', 'page_size',  'tag']);
+            $validated = $validator->safe()->only(['lock_id', 'page_number',   'tag']);
+            return (new JobsService(auth()->user()->id))->getCodesList($validated['lock_id'], $validated['page_number'], 30, $validated['tag'] ?? '');
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
+
+
+    
+
 
     public function addCodeToLock(Request $request)
     {

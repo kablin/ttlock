@@ -54,6 +54,26 @@
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>&nbsp;api/v1/get_codes_list</strong></p>
+<p><strong>*</strong> Получить список ключей в замке<br /><br /></p>
+<p>{</p>
+<p>"lock_id":"12345",</p>
+<p>"page_number":"1", // номер страницы. На странице 30 ключей<br />"tag":{}<br />}</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span></p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br />"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "method" : "get_codes_list",<br /> 'data" : {//ответ ttlock},</span></p>
+<p><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не указан lock_id" || "Не указан page_number"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",<br /> "method" : "get_codes_list",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестный замок"</span><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/open_lock</strong></p>
 <p><strong>* </strong>Открыть замок</p>
 <p>{<br />"lock_id":"12345",<br />"tag":{}<br />}</p>
