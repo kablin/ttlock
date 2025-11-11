@@ -73,11 +73,11 @@ class TTLockService
 	}
 
 
-	public  function testAuth(string $login, string $password ): array
+	public  function testAuth(string $login, string $password): array
 	{
 
 		$data = $this->request('/oauth2/token', [
-			'username' =>$login,
+			'username' => $login,
 			'password' => ($this->isValidMd5($password)) ? $password : md5($password),
 			'client_secret' => $this->client_secret,
 		]);
@@ -150,6 +150,25 @@ class TTLockService
 		]);
 		return   $data;
 	}
+
+
+
+	public function getKeyList(Lock $lock, $pageNo, $pagSize)
+	{
+		$data = $this->request('/v3/lock/listKeyboardPwd', [
+			'lockId' => $lock->lock_id,
+			'pageNo' => $pageNo,
+			'pageSize' => $pagSize,
+		]);
+
+		$lock->api_logs()->create([
+			'api_method' => '/v3/lock/listKeyboardPwd',
+			'params' => json_encode($data),
+			'user_id' => $this->user?->id,
+		]);
+		return   $data;
+	}
+
 
 
 
@@ -252,6 +271,8 @@ class TTLockService
 
 
 
+
+
 	public function newKey($code, Lock $lock, $code_name, $begin = null, $end = null): array
 	{
 
@@ -300,7 +321,7 @@ class TTLockService
 			];
 		}
 	}
-	
+
 	/*
 	public function changePeriod($keyId, $begin = null, $end = null)
 	{
@@ -480,18 +501,18 @@ class TTLockService
 		try {
 
 
-            // пытаемся выполнить запрос два раза
+			// пытаемся выполнить запрос два раза
 			$request = retry(2, function ($attempt) use ($url, $array) {
 				$array['accessToken'] = $this->user?->token?->access_token ?? '';
 				$r = Http::accept('application/json')->asForm()->withHeaders([
 					'Content-Type' => 'application/x-www-form-urlencoded',
 				])->post($this->api_url . $url, $array);
 				$data = json_decode($r->body(), true);
-                // если ошибка токена, то пробуем его обновить
+				// если ошибка токена, то пробуем его обновить
 				if (isset($data['errcode']) && $data['errcode'] != 0) {
 					if ($data['errcode'] == 10003) {
 						if ($credential = $this->user?->credential)
-						    // обновляем
+							// обновляем
 							updateRefreshToken($credential);
 						// перечитываем модель	
 						if ($this->user) $this->user = $this->user->fresh();

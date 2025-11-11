@@ -40,14 +40,27 @@ class TTLockWebHook extends Controller
           ]);
 
 
-          if ($info->recordTypeFromLock && $info->keyboardPwd ) {
-            $pin = LockPinCode::where('lock_id',$lock->id)->where('pin_code',$info->keyboardPwd)->first();
+          if ($info->recordTypeFromLock && $info->keyboardPwd) {
+            $pin = LockPinCode::where('lock_id', $lock->id)->where('pin_code', $info->keyboardPwd)->first();
             $msg = get_msg_by_type($info->recordTypeFromLock);
             $code_name = '';
-            if ($pin) $code_name = $pin->code_name;
+            $first_use = false;
+            if ($pin) {
+              $code_name = $pin->code_name;
+              if (!$pin->used) {
+                $pin->used = true;
+                $pin->save();
+                $first_use =  true;
+              }
+            }
 
-            Http::withBody(json_encode(['msg' => $msg, 'record_type_from_lock' =>  $info->recordTypeFromLock, 'code'=>$info->keyboardPwd,
-              'code_name'=>$code_name]), 'application/json')
+            Http::withBody(json_encode([
+              'msg' => $msg,
+              'first_use' => $first_use,
+              'record_type_from_lock' =>  $info->recordTypeFromLock,
+              'code' => $info->keyboardPwd,
+              'code_name' => $code_name
+            ]), 'application/json')
               //                ->withOptions([
               //                    'headers' => ''
               //                ])

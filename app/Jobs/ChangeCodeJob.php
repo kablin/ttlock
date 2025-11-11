@@ -26,7 +26,7 @@ class ChangeCodeJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code_id, private string $code_name,private $begin = null, private $end = null) {}
+    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code_id, private $begin = null, private $end = null) {}
 
     /**
      * Execute the job.
@@ -128,7 +128,7 @@ class ChangeCodeJob implements ShouldQueue
             {
                  $data['status'] = false;
                 $data['msg'] = "Ошибка обновления ключа. ".$key['msg'].' Следеющая попытка загрузки ключа чере 20 минут';
-                ChangeCodeJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,$this->code_id, $this->code_name, $this->begin, $this->end)->onQueue('default')
+                ChangeCodeJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,$this->code_id, $this->begin, $this->end)->onQueue('default')
                 ->chain([
                     new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                 ])

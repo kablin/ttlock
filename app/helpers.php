@@ -74,16 +74,16 @@ if (!function_exists('get_msg_by_type')) {
 
 		switch ($type) {
 			case 4:
-				return 'unlock success';
+				return 'Замок успешно открыт';
 				break;
 			case 7:
-				return 'uncnown code';
+				return 'Неизветный код';
 				break;
 			case 11:
-				return 'code expired';
+				return 'Код истек';
 				break;
 			default:
-			    return 'uncnown type';
+			    return 'Ошибка';
 		}
 	}
 }
