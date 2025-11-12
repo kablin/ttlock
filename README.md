@@ -282,3 +282,6 @@
  apt-get install php8.2
 
 apt-get install php8.2-mbstring
+
+
+php artisan fortify:install
