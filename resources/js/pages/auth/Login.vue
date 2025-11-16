@@ -60,7 +60,7 @@ defineProps<{
                         required
                         :tabindex="2"
                         autocomplete="current-password"
-                        placeholder="Password"
+                        placeholder="Пароль"
                     />
                     <InputError :message="errors.password" />
                 </div>
@@ -72,7 +72,7 @@ defineProps<{
                     </Label>
                 </div>
 
-                <Button type="submit" class="mt-4 w-full blue-style bg-blue-style" :tabindex="4" :disabled="processing" data-test="login-button">
+                <Button type="submit"  variant="design" class="mt-4 w-full" :tabindex="4" :disabled="processing" data-test="login-button">
                     <LoaderCircle v-if="processing" class="h-4 w-4 animate-spin" />
                     Войти
                 </Button>

@@ -94,7 +94,7 @@ const getLocks = async () => {
 
 
                 <div class="m-7">
-                    <Button @click="getLocks" :disabled="loading">Синхронизировать с TTlock</Button>
+                    <Button @click="getLocks" variant="design" :disabled="loading">Синхронизировать с TTlock</Button>
                 </div>
 
                 <Table>

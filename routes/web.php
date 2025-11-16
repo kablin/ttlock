@@ -14,7 +14,7 @@ Route::get('dashboard', function () {
 
 
 Route::get('/lockList', [\App\Http\Controllers\LockController::class, 'lockList'])->middleware(['auth', 'verified'])->name('lockList');
-Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'show'])->middleware(['auth', 'verified'])->name('settings');
+Route::get('/credential', [\App\Http\Controllers\SettingsController::class, 'show'])->middleware(['auth', 'verified'])->name('settings');
 
 Route::post('/refresh_token', [\App\Http\Controllers\SettingsController::class, 'refreshToken'])->middleware(['auth', 'verified'])->name('refreshToken');
 Route::post('/save_credential', [\App\Http\Controllers\SettingsController::class, 'saveCredential'])->middleware(['auth', 'verified'])->name('saveCredential');

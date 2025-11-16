@@ -18,8 +18,8 @@ const inputEmail = ref(props.email);
 </script>
 
 <template>
-    <AuthLayout title="Reset password" description="Please enter your new password below">
-        <Head title="Reset password" />
+    <AuthLayout title="Сбросить пароль" description="Пожалуйста введите свой новый пароль">
+        <Head title="Сбросить пароль" />
 
         <Form
             v-bind="NewPasswordController.store.form()"
@@ -35,7 +35,7 @@ const inputEmail = ref(props.email);
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="password">Password</Label>
+                    <Label for="password">Пароль</Label>
                     <Input
                         id="password"
                         type="password"
@@ -43,27 +43,27 @@ const inputEmail = ref(props.email);
                         autocomplete="new-password"
                         class="mt-1 block w-full"
                         autofocus
-                        placeholder="Password"
+                        placeholder="Пароль"
                     />
                     <InputError :message="errors.password" />
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="password_confirmation"> Confirm Password </Label>
+                    <Label for="password_confirmation"> Повторите пароль </Label>
                     <Input
                         id="password_confirmation"
                         type="password"
                         name="password_confirmation"
                         autocomplete="new-password"
                         class="mt-1 block w-full"
-                        placeholder="Confirm password"
+                        placeholder="Повторите пароль"
                     />
                     <InputError :message="errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-4 w-full" :disabled="processing" data-test="reset-password-button">
+                <Button type="submit" variant="design" class="mt-4 w-full" :disabled="processing" data-test="reset-password-button">
                     <LoaderCircle v-if="processing" class="h-4 w-4 animate-spin" />
-                    Reset password
+                    Сбросить пароль
                 </Button>
             </div>
         </Form>
