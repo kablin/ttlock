@@ -70,6 +70,8 @@ node:
 	docker compose  -f docker-compose.dev.yml exec ttlocknode bash
 
 
+centrifugo:     
+	docker compose  -f docker-compose.dev.yml exec centrifugo bash
 
 
 

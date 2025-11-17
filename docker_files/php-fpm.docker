@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y  libmcrypt-dev libpq-dev libfreetype6-d
 
 
 # PHP
-COPY ./docker/php.ini /usr/local/etc/php/php.ini
+COPY ./docker_files/php.ini /usr/local/etc/php/php.ini
 
 
 # User
