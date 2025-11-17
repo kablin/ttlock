@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
+use denis660\Centrifugo\Centrifugo; 
 
 
 
@@ -41,6 +42,11 @@ class CallbackApiController extends Controller
     public function getLockList(Request $request)
     {
         try {
+
+$centrifugo =  resolve(Centrifugo::class);  
+info('!!!!!');
+$centrifugo->publish('news', ['message' => 'Hello world']); 
+info('1111111');
             return (new JobsService(auth()->user()->id))->getLockList(json_decode($request->getContent())->tag ?? '');
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);

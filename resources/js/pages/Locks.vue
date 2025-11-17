@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { lockList, getLockList,getJobResult } from '@/routes';
-import { ref } from 'vue'
+import { ref , onMounted} from 'vue'
 import { Button } from '@/components/ui/button';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
@@ -16,10 +16,54 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
+import { Centrifuge } from 'centrifuge'
+
+
+
+
+
+
+onMounted(async () => {
+
+    const centrifuge = new Centrifuge("ws://localhost:8012/connection/websocket", {
+        token: props.token
+    })
+
+    const sub = centrifuge.newSubscription('news' )
+
+    //получение сообщений по веб.сокет
+    sub.on('publication', ctx => {
+         console.log('!!!!!!!!!!!');
+        console.log(ctx.data);
+    })
+
+    //подключен к ws серверу
+    centrifuge.on('connected', function(ctx) {
+        console.log('connected CENTR', ctx);
+    })
+
+    //процесс подключения к ws серверу
+    centrifuge.on('connecting', function(ctx) {
+        console.log('connecting CENTR', ctx);
+    })
+
+    centrifuge.on('error', function(ctx) {
+        console.log('ERROR: ', ctx);
+    })
+
+    centrifuge.connect()
+    sub.subscribe()
+})
+
+
 
 const props = defineProps({
     locks: {
         type: Object
+    },
+
+     token: {
+        type: String
     },
 });
 
