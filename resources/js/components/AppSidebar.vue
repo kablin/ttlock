@@ -3,7 +3,7 @@ import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { dashboard, lockList,settings } from '@/routes';
+import { dashboard, lockList,settings, wizard } from '@/routes';
 import { edit as editProfile } from '@/routes/profile';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
@@ -26,6 +26,12 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Настройки',
         href: editProfile(),
+        icon: LayoutGrid,
+    },
+
+     {
+        title: 'Мастер',
+        href: wizard(),
         icon: LayoutGrid,
     },
 ];

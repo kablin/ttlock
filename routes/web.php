@@ -22,6 +22,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
 
+    Route::get('wizard', function () {
+        return Inertia::render('Wizard');
+    })->name('wizard');
+
+
+
+
 
     Route::get('/lockList', [\App\Http\Controllers\LockController::class, 'lockList'])->name('lockList');
     Route::post('/lockList_refresh', [\App\Http\Controllers\LockController::class, 'lockList_refresh'])->name('lockList_refresh');
