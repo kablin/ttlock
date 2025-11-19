@@ -4,6 +4,7 @@ import { lockList, getLockList, getJobResult, lockList_refresh } from '@/routes'
 import { ref, onMounted } from 'vue'
 import { usePage } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
@@ -142,7 +143,9 @@ const getLocks = async () => {
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
 
                 <div class="m-7">
-                    <Button @click="getLocks" variant="design" :disabled="loading">Синхронизировать с TTlock</Button>
+                    <Button @click="getLocks" variant="design" :disabled="loading">
+                        <Spinner v-if="loading"/>
+                        Синхронизировать с TTlock</Button>
                 </div>
 
                 <Table>

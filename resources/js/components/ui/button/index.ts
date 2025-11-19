@@ -11,6 +11,8 @@ export const buttonVariants = cva(
           'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
         design:
           'bg-design text-design-foreground shadow-xs hover:bg-design/90 rounded-[20px]',
+        design_outline:
+         'rounded-[20px] border-2 border-design  bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-design/30 dark:border-design dark:hover:bg-design/50',
         destructive:
           'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
         outline:
