@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
-use denis660\Centrifugo\Centrifugo; 
 
 
 
@@ -43,10 +42,6 @@ class CallbackApiController extends Controller
     {
         try {
 
-$centrifugo =  resolve(Centrifugo::class);  
-info('!!!!!');
-$centrifugo->publish('news', ['message' => 'Hello world']); 
-info('1111111');
             return (new JobsService(auth()->user()->id))->getLockList(json_decode($request->getContent())->tag ?? '');
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
@@ -54,21 +49,21 @@ info('1111111');
     }
 
 
- public function getCodesList(Request $request)
+    public function getCodesList(Request $request)
     {
         try {
             //2025-08-28 15:43
             $validator = Validator::make($request->all(), [
                 'page_number' => 'required|integer',
-               // 'page_size' => 'required|integer',
+                // 'page_size' => 'required|integer',
                 'lock_id' => 'required|integer',
                 'tag' => 'nullable',
 
             ], [
                 'page_number.integer' => 'page_number не число.',
                 'page_number.required' => 'Не указан page_number.',
-               // 'page_size.integer' => 'page_size не число.',
-              //  'page_size.required' => 'Не указан page_size.',
+                // 'page_size.integer' => 'page_size не число.',
+                //  'page_size.required' => 'Не указан page_size.',
                 'lock_id.integer' => 'lock_id не число.',
                 'lock_id.required' => 'Не указан lock_id.',
 
@@ -90,7 +85,7 @@ info('1111111');
     }
 
 
-    
+
 
 
     public function addCodeToLock(Request $request)
@@ -101,7 +96,7 @@ info('1111111');
                 'begin' => 'date_format:Y-m-d H:i',
                 'end' => 'date_format:Y-m-d H:i',
                 'code' => 'required',
-                'code_name' => 'nullable|string', 
+                'code_name' => 'nullable|string',
                 'tag' => 'nullable',
                 'lock_id' => 'required|integer',
 

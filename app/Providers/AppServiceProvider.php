@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
+use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +14,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+          Inertia::share('centrifugo_listener', config('broadcasting.connections.centrifugo.listener_url'));
+          
     }
 
     /**
@@ -24,6 +26,5 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('delete_key', function (object $job) {
             return  Limit::perSecond(1,5);
         });
-
     }
 }

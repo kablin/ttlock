@@ -12,7 +12,7 @@ class GetLockListSchedule
     {
 
         \App\Models\LocksCredential::query()->get()->map(function ($l) {
-            (new JobsService($l->user->id))->getLockList();
+            (new JobsService($l->user->id))->getLockList('');
         });
     }
 }

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { lockList, getLockList,getJobResult } from '@/routes';
-import { ref , onMounted} from 'vue'
+import { lockList, getLockList, getJobResult, lockList_refresh } from '@/routes';
+import { ref, onMounted } from 'vue'
+import { usePage } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
@@ -19,35 +20,47 @@ import {
 import { Centrifuge } from 'centrifuge'
 
 
+const page = usePage();
 
-
-
+const locks_data = ref()
 
 onMounted(async () => {
 
-    const centrifuge = new Centrifuge("ws://localhost:8012/connection/websocket", {
+    locks_data.value = props.locks
+
+
+    const centrifuge = new Centrifuge(props.centrifugo_listener, {
         token: props.token
     })
 
-    const sub = centrifuge.newSubscription('news' )
+    const sub = centrifuge.newSubscription('api:get_lock_list-' + page.props.auth.user.id)
 
     //получение сообщений по веб.сокет
-    sub.on('publication', ctx => {
-         console.log('!!!!!!!!!!!');
-        console.log(ctx.data);
+    sub.on('publication', (ctx: any) => {
+        loading.value = false
+        axios.post(lockList_refresh().url).then((response: any) => {
+            locks_data.value = response.data
+        })
+            .catch((error: any) => {
+                console.log(error);
+
+            })
+            .finally(() => {
+
+            });
     })
 
-    //подключен к ws серверу
-    centrifuge.on('connected', function(ctx) {
+    /*//подключен к ws серверу
+    centrifuge.on('connected', function (ctx) {
         console.log('connected CENTR', ctx);
     })
 
     //процесс подключения к ws серверу
-    centrifuge.on('connecting', function(ctx) {
+    centrifuge.on('connecting', function (ctx) {
         console.log('connecting CENTR', ctx);
-    })
+    })*/
 
-    centrifuge.on('error', function(ctx) {
+    centrifuge.on('error', function (ctx) {
         console.log('ERROR: ', ctx);
     })
 
@@ -62,9 +75,15 @@ const props = defineProps({
         type: Object
     },
 
-     token: {
+    token: {
         type: String
     },
+    centrifugo_listener:
+    {
+        type: String,
+        required: true,
+    }
+
 });
 
 
@@ -81,28 +100,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 
-const pollForResult = async (job_id) => {
-
-    let result;
-    while (!result || ! result.status ) {
-        await new Promise(resolve => setTimeout(resolve, 5000)); // ждем 2 сек
-        const response = await axios.post(getJobResult(job_id).url, {
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        result = response.data;
-        if (result.status ) {
-           location.reload();
-            break;
-        }
-    }
-}
-
 
 
 const getLocks = async () => {
+
     loading.value = true
     try {
         const response = await axios.post(getLockList().url, {
@@ -111,13 +112,17 @@ const getLocks = async () => {
                 'Content-Type': 'application/json',
             }
         })
-        pollForResult( response.data.job_id)
+
+
+
+        //   pollForResult(response.data.job_id)
 
     } catch (error: any) {
         console.error('Error:', error)
     } finally {
         // loading.value = false
     }
+
 }
 
 
@@ -135,7 +140,6 @@ const getLocks = async () => {
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-
 
                 <div class="m-7">
                     <Button @click="getLocks" variant="design" :disabled="loading">Синхронизировать с TTlock</Button>
@@ -157,7 +161,7 @@ const getLocks = async () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="lock in locks" :key="lock.id">
+                        <TableRow v-for="lock in locks_data" :key="lock.id">
                             <TableCell class="font-medium">
                                 {{ lock.lock_id }}
                             </TableCell>

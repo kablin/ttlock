@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\LockJob;
 use App\Models\Lock;
 use App\Services\TTLockService;
+use denis660\Centrifugo\Centrifugo; 
 
 class GetLockListJob implements ShouldQueue
 {
@@ -95,6 +96,9 @@ class GetLockListJob implements ShouldQueue
 
             $job->data = json_encode($result);
             $job->save();
+
+            $centrifugo =  resolve(Centrifugo::class);  
+            $centrifugo->publish('api:get_lock_list-'.$job->user->id, ['method'=> $result['method'], 'job'=>  $result['job'], 'status'=>$result['status']]); 
 
             if ($job->user->callback) {
                 Http::withBody(json_encode($result), 'application/json')
