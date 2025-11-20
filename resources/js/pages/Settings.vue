@@ -98,31 +98,32 @@ const saveTtlockCredential = async () => {
         <Head title="Список замков" />
 
         <SettingsLayout>
-            <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div class="flex   flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div
-                    class="relative min-h-[100vh] p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  items-center justify-center gap-4">
-                    <div class="flex  gap-4 mx-3 ">
+                    class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  items-center justify-center gap-4">
+                    <div class="grid gap-3 mx-3 w-full">
                         <Label class="w-full min-w-[160px]">Учетная запись ttlock</Label>
-                        <Input v-model="credential_login" class="min-w-[260px]" type="email"
+                        <Input v-model="credential_login" class="w-full " type="email"
                             placeholder="name@example.ru" />
                     </div>
-                    <div class="flex  gap-4 mx-3 ">
+                    <div class="grid w-full gap-3 mx-3 ">
 
                         <Label class="w-full min-w-[140px]">Пароль</Label>
-                        <Input :type="showPassword ? 'text' : 'password'" class="min-w-[210px]" type="password"
-                            placeholder="пароль" v-model="credential_password" />
-                        <Button @click="togglePassword">
-
-                            <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12" stroke="#ffffff" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M1 12C1 12 5 20 12 20C19 20 23 12 23 12" stroke="#ffffff" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <circle cx="12" cy="12" r="3" stroke="#ffffff" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-                        </Button>
+                        <div class="flex">
+                            <Input :type="showPassword ? 'text' : 'password'" class="" 
+                                placeholder="пароль" v-model="credential_password" />
+                            <Button @click="togglePassword">
+                                <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12" stroke="#ffffff" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M1 12C1 12 5 20 12 20C19 20 23 12 23 12" stroke="#ffffff" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <circle cx="12" cy="12" r="3" stroke="#ffffff" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </Button>
+                        </div>
                     </div>
                     <div>
                         <Button variant="design" class="my-4" @click="saveTtlockCredential" :disabled="loadingTtlock">Сохранить</Button>
@@ -135,7 +136,7 @@ const saveTtlockCredential = async () => {
             </div>
             <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div
-                    class="relative min-h-[100vh] p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col items-center justify-center gap-4">
+                    class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col items-center justify-center gap-4">
                     <div>
                         <Label>Внимание! Токен будет показан только один раз</Label>
                     </div>

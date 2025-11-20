@@ -52,8 +52,8 @@ withDefaults(
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="flex items-center">
-                        <p class="text-lg mr-3">10 | 500</p>
-                        <Badge variant="secondary" class="rounded-3xl"><p class="text-xs text-gray-800">Остаток | Общее количество</p> </Badge>
+                        <p class="text-md  lg:text-lg mr-3">10 | 500</p>
+                        <Badge variant="secondary" class="rounded-3xl hidden md:block"><p class="text-xs text-gray-800">Остаток | Общее количество</p> </Badge>
                     </CardContent>
                 </Card>
 
