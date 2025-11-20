@@ -5,10 +5,12 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { ref } from 'vue'
 import { Badge } from '@/components/ui/badge';
 import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper'
-
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 
 
@@ -25,6 +27,15 @@ import {
 const stepIndex = ref(1)
 
 const selectedSystem = ref(1)
+
+
+const togglePassword = () => {
+    showPassword.value = !showPassword.value
+}
+
+const showPassword = ref(false)
+
+
 
 const steps = [
     {
@@ -55,6 +66,15 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: wizard().url,
     },
 ];
+
+
+const getLocks = () => {
+    return true
+}
+
+
+
+
 </script>
 
 <template>
@@ -64,16 +84,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="h-full">
 
-            <Stepper orientation="vertical"  v-model="stepIndex" class="block w-full my-4" v-slot="{ modelValue }">
+            <Stepper v-model="stepIndex" class="block w-full my-4" v-slot="{ modelValue, prevStep, nextStep }">
 
-                <div class="flex w-full  flex-start gap-2">
+                <div class="flex w-full flex-col lg:flex-row flex-start gap-2">
 
 
                     <StepperItem v-for="(item, index) in steps" :key="item.step" :step="item.step" v-slot="{ state }"
                         class="relative flex w-full flex-col items-center ">
 
                         <StepperSeparator v-if="item.step !== steps[steps.length - 1]?.step"
-                            class="absolute left-[calc(50%+20px)] right-[calc(-50%+10px)] top-6 block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary" />
+                            class=" hidden lg:block absolute left-[calc(50%+20px)] right-[calc(-50%+10px)] top-6  h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary" />
 
                         <StepperTrigger>
                             <Button :variant="state === 'completed' || state === 'active' ? 'default' : 'outline'"
@@ -110,7 +130,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                         </StepperTrigger>
 
-                        <div class="flex flex-col items-center">
+                        <div class="flex flex-col items-center justify-center">
                             <StepperTitle>
                                 {{ item.title }}
                             </StepperTitle>
@@ -121,19 +141,27 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </StepperItem>
                 </div>
 
-                <div class="flex flex-col  gap-4  p-8  h-full">
+
+                <Separator class="my-5  lg:hidden block" />
+                <div class="flex flex-col  gap-4  px-8 lg:mt-5 h-full">
 
                     <template v-if="stepIndex === 1">
 
 
 
                         <div class="">
-                            <Badge variant="secondary" class="">
-                                <p class="text-xs text-gray-800">Выберите из списка вашу систему управления
-                                    недвижимостью</p>
+                            <Badge variant="secondary" class="text-xs text-gray-800 break-words whitespace-normal mt-5">
+                                <svg class="mx-2" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
+                                        stroke="#545F71" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                                Выберите из списка вашу систему управления недвижимостью
                             </Badge>
 
-                            <div class="flex items-center justify-center gap-3  mt-10">
+                            <div class="flex items-center justify-center gap-3   flex-col lg:flex-row mt-10">
                                 <div @click="selectedSystem = 1"><img src="/images/Travel.png" class="max-w-[165px]"
                                         :class="[selectedSystem === 1 && 'ring-2  ring-red-600  ring-offset-red-600']" />
                                 </div>
@@ -150,13 +178,167 @@ const breadcrumbs: BreadcrumbItem[] = [
                             </div>
 
 
-                            <div class="max-w-md mx-auto mt-10"><Button variant="design" class=" w-full">
+                            <div class="max-w-md mx-auto mt-10"><Button variant="design" @click="nextStep()"
+                                    class=" w-full">
 
                                     Выбрать</Button>
                             </div>
                         </div>
 
                     </template>
+
+
+
+
+
+                    <template v-if="stepIndex === 2">
+                        <div class="">
+                            <Badge variant="secondary"
+                                class="text-xs text-gray-800 break-words whitespace-normal mt-5 max-w-[650px]">
+                                <svg class="mx-2" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
+                                        stroke="#545F71" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+
+                                Подключите систему управления недвижимостью.Перейдите в RealtyCalendar, скопируйте токен
+                                и вставьте его в поле ниже. Все ваши объекты подгрузятся в интерфейс, чтобы в дальнейшем
+                                связать их с замками.
+                            </Badge>
+
+                            <div class="flex items-center justify-center  gap-3    flex-col lg:flex-row mt-12">
+                                <div v-if="selectedSystem === 1"><img src="/images/Travel.png" class="max-w-[165px]" />
+                                </div>
+                                <div v-else-if="selectedSystem === 2"><img src="/images/Realty.png"
+                                        class="max-w-[165px]" width="142px" />
+                                </div>
+                                <div v-else-if="selectedSystem === 3"><img src="/images/Bitrix.png"
+                                        class="max-w-[165px]" />
+                                </div>
+                                <div v-else><img src="/images/YC.png" class="max-w-[165px]" />
+                                </div>
+
+
+                                <div class="flex flex-col-reverse  lg:flex-row   justify-center  ">
+
+                                    <div class="self-start lg:self-end mb-4  ">
+                                        <Button @click="prevStep()" variant="link" class="text-blue-500 ">
+                                            Назад
+                                        </Button>
+                                    </div>
+
+                                    <div
+                                        class="relative  p-4    lg:min-w-[500px]  flex flex-col   justify-center gap-4">
+
+                                        <div class=" mx-auto mb-3">
+                                            <Button variant="design_outline" class="">
+                                                <a href="#"> Перейти в RealtyCalendar</a>
+                                            </Button>
+                                        </div>
+                                        <Label for="token">Токен</Label>
+                                        <Input id="token" name="token" class="mt-1 block w-full"
+                                            autocomplete="current-password" placeholder="token" />
+
+                                        <div class="  mt-5 flex justify-between">
+
+                                            <Button variant="design" @click="nextStep()" class=" flex-1">
+                                                Подключить RealtyCalendar</Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+
+
+
+
+                    <template v-if="stepIndex === 3">
+
+
+
+                        <div class="">
+                            <Badge variant="secondary"
+                                class="text-xs text-gray-800 break-words whitespace-normal max-w-[650px] mt-5">
+                                <svg class="mx-2" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
+                                        stroke="#545F71" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+
+                                Введите данные своей учётной записи TTLock, чтобы система получила список
+                                замков.Рекомендуется использовать основную учётную запись — она обеспечивает доступ ко
+                                всем замкам.
+                            </Badge>
+
+                            <div class="ml-12"><img src="/images/ttlock.png" class="mt-10 mx-auto" /></div>
+                        </div>
+
+
+                        <div class="flex flex-col-reverse  lg:flex-row  mx-auto justify-center  lg:w-7/12 xl:w-full ">
+
+                            <div class="self-start lg:self-end mb-8  ">
+
+                                <Button @click="prevStep()" variant="link" class="text-blue-500 ">
+                                    Назад
+                                </Button>
+                            </div>
+
+                            <div
+                                class="relative  p-4  md:min-h-min   xl:w-5/12 flex flex-col  items-center justify-center gap-4">
+                                <div class="grid gap-3 mx-3 w-full">
+                                    <Label class="w-full min-w-[160px]">Учетная запись ttlock</Label>
+                                    <Input class="w-full " type="email" placeholder="name@example.ru" />
+                                </div>
+                                <div class="grid w-full gap-3 mx-3 ">
+
+                                    <Label class="w-full min-w-[140px]">Пароль</Label>
+                                    <div class="flex">
+                                        <Input :type="showPassword ? 'text' : 'password'" class=""
+                                            placeholder="пароль" />
+                                        <Button @click="togglePassword" variant="design" class="rounded-[5px]">
+                                            <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12" stroke="#ffffff"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M1 12C1 12 5 20 12 20C19 20 23 12 23 12" stroke="#ffffff"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                <circle cx="12" cy="12" r="3" stroke="#ffffff" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div class="w-full">
+                                    <Button variant="design" @click=" nextStep() "  class="my-4 w-full">Подключить замки TTLock</Button>
+                                </div>
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+                    </template>
+
+
+
+
+
+
                 </div>
 
             </Stepper>
