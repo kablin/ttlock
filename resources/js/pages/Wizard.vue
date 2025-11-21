@@ -6,11 +6,13 @@ import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Badge } from '@/components/ui/badge';
 import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper'
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { VueDraggable } from 'vue-draggable-plus'
+
 
 
 
@@ -27,6 +29,9 @@ import {
 const stepIndex = ref(1)
 
 const selectedSystem = ref(1)
+
+
+
 
 
 const togglePassword = () => {
@@ -69,8 +74,93 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 const getLocks = () => {
+
     return true
 }
+
+
+
+
+const rooms = ref([
+    {
+        name: 'Дом',
+        id: 1
+    },
+    {
+        name: 'Гараж',
+        id: 2
+    },
+    {
+        name: 'Ворота',
+        id: 3
+    },
+    {
+        name: 'Черный ход',
+        id: 4
+    }
+])
+
+const roomsdata = ref([])
+
+
+
+onMounted(() => {
+
+    rooms.value.forEach((v) => {
+        // let tmp = {}
+        roomsdata.value[v.id] = []
+        //roomsdata.value[v.id].push(tmp)
+    })
+})
+
+
+
+
+
+
+const locks = ref([
+    {
+        name: 'Замок 1',
+        id: 1
+    },
+    {
+        name: 'Замок с очень длинным именем, вот прям совсем длинным',
+        id: 2
+    },
+    {
+        name: 'Замок 3',
+        id: 3
+    },
+    {
+        name: 'Замок 4',
+        id: 4
+    },
+    {
+        name: 'Замок 5',
+        id: 5
+    },
+    {
+        name: 'Замок 6',
+        id: 6
+    },
+    {
+        name: 'Замок 7',
+        id: 7
+    },
+    {
+        name: 'Замок 8',
+        id: 8
+    }, {
+        name: 'Замок 9',
+        id: 9
+    },
+    {
+        name: 'Замок 10',
+        id: 10
+    }
+
+])
+
 
 
 
@@ -315,26 +405,98 @@ const getLocks = () => {
                                     </div>
                                 </div>
                                 <div class="w-full">
-                                    <Button variant="design" @click=" nextStep() "  class="my-4 w-full">Подключить замки TTLock</Button>
+                                    <Button variant="design" @click=" getLocks() ? nextStep() : undefined"
+                                        class="my-4 w-full">Подключить замки TTLock</Button>
                                 </div>
 
                             </div>
-
-
-
                         </div>
-
-
-
-
-
-
-
-
 
                     </template>
 
 
+
+
+
+
+
+
+                    <template v-if="stepIndex === 4">
+
+
+                        <Badge variant="secondary"
+                            class="text-xs text-gray-800 break-words whitespace-normal max-w-[650px] my-5">
+                            <svg class="mx-2" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
+                                    stroke="#545F71" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+
+                            Настройте, какие замки относятся к каким объектам.Перетащите замок из списка к
+                            соответствующему объекту.Это нужно, чтобы система понимала, какой замок открывает конкретное
+                            помещение.<br />
+                            💡 Рекомендации:
+                            Один объект может быть связан с несколькими замками (например, входная дверь + дверь в
+                            объект).
+                            Один замок может быть привязан только к одному объекту.
+                        </Badge>
+
+                        <div class="flex justify-center lg:gap-6 gap-2  flex-col sm:flex-row  items-stretch h-full">
+                            <VueDraggable v-model="locks" group="locks"
+                                class="min-h-[50px] items-center border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
+                                <div v-for="item in locks" :key="item.id" class="lg:my-5 my-3">
+                                    <div
+                                        class="bg-design inline-flex px-4 py-2 items-center justify-center gap-2 text-sm 
+                                        font-medium  cursor-grab text-design-foreground shadow-xs hover:bg-design/90 rounded-[20px]  min-w-[230px] max-w-[230px] break-words whitespace-normal h-auto">
+                                        {{ item.name }}</div>
+
+                                </div>
+                            </VueDraggable>
+
+
+                            <div class=" border-dashed border-2 p-3 lg:p-4    border-gray-500">
+                                <div class="w-full gap-3 flex items-center justify-center h-full flex-col">
+                                    <VueDraggable v-for="item in rooms" :key="item.id" v-model="roomsdata[item.id]"
+                                        group="locks" emptyInsertThreshold="0" :target="'.tg' + item.id" class="w-full">
+
+                                        <Card class="rounded-none  gap-0 shadow-xs py-2 border-gray-600">
+                                            <CardHeader>
+                                                <CardDescription>
+                                                    {{ item.name }}
+                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent :class="'tg' + item.id"
+                                                class="  lg:px-5 px-1 flex items-center flex-col justify-center min-h-[50px] border-amber-100 border-2 mx-2">
+
+                                                <p class="text-xs text-gray-800  " v-if="!roomsdata[item.id].length">
+                                                    Перетащите сюда замок </p>
+                                                <div v-for="lock in roomsdata[item.id]" :key="lock.id"
+                                                    class="my-2 mx-auto l">
+                                                    <div
+                                                        class=" bg-design inline-flex px-2 py-2 items-center justify-center gap-2 text-sm 
+                                                        min-w-[200px] max-w-[200px]
+                                        font-medium  cursor-grab text-design-foreground shadow-xs hover:bg-design/90 rounded-[20px] lg:min-w-[230px] lg:max-w-[230px]  break-words whitespace-normal h-auto ">
+                                                        {{ lock.name }}</div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                    </VueDraggable>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-center gap-5">
+                                <Button @click="prevStep()" variant="link" class="text-blue-500 ">
+                                            Назад
+                                        </Button>
+                            <Button variant="design" @click=" getLocks() ? nextStep() : undefined"
+                                class="my-4 ">Завершить настройку и перейти в панель управления</Button>
+                        </div>
+
+                    </template>
 
 
 
