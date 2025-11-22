@@ -27,6 +27,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('wizard');
 
 
+    Route::get('rents_objects', function () {
+        return Inertia::render('RentsObjects');
+    })->name('rents_objects');
+
+
 
 
 
