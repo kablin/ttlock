@@ -40,6 +40,7 @@ onMounted(async () => {
     sub.on('publication', (ctx: any) => {
         loading.value = false
         axios.post(lockList_refresh().url).then((response: any) => {
+            console.log('get from centrifugo')
             locks_data.value = response.data
         })
             .catch((error: any) => {
@@ -144,8 +145,9 @@ const getLocks = async () => {
 
                 <div class="m-7">
                     <Button @click="getLocks" variant="design" :disabled="loading">
-                        <Spinner v-if="loading"/>
-                        Синхронизировать с TTlock</Button>
+                        <Spinner v-if="loading" />
+                        Синхронизировать с TTlock
+                    </Button>
                 </div>
 
                 <Table>

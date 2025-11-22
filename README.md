@@ -285,3 +285,8 @@ apt-get install php8.2-mbstring
 
 
 php artisan fortify:install
+
+
+docker exec -it  centrifugo  centrifugo genconfig
+
+ docker logs -f centrifugo
