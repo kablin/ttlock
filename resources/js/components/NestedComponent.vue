@@ -1,31 +1,44 @@
 <template>
-    <VueDraggable class="border-dashed border-2 my-5 border-gray-500 p-1 lg:p-10 min-h-[50px]" tag="ul" v-model="list"
+
+ <slot />
+
+    <VueDraggable class=" border-dashed border-2 my-5 border-gray-500 p-1 lg:p-10 min-h-[50px]" tag="ul" v-model="list"
         group="g1">
 
-        <slot />
-        <li v-for="el in modelValue" :key="el.name" class="">
+
+        <slot name="emptyMessage"></slot>
+ 
+
+        <li v-for="el in modelValue" :key="el.name" class=" relative ">
             <div class="flex items-center">
-                <div class=" bg-design inline-flex px-2 py-2 items-center justify-center gap-2 text-sm 
+                <div class="  bg-design inline-flex px-2 py-2 items-center justify-center gap-2 text-sm 
                         min-w-[200px] max-w-[200px] font-medium  cursor-grab text-design-foreground
                          shadow-xs hover:bg-design/90 rounded-[20px] lg:min-w-[230px] lg:max-w-[230px] 
                           break-words whitespace-normal h-auto ">
-                    {{ el.name }}</div>
-
-
-
+                    {{ el.name }}  </div>
 
 
             </div>
 
-            <nested-component v-model="el.children" class="lg:ms-5 ms-1"    v-if="currentDepth < maxDepth"     
-              :depth="currentDepth + 1" >
-                <p v-if="el.children.length == 0"> Перетащите сюда ваши объекты, для доступа к которым надо открыть
-                    замок
-                    объекта {{ el.name }}</p>
+            <nested-component v-model="el.children"   v-if="currentDepth < maxDepth"
+                :depth="currentDepth + 1">
+                <template #emptyMessage>
+                    <p v-if="el.children.length == 0">
+                        Перетащите сюда ваши объекты, для доступа к которым надо открыть
+                        замок объекта {{ el.name }}
+                    </p>
+                </template>
 
-                <Button variant="" @click="addObject(el)" class=" ">Добавить объект</Button>
-
+                <!-- Вставляем основной слот 'default' -->
+                <template #default>
+                    <Button variant="" @click="addObject(el)" class="absolute left-[240px] top-0 ">
+                        Добавить объект
+                    </Button>
+                </template>
             </nested-component>
+
+
+
 
             <div v-else class="ms-5 text-sm text-red-500 italic">
                 Достигнута максимальная глубина вложений.
@@ -69,7 +82,7 @@ interface IList {
 
 interface Props {
     modelValue: IList[]
-    depth?: number; 
+    depth?: number;
 }
 
 //const props = defineProps<Props>()
@@ -77,7 +90,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     depth: 0, // По умолчанию - корневой уровень (глубина 0)
-});  
+});
 
 const currentDepth = computed(() => props.depth);
 

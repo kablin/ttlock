@@ -142,13 +142,14 @@ const locks = ref([
         </Badge>
 
 
-{{ locks }}
+        {{ locks }}
 
 
-        <div class="flex justify-between   lg:p-10">
-            <nested-draggable v-model="locks" class="w-full">
+        <div class="flex justify-between  flex-col lg:p-10">
+            <Button variant="" class=" " @click="addObject()">Добавить объект</Button>
+            <nested-draggable v-model="locks" >
 
-                <Button variant="" class=" " @click="addObject()">Добавить объект</Button>
+
             </nested-draggable>
 
         </div>
