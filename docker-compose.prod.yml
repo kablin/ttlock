@@ -2,6 +2,7 @@ version: '3'
 services:
 
 
+  
   ttlockdb:
       container_name: ttlock-db
       image: postgres
@@ -20,12 +21,13 @@ services:
     depends_on:
       - ttlockpfpm
     build:
-      context: ./
-      dockerfile: docker/nginx.docker
+      #context: ./
+      dockerfile: docker_files/nginx.docker
 
     volumes:
       - ./:/var/www
       - ./cert:/etc/letsencrypt
+
     ports:
       - "452:443"
       - "122:80"
@@ -37,11 +39,11 @@ services:
   ttlockpfpm:
     container_name: ttlock-fpm
     build:
-      context: ./
+      #context: ./
       args:
         USER_ID: ${USER_ID:-0}
         GROUP_ID: ${GROUP_ID:-0}
-      dockerfile: docker/php-fpm.docker
+      dockerfile: docker_files/php-fpm.docker
     volumes:
       - ./:/var/www
     environment:
@@ -50,17 +52,29 @@ services:
     networks:
       - ttlock-net
 
+  ttlocknode:
+    container_name:  ttlock-node
+    image: node:23
+    tty: true
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    ports:
+      - "8004:8000"
+      - "5186:5186"
+    networks:
+      - ttlock-net
 
 
   ttlockcli:
     container_name: ttlock-cli
     restart: always
     build:
-      context: ./
+      #context: ./
       args:
         USER_ID: ${USER_ID:-0}
         GROUP_ID: ${GROUP_ID:-0}
-      dockerfile: docker/php-cli.docker
+      dockerfile: docker_files/php-cli.docker
     volumes:
         - ./:/var/www
         - ./docker/composer:/var/composer
@@ -83,6 +97,23 @@ services:
       - 5002:8080
     networks:
       - ttlock-net
+
+
+  centrifugo:  
+     build:  
+       dockerfile: ./docker_files/centrifugo.docker
+     container_name: centrifugo 
+     ports:  
+        - '8012:8000'  
+     networks:  
+        - ttlock-net  
+     ulimits:  
+        nofile:  
+          soft: 65535  
+          hard: 65535
+     volumes:
+        - ./docker/centrifugo/:/centrifugo
+
 
 
 networks:
