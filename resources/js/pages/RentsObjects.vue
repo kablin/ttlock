@@ -13,30 +13,6 @@ import { Label } from '@/components/ui/label';
 import { VueDraggable } from 'vue-draggable-plus'
 import NestedDraggable from '@/components/NestedComponent.vue'
 
-const list = ref([
-    {
-        name: 'item 1',
-        children: [
-            {
-                name: 'item 2',
-                children: []
-            }
-        ]
-    },
-    {
-        name: 'item 3',
-        children: [
-            {
-                name: 'item 4',
-                children: []
-            }
-        ]
-    },
-    {
-        name: 'item 5',
-        children: []
-    }
-])
 
 
 
@@ -63,42 +39,23 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 
-
-
-
-const rooms = ref([
-    {
-        name: 'Дом',
-        id: 1
-    },
-    {
-        name: 'Гараж',
-        id: 2
-    },
-    {
-        name: 'Ворота',
-        id: 3
-    },
-    {
-        name: 'Черный ход',
-        id: 4
-    }
-])
-
-const roomsdata = ref([])
-
-
-
 onMounted(() => {
 
-    rooms.value.forEach((v) => {
-        // let tmp = {}
-        roomsdata.value[v.id] = []
-        //roomsdata.value[v.id].push(tmp)
-    })
+
 })
 
 
+
+const addObject = () => {
+
+    let tmp = {
+        name: 'Замок ' + Math.floor(Math.random() * 1000),
+        id: Math.floor(Math.random() * 1000),
+        children: []
+    }
+    locks.value.unshift(tmp)
+    return true
+}
 
 
 
@@ -185,11 +142,14 @@ const locks = ref([
         </Badge>
 
 
+{{ locks }}
 
 
+        <div class="flex justify-between   lg:p-10">
+            <nested-draggable v-model="locks" class="w-full">
 
-        <div class="flex justify-between   p-10">
-            <nested-draggable v-model="locks" class="w-full"></nested-draggable>
+                <Button variant="" class=" " @click="addObject()">Добавить объект</Button>
+            </nested-draggable>
 
         </div>
 
