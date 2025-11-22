@@ -1,43 +1,42 @@
 <template>
 
- <slot />
+    <slot />
 
     <VueDraggable class=" border-dashed border-2 my-5 border-gray-500 p-1 lg:p-10 min-h-[50px]" tag="ul" v-model="list"
         group="g1">
 
 
         <slot name="emptyMessage"></slot>
- 
+
 
         <li v-for="el in modelValue" :key="el.name" class=" relative ">
             <div class="flex items-center">
-                <div class="  bg-design inline-flex px-2 py-2 items-center justify-center gap-2 text-sm 
+                <div class=" bg-design inline-flex px-2 py-2 items-center justify-center gap-2 text-sm 
                         min-w-[200px] max-w-[200px] font-medium  cursor-grab text-design-foreground
                          shadow-xs hover:bg-design/90 rounded-[20px] lg:min-w-[230px] lg:max-w-[230px] 
                           break-words whitespace-normal h-auto ">
-                    {{ el.name }}  </div>
+                    {{ el.name }} </div>
 
 
             </div>
+            <div class="lg:ms-7 ms-1" v-if="currentDepth < maxDepth">
+                <nested-component v-model="el.children" :depth="currentDepth + 1">
+                    <template #emptyMessage>
+                        <p v-if="el.children.length == 0">
+                            Перетащите сюда ваши объекты, для доступа к которым надо открыть
+                            замок объекта {{ el.name }}
+                        </p>
+                    </template>
 
-            <nested-component v-model="el.children"   v-if="currentDepth < maxDepth"
-                :depth="currentDepth + 1">
-                <template #emptyMessage>
-                    <p v-if="el.children.length == 0">
-                        Перетащите сюда ваши объекты, для доступа к которым надо открыть
-                        замок объекта {{ el.name }}
-                    </p>
-                </template>
+                    <!-- Вставляем основной слот 'default' -->
+                    <template #default>
+                        <Button variant="" @click="addObject(el)" class="absolute left-[240px] top-0 ">
+                            Добавить объект
+                        </Button>
+                    </template>
+                </nested-component>
 
-                <!-- Вставляем основной слот 'default' -->
-                <template #default>
-                    <Button variant="" @click="addObject(el)" class="absolute left-[240px] top-0 ">
-                        Добавить объект
-                    </Button>
-                </template>
-            </nested-component>
-
-
+            </div>
 
 
             <div v-else class="ms-5 text-sm text-red-500 italic">
