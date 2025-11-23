@@ -24,8 +24,71 @@ class Rent extends Model
         return $this->hasMany(Lock::class);
     }
 
-     public function rents()
+    public function children()
     {
-        return $this->hasMany(Rent::class,'rent_id','id');
+        return $this->hasMany(Rent::class, 'rent_id', 'id')->with('children');
     }
+
+
+    public function parent_rents()
+    {
+        return $this->hasMany(Rent::class, 'rent_id', 'id')->whereNull('rent_id');
+    }
+    
+
+    public function parent()
+    {
+        return $this->belongsTo(Rent::class, 'rent_id');
+    }
+
+
+    static public function getNestedRentsForUser($userId)
+    {
+
+
+        // CTE, которая начинается с корневых записей для конкретного пользователя
+        // и рекурсивно поднимает только те дочерние записи, у которых user_id совпадает
+        $cteQuery = "
+            WITH RECURSIVE rent_tree AS (
+                -- Базовый случай: выбираем корневые элементы (где rent_id IS NULL) для конкретного user_id
+                SELECT id, name, description, rent_id, user_id, 0 AS level
+                FROM rents
+                WHERE rent_id IS NULL AND user_id = ? AND deleted_at IS NULL -- Фильтруем по user_id и учитываем soft deletes
+
+                UNION ALL
+
+                -- Рекурсивный случай: добавляем дочерние элементы,
+                -- у которых rent_id указывает на id из предыдущего шага (rt.id)
+                -- И user_id совпадает с user_id родительской записи (rt.user_id)
+                SELECT r.id, r.name, r.description, r.rent_id, r.user_id, rt.level + 1
+                FROM rents r
+                INNER JOIN rent_tree rt ON r.rent_id = rt.id
+                WHERE r.user_id = rt.user_id AND r.deleted_at IS NULL -- Важно: user_id должен совпадать и учитываем soft deletes
+            )
+            SELECT * FROM rent_tree ORDER BY level, id; -- Сортировка по желанию
+        ";
+
+        $bindings = [$userId]; // Привязываем ID пользователя к плейсхолдеру ?
+
+        // Выполняем запрос и получаем результаты как stdClass объекты
+        $results = \DB::select($cteQuery, $bindings);
+
+        // Преобразуем результаты в коллекцию Eloquent моделей
+        $ids = collect($results)->pluck('id')->toArray();
+
+        // Загружаем модели по ID, убедившись, что учитываются soft deletes,
+        // если это важно в вашем контексте. Если нет, можно убрать withTrashed().
+        // ВАЖНО: Убедитесь, что вы не загружаете связи, которые могут снова вызвать рекурсию!
+        $models = Rent::whereIn('id', $ids)->get();
+
+        // Сортируем модели вручную по порядку, в котором они были возвращены CTE,
+        // чтобы сохранить структуру уровней.
+       /* $sortedModels = collect($results)->map(function ($row) use ($models) {
+            return $models->firstWhere('id', $row->id);
+        })->filter(); // Убираем null, если модель не найдена (в нормальном случае не должно быть)
+*/
+        return $models;
+    }
+
+ 
 }

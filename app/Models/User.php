@@ -51,25 +51,35 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-     public function locks() 
+    public function locks()
     {
         return $this->hasMany(Lock::class);
     }
 
+    public function rents()
+    {
+        return $this->hasMany(Rent::class);
+    }
 
-    public function jobs() 
+    public function parent_rents()
+    {
+        return $this->hasMany(Rent::class)->whereNull('rent_id');
+    }
+
+
+    public function jobs()
     {
         return $this->hasMany(LockJob::class);
     }
 
 
 
-    public function credential() 
+    public function credential()
     {
         return $this->hasOne(LocksCredential::class);
     }
 
-    public function code_packet() 
+    public function code_packet()
     {
         return $this->hasOne(CodePacket::class);
     }
@@ -78,6 +88,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function token(): HasOneThrough
     {
-        return $this->hasOneThrough(LocksToken::class, LocksCredential::class,'user_id','credential_id');
+        return $this->hasOneThrough(LocksToken::class, LocksCredential::class, 'user_id', 'credential_id');
     }
 }

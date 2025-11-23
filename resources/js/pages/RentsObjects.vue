@@ -40,8 +40,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 onMounted(() => {
+    local_rents.value = props.rents
 
+    local_rents.value.forEach((v) => {
+     //   v['children']=v['rents']
 
+    })
 })
 
 
@@ -59,6 +63,8 @@ const addObject = () => {
 
 
 
+
+const local_rents = ref()
 
 const locks = ref([
     {
@@ -119,7 +125,7 @@ const props = defineProps({
         type: Object
     },
 
-    
+
 });
 
 
@@ -154,7 +160,7 @@ const props = defineProps({
 
         <div class="flex justify-between  flex-col lg:p-10">
             <Button variant="" class=" " @click="addObject()">Добавить объект</Button>
-            <nested-draggable v-model="locks" >
+            <nested-draggable v-model="local_rents">
 
 
             </nested-draggable>
