@@ -26,12 +26,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Wizard');
     })->name('wizard');
 
-
+/*
     Route::get('rents_objects', function () {
         return Inertia::render('RentsObjects');
-    })->name('rents_objects');
+    })->name('rents_objects');*/
 
-
+    Route::get('/rents_objects', [\App\Http\Controllers\RentController::class, 'index'])->name('rents_objects');
 
 
 

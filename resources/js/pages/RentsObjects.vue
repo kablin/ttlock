@@ -114,6 +114,13 @@ const locks = ref([
 ])
 
 
+const props = defineProps({
+    rents: {
+        type: Object
+    },
+
+    
+});
 
 
 
@@ -142,7 +149,7 @@ const locks = ref([
         </Badge>
 
 
-        {{ locks }}
+        {{ rents }}
 
 
         <div class="flex justify-between  flex-col lg:p-10">

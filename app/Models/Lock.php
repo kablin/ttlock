@@ -33,9 +33,15 @@ class Lock extends Model
     }
 */
 
+    public function rent()
+    {
+        return $this->belongsTo(Rent::class);
+    }
+
+
     public function events()
     {
-        return $this->hasMany(LockEvent::class, 'lock_id', 'lock_id');
+        return $this->hasMany(LockEvent::class, 'lock_id', 'lock_id'); // тут правильно в Lock lock_id это ид из ttlock
     }
 
     public function pincodes()
