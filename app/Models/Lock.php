@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\OptionValueTrait;
 use App\Models\LockEvent;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Lock extends Model
 {
@@ -67,6 +68,10 @@ class Lock extends Model
     }
 
 
+    public function groups(): MorphToMany
+    {
+        return $this->morphToMany(Group::class, 'groupable');
+    }
 
 
 }

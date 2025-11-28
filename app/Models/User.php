@@ -61,6 +61,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Rent::class);
     }
 
+
+    public function groups()
+    {
+        return $this->hasMany(Group::class);
+    }
+
     public function parent_rents()
     {
         return $this->hasMany(Rent::class)->whereNull('rent_id');

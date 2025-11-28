@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Rent extends Model
 {
@@ -34,7 +35,7 @@ class Rent extends Model
     {
         return $this->hasMany(Rent::class, 'rent_id', 'id')->whereNull('rent_id');
     }
-    
+
 
     public function parent()
     {
@@ -42,7 +43,12 @@ class Rent extends Model
     }
 
 
-    static public function getNestedRentsForUser($userId)
+    public function groups(): MorphToMany
+    {
+        return $this->morphToMany(Group::class, 'groupable');
+    }
+
+   /* static public function getNestedRentsForUser($userId)
     {
 
 
@@ -81,14 +87,7 @@ class Rent extends Model
         // ВАЖНО: Убедитесь, что вы не загружаете связи, которые могут снова вызвать рекурсию!
         $models = Rent::whereIn('id', $ids)->get();
 
-        // Сортируем модели вручную по порядку, в котором они были возвращены CTE,
-        // чтобы сохранить структуру уровней.
-       /* $sortedModels = collect($results)->map(function ($row) use ($models) {
-            return $models->firstWhere('id', $row->id);
-        })->filter(); // Убираем null, если модель не найдена (в нормальном случае не должно быть)
-*/
-        return $models;
-    }
 
- 
+        return $models;
+    }*/
 }
