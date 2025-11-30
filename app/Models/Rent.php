@@ -14,6 +14,14 @@ class Rent extends Model
 
     protected $guarded = [];
 
+    protected static function booted()
+    {
+        static::deleting(function ($rent) {
+            // Обновляем связанные замки, устанавливая rent_id в NULL
+            $rent->locks()->update(['rent_id' => null]);
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -48,7 +56,7 @@ class Rent extends Model
         return $this->morphToMany(Group::class, 'groupable');
     }
 
-   /* static public function getNestedRentsForUser($userId)
+    /* static public function getNestedRentsForUser($userId)
     {
 
 

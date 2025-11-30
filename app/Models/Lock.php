@@ -74,4 +74,12 @@ class Lock extends Model
     }
 
 
+
+    public function scopeFree($query)
+    {
+        return $query
+            ->whereNull("rent_id")
+          ;
+    }
+
 }

@@ -26,13 +26,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Wizard');
     })->name('wizard');
 
-/*
+    /*
     Route::get('rents_objects', function () {
         return Inertia::render('RentsObjects');
     })->name('rents_objects');*/
 
-    Route::get('/rents_objects', [\App\Http\Controllers\RentController::class, 'index'])->name('rents_objects');
 
+    //RENTS
+
+
+
+    Route::get('/objects', [\App\Http\Controllers\RentController::class, 'objects'])->name('objects');
+    Route::get('/objects2', [\App\Http\Controllers\RentController::class, 'objects2'])->name('objects2');
+
+    Route::post('rents/create', [\App\Http\Controllers\RentController::class, 'create'])->name('rent_create');
+    Route::post('rents/delete', [\App\Http\Controllers\RentController::class, 'delete'])->name('rent_delete');
+
+
+    Route::post('rents/attach_lock', [\App\Http\Controllers\RentController::class, 'attach_lock'])->name('rent_attach_lock');
+    Route::post('rents/detach_lock', [\App\Http\Controllers\RentController::class, 'detach_lock'])->name('rent_detach_lock');
+
+
+    Route::post('rents/refresh', [\App\Http\Controllers\RentController::class, 'refresh'])->name('rent_refresh');
+    Route::post('rents/update', [\App\Http\Controllers\RentController::class, 'update'])->name('rent_update');
+
+
+
+
+
+
+
+    Route::get('/rents_objects', [\App\Http\Controllers\RentController::class, 'index'])->name('rents_objects');
 
 
     Route::get('/lockList', [\App\Http\Controllers\LockController::class, 'lockList'])->name('lockList');

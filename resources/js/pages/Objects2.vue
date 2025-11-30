@@ -1,0 +1,285 @@
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { objects, rent_create } from '@/routes';
+import { type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/vue3';
+import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { ref, onMounted } from 'vue'
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { VueDraggable } from 'vue-draggable-plus'
+import { Textarea } from '@/components/ui/textarea'
+import { CheckCircle2Icon } from 'lucide-vue-next'
+import axios from 'axios';
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from '@/components/ui/alert'
+
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+
+
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination'
+
+
+
+import {
+    Card,
+    CardAction,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card'
+
+
+
+const newObjectName = ref('')
+const newObjectDescription = ref('')
+const successCreateSchow = ref(false)
+const successCreateText = ref('')
+
+
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Мои объекты',
+        href: objects().url,
+    },
+];
+
+
+
+onMounted(() => {
+    local_rents.value = props.rents
+
+
+})
+
+
+
+const addObject = () => {
+
+    if (newObjectName.value.trim()) {
+        axios.post(rent_create().url, { 'name': newObjectName.value, 'description': newObjectDescription.value }).then((response: any) => {
+
+            successCreateSchow.value = true
+        })
+            .catch((error: any) => {
+                console.log(error);
+
+            })
+            .finally(() => {
+
+            });
+    }
+    successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
+    newObjectName.value = '';
+    newObjectDescription.value = '';
+    return true
+}
+
+
+
+
+const local_rents = ref()
+
+const locks = ref([
+    {
+        name: 'Замок 1',
+        id: 1,
+
+    },
+    {
+        name: 'Замок с очень длинным именем, вот прям совсем длинным',
+        id: 2,
+
+    },
+    {
+        name: 'Замок 3',
+        id: 3,
+
+    },
+    {
+        name: 'Замок 4',
+        id: 4,
+
+    },
+    {
+        name: 'Замок 5',
+        id: 5,
+
+    },
+    {
+        name: 'Замок 6',
+        id: 6,
+
+    },
+    {
+        name: 'Замок 7',
+        id: 7,
+
+    },
+    {
+        name: 'Замок 8',
+        id: 8,
+
+    }, {
+        name: 'Замок 9',
+        id: 9,
+
+    },
+    {
+        name: 'Замок 10',
+        id: 10,
+
+    }
+
+])
+
+
+const props = defineProps({
+    rents: {
+        type: Object
+    },
+
+
+});
+
+
+
+</script>
+
+<template>
+
+
+
+
+
+    <Head title="Мои объекты" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+
+
+        <Badge variant="secondary" class="text-xs ms-10 text-gray-800 break-words whitespace-normal max-w-[650px] my-5">
+            <svg class="mx-2" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
+                    stroke="#545F71" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+
+            Тут какой-то текст который поясняет, как это все работает и зачем вообще эти объекты нужны
+        </Badge>
+
+
+
+        <div class="grid w-full max-w-sm items-start gap-4 mx-10">
+            <Alert v-if="successCreateSchow" @click="successCreateSchow = false">
+                <CheckCircle2Icon :size="16" />
+                <AlertTitle class="text-green-500">{{ successCreateText }}</AlertTitle>
+
+            </Alert>
+        </div>
+        <div class="flex    lg:p-10">
+            <Dialog>
+
+                <DialogTrigger as-child>
+                    <Button variant="design">
+                        Добавить объект
+                    </Button>
+                </DialogTrigger>
+                <DialogContent class="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Добавить объект</DialogTitle>
+                        <DialogDescription>
+                            Добавьте новый объект в котором установлены умные замки TTLock
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div class="grid gap-4">
+                        <div class="grid gap-3">
+                            <Label for="name-1">Название</Label>
+                            <Input id="name-1" name="name" v-model="newObjectName" />
+                        </div>
+                        <div class="grid gap-3">
+                            <Label for="username-1">Описание</Label>
+                            <Textarea placeholder="" v-model="newObjectDescription" />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose as-child>
+                            <Button variant="design_outline">
+                                Закрыть
+                            </Button>
+
+                        </DialogClose>
+                        <DialogClose as-child>
+                            <Button @click="addObject()" variant="design">
+                                Добавить
+                            </Button>
+                        </DialogClose>
+
+                    </DialogFooter>
+                </DialogContent>
+
+            </Dialog>
+        </div>
+
+
+
+
+
+
+
+
+
+        <div class="flex flex-col gap-6">
+            <Pagination v-slot="{ page }" :items-per-page="10" :total="30" :default-page="2">
+                <PaginationContent v-slot="{ items }">
+                    <PaginationPrevious />
+
+                    <template v-for="(item, index) in items" :key="index">
+                        <PaginationItem v-if="item.type === 'page'" :value="item.value"
+                            :is-active="item.value === page">
+                            {{ item.value }}
+                        </PaginationItem>
+                    </template>
+
+                    <PaginationEllipsis :index="4" />
+
+                    <PaginationNext />
+                </PaginationContent>
+            </Pagination>
+        </div>
+
+
+    </AppLayout>
+
+
+
+
+
+
+
+
+</template>
