@@ -14,11 +14,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next'
 import axios from 'axios';
 
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from '@/components/ui/button'
 
-
+import { Progress } from '@/components/ui/progress'
 import {
     Alert,
     AlertDescription,
@@ -86,9 +92,9 @@ import {
 } from '@/components/ui/popover'
 
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 
 
@@ -100,8 +106,9 @@ const successCreateText = ref('')
 const isDialogOpen = ref(false)
 const isChangeDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
+const isDetachDialogOpen = ref(false)
 const currentRent = ref(null)
-const selectedLock = ref(null)
+const currentLock = ref(null)
 
 
 const breadcrumbs = [
@@ -185,12 +192,10 @@ const attachLock = () => {
 
 
 
-const detachLock = (lock) => {
-
-    if (selLock.value) {
-        axios.post(rent_attach_lock().url, { 'rent_id': currentRent?.value.id, 'lock_id': selLock.value }).then((response) => {
+const detachLock = () => {
+    if (currentLock.value) {
+        axios.post(rent_detach_lock().url, { 'rent_id': currentRent?.value.id, 'lock_id': currentLock.value.id }).then((response) => {
             successCreateSchow.value = true
-            selLock.value = null
             refresh()
         })
             .catch((error) => {
@@ -201,7 +206,7 @@ const detachLock = (lock) => {
 
             });
     }
-    successCreateText.value = 'Замок ' + selectedFreeLock?.lock_alias + ' привязан к объекту  ' + currentRent?.value.name
+    successCreateText.value = 'Замок ' + currentLock.value.lock_alias + ' отвзязан от объекта  ' + currentRent?.value.name
     return true
 }
 
@@ -286,7 +291,6 @@ const props = defineProps({
 
 const openAssignDialog = (rent) => {
     currentRent.value = rent
-    selectedLock.value = null
     isDialogOpen.value = true
 };
 
@@ -302,6 +306,11 @@ const openDeleteDialog = (rent) => {
     isDeleteDialogOpen.value = true
 };
 
+const openDetachDialog = (rent, lock) => {
+    currentRent.value = Object.assign({}, rent)
+    currentLock.value = Object.assign({}, lock)
+    isDetachDialogOpen.value = true
+};
 
 </script>
 
@@ -328,7 +337,7 @@ const openDeleteDialog = (rent) => {
 
 
 
-        <div class="grid w-full max-w-sm items-start gap-4 mx-10">
+        <div class="grid   items-start gap-4 mx-10">
             <Alert v-if="successCreateSchow" @click="successCreateSchow = false">
                 <CheckCircle2Icon :size="16" />
                 <AlertTitle class="text-green-500">{{ successCreateText }}</AlertTitle>
@@ -389,7 +398,7 @@ const openDeleteDialog = (rent) => {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-3">
             <Card v-for="rent in local_rents" :key="rent.id" class="relative">
                 <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                }}</span>
+                    }}</span>
                 <CardHeader class="px-2">
                     <CardTitle class=""> {{ rent.name }}
                         <Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
@@ -423,7 +432,7 @@ const openDeleteDialog = (rent) => {
                                 {{ lock.lock_name }}
                             </CardDescription-->
                             <CardAction>
-                                <Button @click="detachLock(lock)" variant="destructive2" >
+                                <Button @click="openDetachDialog(rent, lock)" variant="destructive2">
                                     Отвязать
                                 </Button>
                             </CardAction>
@@ -436,29 +445,26 @@ const openDeleteDialog = (rent) => {
 
                                 </li>
                                 <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                   Заряд батареи<span>{{ lock.electric_quantity }}</span>
+                                    Заряд батареи
 
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger as-child>
+                                                <Progress :model-value="lock.electric_quantity" class="w-[30%]" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <span>{{ lock.electric_quantity }}%</span>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
                                 </li>
 
                             </ul>
-
-
                         </CardContent>
-
                     </Card>
-
-
-
                     <div v-if="rent.locks.length === 0" class="text-gray-500 text-sm flex justify-center">
                         <p>Нет привязанных замков</p>
                     </div>
-
-
-
-
-
-
-
                 </CardContent>
             </Card>
         </div>
@@ -580,6 +586,24 @@ const openDeleteDialog = (rent) => {
                     <AlertDialogCancel>Отменить</AlertDialogCancel>
                     <AlertDialogAction :class="cn(buttonVariants({ variant: 'destructive2' }))" @click="deleteRent()">
                         Удалить</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
+
+
+        <AlertDialog v-model:open="isDetachDialogOpen">
+
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Отвязать замок {{ currentLock?.lock_alias }} от объекта {{ currentRent?.name }}?
+                    </AlertDialogTitle>
+
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Отменить</AlertDialogCancel>
+                    <AlertDialogAction :class="cn(buttonVariants({ variant: 'destructive2' }))" @click="detachLock()">
+                        Отвязать</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
