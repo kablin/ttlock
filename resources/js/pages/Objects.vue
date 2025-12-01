@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { VueDraggable } from 'vue-draggable-plus'
 import { Textarea } from '@/components/ui/textarea'
-import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next'
+import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown } from 'lucide-vue-next'
 import axios from 'axios';
 
 import {
@@ -395,7 +395,7 @@ const openDetachDialog = (rent, lock) => {
 
 
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mx-3">
             <Card v-for="rent in local_rents" :key="rent.id" class="relative">
                 <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
                     }}</span>
@@ -424,43 +424,71 @@ const openDetachDialog = (rent, lock) => {
 
 
 
-                    <Card class="w-full max-w-sm relative gap-2" v-for="lock in rent.locks" :key="lock.id">
-                        <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
-                        <CardHeader>
-                            <CardTitle>{{ lock.lock_alias }}</CardTitle>
-                            <!--CardDescription>
+                    <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in rent.locks" :key="lock.id">
+                        <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
+
+                        <Collapsible>
+
+                            <CardHeader class=" flex items-center justify-between">
+
+                                <CollapsibleTrigger class="flex   ">
+                                    <ChevronsUpDown class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
+                                    <CardTitle class="flex items-center">{{ lock.lock_alias }}</CardTitle>
+                                </CollapsibleTrigger>
+                                <!--CardDescription>
                                 {{ lock.lock_name }}
                             </CardDescription-->
-                            <CardAction>
-                                <Button @click="openDetachDialog(rent, lock)" variant="destructive2">
-                                    Отвязать
-                                </Button>
-                            </CardAction>
-                        </CardHeader>
-                        <CardContent>
+                                <CardAction>
+                                    <Button @click="openDetachDialog(rent, lock)" variant="destructive2">
+                                        Отвязать
+                                    </Button>
+                                </CardAction>
+                            </CardHeader>
+                            <CollapsibleContent>
+                                <CardContent>
 
-                            <ul class="">
-                                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                    Мастер ключ<span>{{ lock.no_key_pwd }}</span>
 
-                                </li>
-                                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                    Заряд батареи
+                                    <ul class="mt-3">
+                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            Имя<span>{{ lock.lock_name }}</span>
+                                        </li>
+                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            Мастер ключ<span>{{ lock.no_key_pwd }}</span>
+                                        </li>
+                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            TTlock Id<span>{{ lock.lock_id }}</span>
+                                        </li>
 
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger as-child>
-                                                <Progress :model-value="lock.electric_quantity" class="w-[30%]" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <span>{{ lock.electric_quantity }}%</span>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </li>
+                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            Заряд батареи
 
-                            </ul>
-                        </CardContent>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger as-child>
+                                                        <Progress :model-value="lock.electric_quantity" class="w-[30%]"
+                                                             />
+                                                             <!--
+                                                             :class="{
+                                                                'bg-green-500': lock.electric_quantity >= 70,
+                                                                'bg-yellow-500': lock.electric_quantity >= 30 && lock.electric_quantity < 70,
+                                                                'bg-red-500': lock.electric_quantity < 30
+                                                            }"
+                                                             -->
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <span>{{ lock.electric_quantity }}%</span>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </li>
+                                    </ul>
+
+
+                                </CardContent>
+
+
+                            </CollapsibleContent>
+                        </Collapsible>
                     </Card>
                     <div v-if="rent.locks.length === 0" class="text-gray-500 text-sm flex justify-center">
                         <p>Нет привязанных замков</p>
@@ -618,7 +646,7 @@ const openDetachDialog = (rent, lock) => {
 
 
 
-        <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-6 mt-5">
             <Pagination v-slot="{ page }" :items-per-page="10" :total="30" :default-page="2">
                 <PaginationContent v-slot="{ items }">
                     <PaginationPrevious />
