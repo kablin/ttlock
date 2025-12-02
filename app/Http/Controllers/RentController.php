@@ -39,7 +39,7 @@ class RentController extends Controller
     $rents = auth()->user()->rents()->with('locks')->orderBy('id')
       ->get();
 
-    $free_locks = auth()->user()->locks()->free()->select(['id','lock_alias'])->orderBy('id')
+    $free_locks = auth()->user()->locks()->free()->orderBy('id')
       ->get();
     return Inertia::render('Objects2', ['rents' => $rents, 'free_locks' => $free_locks ]);
   }

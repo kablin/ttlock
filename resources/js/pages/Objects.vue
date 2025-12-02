@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { VueDraggable } from 'vue-draggable-plus'
 import { Textarea } from '@/components/ui/textarea'
-import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown } from 'lucide-vue-next'
+import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown,ChevronsUpDownIcon } from 'lucide-vue-next'
 import axios from 'axios';
 
 import {
@@ -395,7 +395,7 @@ const openDetachDialog = (rent, lock) => {
 
 
 
-        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mx-3">
+        <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mx-3">
             <Card v-for="rent in local_rents" :key="rent.id" class="relative">
                 <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
                     }}</span>
@@ -408,13 +408,13 @@ const openDetachDialog = (rent, lock) => {
                     <CardDescription>
                         {{ rent.description }}
                     </CardDescription>
-                    <CardAction class="flex gap-3 ">
+                    <CardAction class="flex flex-col md:flex-row gap-3 ">
 
 
-                        <Button variant="design" @click="openAssignDialog(rent)">
+                        <Button  class="order-last md:order-first" variant="design" @click="openAssignDialog(rent)">
                             Привязать замок
                         </Button>
-                        <Button variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
+                        <Button  class="self-end" variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
                             <CircleX />
                         </Button>
                     </CardAction>
