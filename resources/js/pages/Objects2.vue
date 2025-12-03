@@ -467,115 +467,113 @@ function onAdd(rent_id, event) {
                 <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
                     <div class="my-3 mx-auto font-bold text-lg">Объекты</div>
 
-
-                    <VueDraggable v-for="rent in local_rents" :key="rent.id" v-model="rent.locks" group="main"
-                        emptyInsertThreshold="20" :target="'.tg' + rent.id" @add="onAdd(rent.id, $event)">
-
-
-
-                        <Card class="relative my-2 pt-6 pb-0">
-                            <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                            }}</span>
-                            <CardHeader class="px-2">
-                                <CardTitle class=""> {{ rent.name }}
-
-                                </CardTitle>
-                                <CardDescription>
-                                    {{ rent.description }}
-                                </CardDescription>
-                                <CardAction class="flex gap-3 ">
-                                    <Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
-                                        <Pencil />
-                                    </Button>
-                                    <Button variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
-                                        <CircleX />
-                                    </Button>
-                                </CardAction>
-                            </CardHeader>
-                            <CardContent class="">
-
-                       
-                                <div :class="['tg' + rent.id,{
-                                                                'border-b-zinc-300 border-2': rent.locks.length == 0,
-                                                            }] "
-                                
-                                class="w-full min-h-[100px] flex flex-col mb-3   ">
-
-
-                                    <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in rent.locks"
-                                        :key="lock.id">
-                                        <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
-
-                                        <Collapsible>
-
-                                            <CardHeader class=" flex items-center justify-between">
-
-                                                <CollapsibleTrigger class="flex   ">
-                                                    <ChevronsUpDown
-                                                        class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
-                                                    <CardTitle class="flex items-center">{{ lock.lock_alias }}
-                                                    </CardTitle>
-                                                </CollapsibleTrigger>
-                                                <CardAction>
-
-                                                </CardAction>
-                                            </CardHeader>
-                                            <CollapsibleContent>
-                                                <CardContent>
-
-
-                                                    <ul class="mt-3">
-                                                        <li
-                                                            class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                            Имя<span>{{ lock.lock_name }}</span>
-                                                        </li>
-                                                        <li
-                                                            class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                            Мастер ключ<span>{{ lock.no_key_pwd }}</span>
-                                                        </li>
-                                                        <li
-                                                            class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                            TTlock Id<span>{{ lock.lock_id }}</span>
-                                                        </li>
-
-                                                        <li
-                                                            class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                            Заряд батареи
-
-                                                            <TooltipProvider>
-                                                                <Tooltip>
-                                                                    <TooltipTrigger as-child>
-                                                                        <Progress :model-value="lock.electric_quantity"
-                                                                            class="w-[30%]" />
-
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <span>{{ lock.electric_quantity }}%</span>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </TooltipProvider>
-                                                        </li>
-                                                    </ul>
-                                                </CardContent>
-                                            </CollapsibleContent>
-                                        </Collapsible>
-                                    </Card>
+                    <div v-for="rent in local_rents" :key="rent.id">
+                        <VueDraggable v-model="rent.locks" group="main" emptyInsertThreshold="20"
+                            target=".tg-zone" @add="onAdd(rent.id, $event)">
 
 
 
-                                    <!--div v-if="rent.locks.length === 0"
+                            <Card class="relative my-2 pt-6 pb-0">
+                                <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
+                                    }}</span>
+                                <CardHeader class="px-2">
+                                    <CardTitle class=""> {{ rent.name }}
+
+                                    </CardTitle>
+                                    <CardDescription>
+                                        {{ rent.description }}
+                                    </CardDescription>
+                                    <CardAction class="flex gap-3 ">
+                                        <Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
+                                            <Pencil />
+                                        </Button>
+                                        <Button variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
+                                            <CircleX />
+                                        </Button>
+                                    </CardAction>
+                                </CardHeader>
+                                <CardContent class="tg-zone min-h-[80px]">
+
+
+                                   
+
+
+                                        <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in rent.locks"
+                                            :key="lock.id">
+                                            <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id
+                                                }}</span>
+
+                                            <Collapsible>
+
+                                                <CardHeader class=" flex items-center justify-between">
+
+                                                    <CollapsibleTrigger class="flex   ">
+                                                        <ChevronsUpDown
+                                                            class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
+                                                        <CardTitle class="flex items-center">{{ lock.lock_alias }}
+                                                        </CardTitle>
+                                                    </CollapsibleTrigger>
+                                                    <CardAction>
+
+                                                    </CardAction>
+                                                </CardHeader>
+                                                <CollapsibleContent>
+                                                    <CardContent>
+
+
+                                                        <ul class="mt-3">
+                                                            <li
+                                                                class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                                Имя<span>{{ lock.lock_name }}</span>
+                                                            </li>
+                                                            <li
+                                                                class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                                Мастер ключ<span>{{ lock.no_key_pwd }}</span>
+                                                            </li>
+                                                            <li
+                                                                class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                                TTlock Id<span>{{ lock.lock_id }}</span>
+                                                            </li>
+
+                                                            <li
+                                                                class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                                Заряд батареи
+
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger as-child>
+                                                                            <Progress
+                                                                                :model-value="lock.electric_quantity"
+                                                                                class="w-[30%]" />
+
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <span>{{ lock.electric_quantity }}%</span>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
+                                                            </li>
+                                                        </ul>
+                                                    </CardContent>
+                                                </CollapsibleContent>
+                                            </Collapsible>
+                                        </Card>
+
+
+
+                                        <div v-if="rent.locks.length === 0"
                                         class="text-gray-500 text-sm flex my-auto items-center justify-center ">
                                         <div>
                                             <p>Нет привязанных замков</p>
                                         </div>
-                                    </div-->
+                                    
 
-                                </div>
-                            </CardContent>
-                        </Card>
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-                    </VueDraggable>
-
+                        </VueDraggable>
+                    </div>
 
 
                     <Pagination class="my-4 self-end" v-slot="{ page }" :items-per-page="10" :total="30"
