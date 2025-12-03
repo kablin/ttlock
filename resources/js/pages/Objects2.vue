@@ -130,7 +130,7 @@ const props = defineProps({
 
 watchEffect(() => {
 
-console.log(props.free_locks);
+    console.log(props.free_locks);
     local_rents.value = JSON.parse(JSON.stringify(props.rents))
     local_free_locks.value = JSON.parse(JSON.stringify(props.free_locks))
 })
@@ -469,13 +469,13 @@ function onAdd(rent_id, event) {
 
 
                     <VueDraggable v-for="rent in local_rents" :key="rent.id" v-model="rent.locks" group="main"
-                        emptyInsertThreshold="0" :target="'.tg' + rent.id" @add="onAdd(rent.id, $event)">
+                        emptyInsertThreshold="20" :target="'.tg' + rent.id" @add="onAdd(rent.id, $event)">
 
 
 
-                        <Card class="relative my-2">
+                        <Card class="relative my-2 pt-6 pb-0">
                             <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                                }}</span>
+                            }}</span>
                             <CardHeader class="px-2">
                                 <CardTitle class=""> {{ rent.name }}
 
@@ -494,7 +494,12 @@ function onAdd(rent_id, event) {
                             </CardHeader>
                             <CardContent class="">
 
-                                <div :class="'tg' + rent.id" class="w-full min-h-[60px]">
+                       
+                                <div :class="['tg' + rent.id,{
+                                                                'border-b-zinc-300 border-2': rent.locks.length == 0,
+                                                            }] "
+                                
+                                class="w-full min-h-[100px] flex flex-col mb-3   ">
 
 
                                     <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in rent.locks"
@@ -559,8 +564,10 @@ function onAdd(rent_id, event) {
 
 
                                     <div v-if="rent.locks.length === 0"
-                                        class="text-gray-500 text-sm flex justify-center">
-                                        <p>Нет привязанных замков</p>
+                                        class="text-gray-500 text-sm flex my-auto items-center justify-center ">
+                                        <div>
+                                            <p>Нет привязанных замков</p>
+                                        </div>
                                     </div>
 
                                 </div>
