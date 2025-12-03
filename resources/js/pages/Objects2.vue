@@ -563,12 +563,12 @@ function onAdd(rent_id, event) {
 
 
 
-                                    <div v-if="rent.locks.length === 0"
+                                    <!--div v-if="rent.locks.length === 0"
                                         class="text-gray-500 text-sm flex my-auto items-center justify-center ">
                                         <div>
                                             <p>Нет привязанных замков</p>
                                         </div>
-                                    </div>
+                                    </div-->
 
                                 </div>
                             </CardContent>
