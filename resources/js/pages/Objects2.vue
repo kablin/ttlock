@@ -462,7 +462,7 @@ function onAdd(rent_id, event) {
 
                         <Card class="relative my-2">
                             <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                            }}</span>
+                                }}</span>
                             <CardHeader class="px-2">
                                 <CardTitle class=""> {{ rent.name }}
 
@@ -557,25 +557,29 @@ function onAdd(rent_id, event) {
                     </VueDraggable>
 
 
+
+                    <Pagination class="my-4 self-end" v-slot="{ page }" :items-per-page="10" :total="30"
+                        :default-page="2">
+                        <PaginationContent v-slot="{ items }">
+                            <PaginationPrevious />
+
+                            <template v-for="(item, index) in items" :key="index">
+                                <PaginationItem v-if="item.type === 'page'" :value="item.value"
+                                    :is-active="item.value === page">
+                                    {{ item.value }}
+                                </PaginationItem>
+                            </template>
+
+                            <PaginationEllipsis :index="4" />
+
+                            <PaginationNext />
+                        </PaginationContent>
+                    </Pagination>
+
                 </div>
 
 
-                <Pagination class="my-4 self-end" v-slot="{ page }" :items-per-page="10" :total="30" :default-page="2">
-                    <PaginationContent v-slot="{ items }">
-                        <PaginationPrevious />
 
-                        <template v-for="(item, index) in items" :key="index">
-                            <PaginationItem v-if="item.type === 'page'" :value="item.value"
-                                :is-active="item.value === page">
-                                {{ item.value }}
-                            </PaginationItem>
-                        </template>
-
-                        <PaginationEllipsis :index="4" />
-
-                        <PaginationNext />
-                    </PaginationContent>
-                </Pagination>
 
             </div>
 
