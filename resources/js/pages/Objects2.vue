@@ -1,11 +1,12 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { objects, rent_create, rent_update, rent_refresh, rent_delete, rent_attach_lock, rent_detach_lock } from '@/routes';
+import { objects, rent_create2, rent_update2, rent_delete2, rent_attach_lock2, rent_detach_lock2 } from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watchEffect, watch } from 'vue'
+import { router } from '@inertiajs/vue3'
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,19 +79,6 @@ import {
 } from '@/components/ui/card'
 
 
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
 
 import {
     Collapsible,
@@ -104,12 +92,11 @@ const newObjectDescription = ref('')
 const successCreateSchow = ref(false)
 const successCreateText = ref('')
 
-const isDialogOpen = ref(false)
+
 const isChangeDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
-const isDetachDialogOpen = ref(false)
+
 const currentRent = ref(null)
-const currentLock = ref(null)
 
 
 const breadcrumbs = [
@@ -121,161 +108,9 @@ const breadcrumbs = [
 
 
 
-onMounted(() => {
-    local_rents.value = props.rents
-    local_free_locks.value = props.free_locks
-
-})
-
-
-
-const newRent = () => {
-
-    if (newObjectName.value.trim()) {
-        axios.post(rent_create().url, { 'name': newObjectName.value, 'description': newObjectDescription.value }).then((response) => {
-            refresh()
-            successCreateSchow.value = true
-        })
-            .catch((error) => {
-                console.log(error);
-
-            })
-            .finally(() => {
-
-            });
-    }
-    successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
-    newObjectName.value = '';
-    newObjectDescription.value = '';
-    return true
-}
-
-
-const saveRent = () => {
-
-    if (currentRent?.value.name.trim()) {
-        axios.post(rent_update().url, { 'rent_id': currentRent?.value.id, 'name': currentRent?.value.name.trim(), 'description': currentRent?.value.description.trim() }).then((response) => {
-            successCreateSchow.value = true
-            refresh()
-        })
-            .catch((error) => {
-                console.log(error);
-
-            })
-            .finally(() => {
-
-            });
-    }
-    successCreateText.value = 'Объект ' + currentRent?.value.name + ' изменен'
-    return true
-}
-
-
-const attachLock = () => {
-
-    if (selLock.value) {
-        axios.post(rent_attach_lock().url, { 'rent_id': currentRent?.value.id, 'lock_id': selLock.value }).then((response) => {
-            successCreateSchow.value = true
-            selLock.value = null
-            refresh()
-        })
-            .catch((error) => {
-                console.log(error);
-
-            })
-            .finally(() => {
-
-            });
-    }
-    successCreateText.value = 'Замок ' + selectedFreeLock?.lock_alias + ' привязан к объекту  ' + currentRent?.value.name
-    return true
-}
-
-
-
-const detachLock = () => {
-    if (currentLock.value) {
-        axios.post(rent_detach_lock().url, { 'rent_id': currentRent?.value.id, 'lock_id': currentLock.value.id }).then((response) => {
-            successCreateSchow.value = true
-            refresh()
-        })
-            .catch((error) => {
-                console.log(error);
-
-            })
-            .finally(() => {
-
-            });
-    }
-    successCreateText.value = 'Замок ' + currentLock.value.lock_alias + ' отвзязан от объекта  ' + currentRent?.value.name
-    return true
-}
-
-
-
-
-
-
-const deleteRent = () => {
-
-    if (currentRent?.value) {
-        axios.post(rent_delete().url, { 'rent_id': currentRent?.value.id }).then((response) => {
-            successCreateSchow.value = true
-            refresh()
-        })
-            .catch((error) => {
-                console.log(error);
-
-            })
-            .finally(() => {
-
-            });
-    }
-    successCreateText.value = 'Объект ' + currentRent?.value.name + ' удален'
-    return true
-}
-
-
-const refresh = () => {
-
-    axios.post(rent_refresh().url, {}).then((response) => {
-
-        local_rents.value = response.data.rents
-        local_free_locks.value = response.data.free_locks
-    })
-        .catch((error) => {
-            console.log(error);
-
-        })
-        .finally(() => {
-
-        });
-
-
-}
-
-
 
 const local_rents = ref([])
 const local_free_locks = ref([])
-
-
-const open = ref(false)
-const selLock = ref()
-
-const selectedFreeLock = computed(() =>
-    local_free_locks.value.find(freelock => freelock.id === selLock.value),
-)
-
-function selectLock(selectedValue) {
-    console.log(selectedValue)
-    selLock.value = selectedValue === selLock.value ? '' : selectedValue
-    open.value = false
-}
-
-
-
-
 
 
 
@@ -290,10 +125,126 @@ const props = defineProps({
 
 });
 
-const openAssignDialog = (rent) => {
-    currentRent.value = rent
-    isDialogOpen.value = true
-};
+
+
+
+watchEffect(() => {
+
+
+    local_rents.value = JSON.parse(JSON.stringify(props.rents))
+    local_free_locks.value = JSON.parse(JSON.stringify(props.free_locks))
+})
+
+
+
+
+
+
+
+const newRent = (rent, lock) => {
+
+    router.post(rent_create2().url, { 'name': newObjectName.value, 'description': newObjectDescription.value },
+        {
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+    );
+    return true
+}
+
+
+
+
+const saveRent = (rent, lock) => {
+
+    router.post(rent_update2().url, { 'rent_id': currentRent?.value.id, 'name': currentRent?.value.name.trim(), 'description': currentRent?.value.description.trim() },
+        {
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Объект ' + currentRent?.value.name + ' изменен'
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+    );
+    return true
+}
+
+
+const attachLock = (rent, lock) => {
+
+    router.post(rent_attach_lock2().url, { 'rent_id': rent.id, 'lock_id': lock.id },
+
+        {
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Замок ' + lock.lock_alias + ' привязан к объекту ' + rent.name
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+
+    );
+
+    return true
+}
+
+
+
+const detachLock = (lock) => {
+
+    router.post(rent_detach_lock2().url, { 'lock_id': lock.id },
+
+        {
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Замок ' + lock.lock_alias + ' отвязан от объекта  '
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+
+    );
+
+
+    return true
+}
+
+
+
+
+
+
+const deleteRent = (rent, lock) => {
+
+    router.post(rent_delete2().url, { 'rent_id': currentRent?.value.id },
+        {
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Объект ' + currentRent?.value.name + ' удален'
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+    );
+    return true
+}
+
+
 
 
 const openChangeDialog = (rent) => {
@@ -307,17 +258,32 @@ const openDeleteDialog = (rent) => {
     isDeleteDialogOpen.value = true
 };
 
-const openDetachDialog = (rent, lock) => {
-    currentRent.value = Object.assign({}, rent)
-    currentLock.value = Object.assign({}, lock)
-    isDetachDialogOpen.value = true
-};
 
 
 
+function onFree() {
+
+    const added = local_free_locks.value.find(lock => !props.free_locks.some(l => l.id === lock.id))
+    if (added) {
+        detachLock(added)
+
+
+    }
 
 
 
+}
+
+
+function onAdd(rent_id, event) {
+    const new_rent = local_rents.value.find(rent => rent.id === rent_id)
+    const old_rent = props.rents.find(rent => rent.id === rent_id)
+    const added = new_rent.locks.find(lock => !old_rent.locks.some(l => l.id === lock.id))
+
+    if (added) {
+        attachLock(new_rent, added)
+    }
+}
 
 
 </script>
@@ -330,29 +296,26 @@ const openDetachDialog = (rent, lock) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
 
-
-
-
-        <Badge variant="secondary" class="text-xs ms-10 text-gray-800 break-words whitespace-normal max-w-[650px] my-5">
+        <Badge variant="secondary" class="text-xs mx-10 text-gray-800 break-words whitespace-normal max-w-[650px] my-5">
             <svg class="mx-2" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
                     stroke="#545F71" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            Создайте объекты в которых установлены умные замки, и привяжите замки к ним
+            Создайте объекты в которые установлены умные замки, и привяжите замки к ним, перетаскивая их мышкой.
         </Badge>
 
 
 
         <div class="grid   items-start gap-4 mx-10">
-            <Alert v-if="successCreateSchow" @click="successCreateSchow = false">
+            <Alert v-if="successCreateSchow" @click="successCreateSchow = false" class="mb-5">
                 <CheckCircle2Icon :size="16" />
                 <AlertTitle class="text-green-500">{{ successCreateText }}</AlertTitle>
 
             </Alert>
         </div>
-        <div class="flex  m-10 ">
+        <div class="flex  mx-10  mb-6">
             <Dialog>
 
                 <DialogTrigger as-child>
@@ -401,179 +364,222 @@ const openDetachDialog = (rent, lock) => {
 
 
 
+        <div class="grid grid-cols-1 md:grid-cols-6  gap-3 mx-3 mb-7">
 
+            <div
+                class="  md:col-span-2 min-h-[50px] border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
+                <div class="my-3 font-bold mx-auto text-lg">Свободные замки</div>
+                <VueDraggable v-model="local_free_locks" group="main" @add="onFree()"
+                    class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
 
+                    <div v-if="local_free_locks && local_free_locks.length === 0"
+                        class="text-gray-500 text-sm flex justify-center">
+                        <p>Нет свободных замков</p>
+                    </div>
 
+                    <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in local_free_locks" :key="lock.id">
+                        <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
 
+                        <Collapsible>
 
+                            <CardHeader class=" flex items-center justify-between">
 
-        <div class="grid grid-cols-1 md:grid-cols-2  gap-4 mx-3">
+                                <CollapsibleTrigger class="flex   ">
+                                    <ChevronsUpDown class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
+                                    <CardTitle class="flex items-center">{{ lock.lock_alias }}</CardTitle>
+                                </CollapsibleTrigger>
+                                <CardAction>
+                                </CardAction>
+                            </CardHeader>
+                            <CollapsibleContent>
+                                <CardContent>
+                                    <ul class="mt-3">
+                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            Имя<span>{{ lock.lock_name }}</span>
+                                        </li>
+                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            Мастер ключ<span>{{ lock.no_key_pwd }}</span>
+                                        </li>
+                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            TTlock Id<span>{{ lock.lock_id }}</span>
+                                        </li>
 
+                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            Заряд батареи
 
-            <VueDraggable v-model="local_free_locks" group="main"
-                class="min-h-[50px] items-center border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger as-child>
+                                                        <Progress :model-value="lock.electric_quantity"
+                                                            class="w-[30%]" />
 
-
-
-                <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in local_free_locks" :key="lock.id">
-                    <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
-
-                    <Collapsible>
-
-                        <CardHeader class=" flex items-center justify-between">
-
-                            <CollapsibleTrigger class="flex   ">
-                                <ChevronsUpDown class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
-                                <CardTitle class="flex items-center">{{ lock.lock_alias }}</CardTitle>
-                            </CollapsibleTrigger>
-                            <CardAction>
-                            </CardAction>
-                        </CardHeader>
-                        <CollapsibleContent>
-                            <CardContent>
-                                <ul class="mt-3">
-                                    <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                        Имя<span>{{ lock.lock_name }}</span>
-                                    </li>
-                                    <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                        Мастер ключ<span>{{ lock.no_key_pwd }}</span>
-                                    </li>
-                                    <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                        TTlock Id<span>{{ lock.lock_id }}</span>
-                                    </li>
-
-                                    <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                        Заряд батареи
-
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger as-child>
-                                                    <Progress :model-value="lock.electric_quantity" class="w-[30%]" />
-
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <span>{{ lock.electric_quantity }}%</span>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    </li>
-                                </ul>
-                            </CardContent>
-                        </CollapsibleContent>
-                    </Collapsible>
-                </Card>
-            </VueDraggable>
-
-
-
-            <div class=" border-dashed border-2 p-3 lg:p-4    border-gray-500">
-
-                <VueDraggable v-for="rent in local_rents" :key="rent.id" v-model="rent.locks" group="main"
-                    emptyInsertThreshold="0" :target="'.tg' + rent.id">
-
-
-
-                    <Card class="relative my-2">
-                        <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                        }}</span>
-                        <CardHeader class="px-2">
-                            <CardTitle class=""> {{ rent.name }}
-                                <Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
-                                    <Pencil />
-                                </Button>
-                            </CardTitle>
-                            <CardDescription>
-                                {{ rent.description }}
-                            </CardDescription>
-                            <CardAction class="flex gap-3 ">
-
-
-                                <Button variant="design" @click="openAssignDialog(rent)">
-                                    Привязать замок
-                                </Button>
-                                <Button variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
-                                    <CircleX />
-                                </Button>
-                            </CardAction>
-                        </CardHeader>
-                        <CardContent class="">
-
-                            <div :class="'tg' + rent.id" class="w-full min-h-[60px]">
-
-
-                                <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in rent.locks"
-                                    :key="lock.id">
-                                    <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
-
-                                    <Collapsible>
-
-                                        <CardHeader class=" flex items-center justify-between">
-
-                                            <CollapsibleTrigger class="flex   ">
-                                                <ChevronsUpDown
-                                                    class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
-                                                <CardTitle class="flex items-center">{{ lock.lock_alias }}</CardTitle>
-                                            </CollapsibleTrigger>
-                                            <CardAction>
-                                                <Button @click="openDetachDialog(rent, lock)" variant="destructive2">
-                                                    Отвязать
-                                                </Button>
-                                            </CardAction>
-                                        </CardHeader>
-                                        <CollapsibleContent>
-                                            <CardContent>
-
-
-                                                <ul class="mt-3">
-                                                    <li
-                                                        class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                        Имя<span>{{ lock.lock_name }}</span>
-                                                    </li>
-                                                    <li
-                                                        class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                        Мастер ключ<span>{{ lock.no_key_pwd }}</span>
-                                                    </li>
-                                                    <li
-                                                        class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                        TTlock Id<span>{{ lock.lock_id }}</span>
-                                                    </li>
-
-                                                    <li
-                                                        class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                        Заряд батареи
-
-                                                        <TooltipProvider>
-                                                            <Tooltip>
-                                                                <TooltipTrigger as-child>
-                                                                    <Progress :model-value="lock.electric_quantity"
-                                                                        class="w-[30%]" />
-
-                                                                </TooltipTrigger>
-                                                                <TooltipContent>
-                                                                    <span>{{ lock.electric_quantity }}%</span>
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        </TooltipProvider>
-                                                    </li>
-                                                </ul>
-                                            </CardContent>
-                                        </CollapsibleContent>
-                                    </Collapsible>
-                                </Card>
-
-
-
-                                <div v-if="rent.locks.length === 0" class="text-gray-500 text-sm flex justify-center">
-                                    <p>Нет привязанных замков</p>
-                                </div>
-
-                            </div>
-                        </CardContent>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <span>{{ lock.electric_quantity }}%</span>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </li>
+                                    </ul>
+                                </CardContent>
+                            </CollapsibleContent>
+                        </Collapsible>
                     </Card>
-
                 </VueDraggable>
 
+
+
+
+                <Pagination class="self-end my-4" v-slot="{ page }" :items-per-page="10" :total="30" :default-page="2">
+                    <PaginationContent v-slot="{ items }">
+                        <PaginationPrevious />
+
+                        <template v-for="(item, index) in items" :key="index">
+                            <PaginationItem v-if="item.type === 'page'" :value="item.value"
+                                :is-active="item.value === page">
+                                {{ item.value }}
+                            </PaginationItem>
+                        </template>
+
+                        <PaginationEllipsis :index="4" />
+
+                        <PaginationNext />
+                    </PaginationContent>
+                </Pagination>
+
             </div>
+
+            <div class="md:col-span-4 0">
+
+                <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
+                    <div class="my-3 mx-auto font-bold text-lg">Объекты</div>
+
+
+                    <VueDraggable v-for="rent in local_rents" :key="rent.id" v-model="rent.locks" group="main"
+                        emptyInsertThreshold="0" :target="'.tg' + rent.id" @add="onAdd(rent.id, $event)">
+
+
+
+                        <Card class="relative my-2">
+                            <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
+                            }}</span>
+                            <CardHeader class="px-2">
+                                <CardTitle class=""> {{ rent.name }}
+
+                                </CardTitle>
+                                <CardDescription>
+                                    {{ rent.description }}
+                                </CardDescription>
+                                <CardAction class="flex gap-3 ">
+                                    <Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
+                                        <Pencil />
+                                    </Button>
+                                    <Button variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
+                                        <CircleX />
+                                    </Button>
+                                </CardAction>
+                            </CardHeader>
+                            <CardContent class="">
+
+                                <div :class="'tg' + rent.id" class="w-full min-h-[60px]">
+
+
+                                    <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in rent.locks"
+                                        :key="lock.id">
+                                        <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
+
+                                        <Collapsible>
+
+                                            <CardHeader class=" flex items-center justify-between">
+
+                                                <CollapsibleTrigger class="flex   ">
+                                                    <ChevronsUpDown
+                                                        class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
+                                                    <CardTitle class="flex items-center">{{ lock.lock_alias }}
+                                                    </CardTitle>
+                                                </CollapsibleTrigger>
+                                                <CardAction>
+
+                                                </CardAction>
+                                            </CardHeader>
+                                            <CollapsibleContent>
+                                                <CardContent>
+
+
+                                                    <ul class="mt-3">
+                                                        <li
+                                                            class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                            Имя<span>{{ lock.lock_name }}</span>
+                                                        </li>
+                                                        <li
+                                                            class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                            Мастер ключ<span>{{ lock.no_key_pwd }}</span>
+                                                        </li>
+                                                        <li
+                                                            class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                            TTlock Id<span>{{ lock.lock_id }}</span>
+                                                        </li>
+
+                                                        <li
+                                                            class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                            Заряд батареи
+
+                                                            <TooltipProvider>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger as-child>
+                                                                        <Progress :model-value="lock.electric_quantity"
+                                                                            class="w-[30%]" />
+
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <span>{{ lock.electric_quantity }}%</span>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                        </li>
+                                                    </ul>
+                                                </CardContent>
+                                            </CollapsibleContent>
+                                        </Collapsible>
+                                    </Card>
+
+
+
+                                    <div v-if="rent.locks.length === 0"
+                                        class="text-gray-500 text-sm flex justify-center">
+                                        <p>Нет привязанных замков</p>
+                                    </div>
+
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                    </VueDraggable>
+
+
+                </div>
+
+
+                <Pagination class="my-4 self-end" v-slot="{ page }" :items-per-page="10" :total="30" :default-page="2">
+                    <PaginationContent v-slot="{ items }">
+                        <PaginationPrevious />
+
+                        <template v-for="(item, index) in items" :key="index">
+                            <PaginationItem v-if="item.type === 'page'" :value="item.value"
+                                :is-active="item.value === page">
+                                {{ item.value }}
+                            </PaginationItem>
+                        </template>
+
+                        <PaginationEllipsis :index="4" />
+
+                        <PaginationNext />
+                    </PaginationContent>
+                </Pagination>
+
+            </div>
+
+
 
 
         </div>
@@ -587,62 +593,6 @@ const openDetachDialog = (rent, lock) => {
 
 
         <!---------------------------------------------------------------------------------------------------------->
-
-        <Dialog v-model:open="isDialogOpen">
-            <DialogContent class="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Привязать замок к {{ currentRent?.name }}</DialogTitle>
-                </DialogHeader>
-
-                <div class="py-4">
-
-
-
-                    <Popover v-model:open="open" class="">
-                        <PopoverTrigger as-child>
-                            <Button variant="outline" role="combobox" :aria-expanded="open"
-                                class="w-full justify-between">
-                                {{ selectedFreeLock?.lock_alias || "Выберите замок..." }}
-                                <ChevronsUpDownIcon class="opacity-50" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent class=" p-0">
-                            <Command>
-                                <CommandInput class="h-9" placeholder="Выбор замка..." />
-                                <CommandList>
-                                    <CommandEmpty>Свободных замков не найдено.</CommandEmpty>
-                                    <CommandGroup>
-                                        <CommandItem v-for="freelock in local_free_locks" :key="freelock.id"
-                                            :value="freelock.id" @select="(ev) => {
-                                                selectLock(ev.detail.value)
-                                            }">
-                                            {{ freelock.lock_alias }}
-                                            <CheckIcon :class="cn(
-                                                'ml-auto',
-                                                selLock === freelock.id ? 'opacity-100' : 'opacity-0',
-                                            )" />
-                                        </CommandItem>
-                                    </CommandGroup>
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-                </div>
-
-                <DialogFooter>
-                    <DialogClose as-child>
-                        <Button variant="design_outline">
-                            Отмена
-                        </Button>
-                    </DialogClose>
-                    <DialogClose as-child>
-                        <Button :disabled="!selLock" @click="attachLock()" variant="design">
-                            Привязать
-                        </Button>
-                    </DialogClose>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
 
 
 
@@ -704,50 +654,8 @@ const openDetachDialog = (rent, lock) => {
 
 
 
-        <AlertDialog v-model:open="isDetachDialogOpen">
-
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Отвязать замок {{ currentLock?.lock_alias }} от объекта {{ currentRent?.name }}?
-                    </AlertDialogTitle>
-
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Отменить</AlertDialogCancel>
-                    <AlertDialogAction :class="cn(buttonVariants({ variant: 'destructive2' }))" @click="detachLock()">
-                        Отвязать</AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
 
 
-
-
-
-
-
-
-
-
-
-        <div class="flex flex-col gap-6 mt-5">
-            <Pagination v-slot="{ page }" :items-per-page="10" :total="30" :default-page="2">
-                <PaginationContent v-slot="{ items }">
-                    <PaginationPrevious />
-
-                    <template v-for="(item, index) in items" :key="index">
-                        <PaginationItem v-if="item.type === 'page'" :value="item.value"
-                            :is-active="item.value === page">
-                            {{ item.value }}
-                        </PaginationItem>
-                    </template>
-
-                    <PaginationEllipsis :index="4" />
-
-                    <PaginationNext />
-                </PaginationContent>
-            </Pagination>
-        </div>
 
 
     </AppLayout>

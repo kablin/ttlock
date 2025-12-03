@@ -41,14 +41,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('rents/create', [\App\Http\Controllers\RentController::class, 'create'])->name('rent_create');
     Route::post('rents/delete', [\App\Http\Controllers\RentController::class, 'delete'])->name('rent_delete');
-
+    Route::post('rents/update', [\App\Http\Controllers\RentController::class, 'update'])->name('rent_update');
 
     Route::post('rents/attach_lock', [\App\Http\Controllers\RentController::class, 'attach_lock'])->name('rent_attach_lock');
     Route::post('rents/detach_lock', [\App\Http\Controllers\RentController::class, 'detach_lock'])->name('rent_detach_lock');
 
 
+
+
+    Route::post('rents/create2', [\App\Http\Controllers\RentController::class, 'create2'])->name('rent_create2');
+    Route::post('rents/delete2', [\App\Http\Controllers\RentController::class, 'delete2'])->name('rent_delete2');
+    Route::post('rents/update2', [\App\Http\Controllers\RentController::class, 'update2'])->name('rent_update2');
+
+    Route::post('rents/attach_lock2', [\App\Http\Controllers\RentController::class, 'attach_lock2'])->name('rent_attach_lock2');
+    Route::post('rents/detach_lock2', [\App\Http\Controllers\RentController::class, 'detach_lock2'])->name('rent_detach_lock2');
+
+
+
     Route::post('rents/refresh', [\App\Http\Controllers\RentController::class, 'refresh'])->name('rent_refresh');
-    Route::post('rents/update', [\App\Http\Controllers\RentController::class, 'update'])->name('rent_update');
+    
+    
 
 
 

@@ -206,7 +206,7 @@ const detachLock = () => {
 
             });
     }
-    successCreateText.value = 'Замок ' + currentLock.value.lock_alias + ' отвзязан от объекта  ' + currentRent?.value.name
+    successCreateText.value = 'Замок ' + currentLock.value.lock_alias + ' отвязан от объекта  ' + currentRent?.value.name
     return true
 }
 
@@ -267,7 +267,6 @@ const selectedFreeLock = computed(() =>
 )
 
 function selectLock(selectedValue) {
-    console.log(selectedValue)
     selLock.value = selectedValue === selLock.value ? '' : selectedValue
     open.value = false
 }
@@ -332,7 +331,7 @@ const openDetachDialog = (rent, lock) => {
                     stroke="#545F71" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            Создайте объекты в которых установлены умные замки, и привяжите замки к ним
+            Создайте объекты в которые установлены умные замки, и привяжите замки к ним
         </Badge>
 
 
