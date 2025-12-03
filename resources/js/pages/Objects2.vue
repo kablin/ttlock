@@ -130,7 +130,7 @@ const props = defineProps({
 
 watchEffect(() => {
 
-
+console.log(props.free_locks);
     local_rents.value = JSON.parse(JSON.stringify(props.rents))
     local_free_locks.value = JSON.parse(JSON.stringify(props.free_locks))
 })
@@ -145,6 +145,9 @@ const newRent = (rent, lock) => {
 
     router.post(rent_create2().url, { 'name': newObjectName.value, 'description': newObjectDescription.value },
         {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
             onFinish: () => {
                 successCreateSchow.value = true
                 successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
@@ -165,6 +168,9 @@ const saveRent = (rent, lock) => {
 
     router.post(rent_update2().url, { 'rent_id': currentRent?.value.id, 'name': currentRent?.value.name.trim(), 'description': currentRent?.value.description.trim() },
         {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
             onFinish: () => {
                 successCreateSchow.value = true
                 successCreateText.value = 'Объект ' + currentRent?.value.name + ' изменен'
@@ -182,8 +188,10 @@ const saveRent = (rent, lock) => {
 const attachLock = (rent, lock) => {
 
     router.post(rent_attach_lock2().url, { 'rent_id': rent.id, 'lock_id': lock.id },
-
         {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
             onFinish: () => {
                 successCreateSchow.value = true
                 successCreateText.value = 'Замок ' + lock.lock_alias + ' привязан к объекту ' + rent.name
@@ -204,8 +212,10 @@ const attachLock = (rent, lock) => {
 const detachLock = (lock) => {
 
     router.post(rent_detach_lock2().url, { 'lock_id': lock.id },
-
         {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
             onFinish: () => {
                 successCreateSchow.value = true
                 successCreateText.value = 'Замок ' + lock.lock_alias + ' отвязан от объекта  '
@@ -231,6 +241,9 @@ const deleteRent = (rent, lock) => {
 
     router.post(rent_delete2().url, { 'rent_id': currentRent?.value.id },
         {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
             onFinish: () => {
                 successCreateSchow.value = true
                 successCreateText.value = 'Объект ' + currentRent?.value.name + ' удален'
