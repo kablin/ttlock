@@ -197,7 +197,7 @@ const attachLock = () => {
 
 const detachLock = () => {
     if (currentLock.value) {
-        router.post(rent_detach_lock().url, { 'lock_id': lock.id },
+        router.post(rent_detach_lock().url, { 'lock_id': currentLock.value.id },
             {
                 preserveScroll: true,
                 preserveState: true,
