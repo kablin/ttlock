@@ -1,6 +1,6 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { objects, rent_create, rent_update, rent_refresh, rent_delete, rent_attach_lock, rent_detach_lock } from '@/routes';
+import { objects, rent_create, rent_update, rent_delete, rent_attach_lock, rent_detach_lock } from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { VueDraggable } from 'vue-draggable-plus'
 import { Textarea } from '@/components/ui/textarea'
-import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown,ChevronsUpDownIcon } from 'lucide-vue-next'
-import axios from 'axios';
+import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown, ChevronsUpDownIcon } from 'lucide-vue-next'
+import { router } from '@inertiajs/vue3'
 
 import {
     Tooltip,
@@ -120,52 +120,51 @@ const breadcrumbs = [
 
 
 
-onMounted(() => {
-    local_rents.value = props.rents
-    local_free_locks.value = props.free_locks
-
-})
-
-
-
 const newRent = () => {
 
     if (newObjectName.value.trim()) {
-        axios.post(rent_create().url, { 'name': newObjectName.value, 'description': newObjectDescription.value }).then((response) => {
-            refresh()
-            successCreateSchow.value = true
-        })
-            .catch((error) => {
-                console.log(error);
+        router.post(rent_create().url, { 'name': newObjectName.value, 'description': newObjectDescription.value },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                history: false,
+                onFinish: () => {
+                    successCreateSchow.value = true
+                    successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
+                },
+                onError: (errors) => {
+                    console.log('Validation errors:', errors)
+                }
+            }
 
-            })
-            .finally(() => {
-
-            });
+        );
     }
-    successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
-    newObjectName.value = '';
-    newObjectDescription.value = '';
     return true
+
+
+
+
+
 }
 
 
 const saveRent = () => {
 
-    if (currentRent?.value.name.trim()) {
-        axios.post(rent_update().url, { 'rent_id': currentRent?.value.id, 'name': currentRent?.value.name.trim(), 'description': currentRent?.value.description.trim() }).then((response) => {
-            successCreateSchow.value = true
-            refresh()
-        })
-            .catch((error) => {
-                console.log(error);
+    router.post(rent_update().url, { 'rent_id': currentRent?.value.id, 'name': currentRent?.value.name.trim(), 'description': currentRent?.value.description.trim() },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Объект ' + currentRent?.value.name + ' изменен'
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
 
-            })
-            .finally(() => {
-
-            });
-    }
-    successCreateText.value = 'Объект ' + currentRent?.value.name + ' изменен'
+    )
     return true
 }
 
@@ -173,20 +172,24 @@ const saveRent = () => {
 const attachLock = () => {
 
     if (selLock.value) {
-        axios.post(rent_attach_lock().url, { 'rent_id': currentRent?.value.id, 'lock_id': selLock.value }).then((response) => {
-            successCreateSchow.value = true
-            selLock.value = null
-            refresh()
-        })
-            .catch((error) => {
-                console.log(error);
+        router.post(rent_attach_lock().url, { 'rent_id': currentRent?.value.id, 'lock_id': selLock.value },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                history: false,
+                onFinish: () => {
+                    successCreateSchow.value = true
+                    successCreateText.value = 'Замок ' + selectedFreeLock?.lock_alias + ' привязан к объекту  ' + currentRent?.value.name
+                },
+                onError: (errors) => {
+                    console.log('Validation errors:', errors)
+                }
+            }
 
-            })
-            .finally(() => {
 
-            });
+        );
     }
-    successCreateText.value = 'Замок ' + selectedFreeLock?.lock_alias + ' привязан к объекту  ' + currentRent?.value.name
+
     return true
 }
 
@@ -194,76 +197,60 @@ const attachLock = () => {
 
 const detachLock = () => {
     if (currentLock.value) {
-        axios.post(rent_detach_lock().url, { 'rent_id': currentRent?.value.id, 'lock_id': currentLock.value.id }).then((response) => {
-            successCreateSchow.value = true
-            refresh()
-        })
-            .catch((error) => {
-                console.log(error);
+        router.post(rent_detach_lock().url, { 'lock_id': lock.id },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                history: false,
+                onFinish: () => {
+                    successCreateSchow.value = true
+                    successCreateText.value = 'Замок ' + currentLock.value.lock_alias + ' отвязан от объекта  ' + currentRent?.value.name
+                },
+                onError: (errors) => {
+                    console.log('Validation errors:', errors)
+                }
+            }
 
-            })
-            .finally(() => {
-
-            });
+        )
     }
-    successCreateText.value = 'Замок ' + currentLock.value.lock_alias + ' отвязан от объекта  ' + currentRent?.value.name
     return true
 }
-
-
-
 
 
 
 const deleteRent = () => {
 
     if (currentRent?.value) {
-        axios.post(rent_delete().url, { 'rent_id': currentRent?.value.id }).then((response) => {
-            successCreateSchow.value = true
-            refresh()
-        })
-            .catch((error) => {
-                console.log(error);
+        router.post(rent_delete().url, { 'rent_id': currentRent?.value.id },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                history: false,
+                onFinish: () => {
+                    successCreateSchow.value = true
+                    successCreateText.value = 'Объект ' + currentRent?.value.name + ' удален'
+                },
+                onError: (errors) => {
+                    console.log('Validation errors:', errors)
+                }
+            }
 
-            })
-            .finally(() => {
-
-            });
+        );
     }
-    successCreateText.value = 'Объект ' + currentRent?.value.name + ' удален'
     return true
 }
 
 
-const refresh = () => {
-
-    axios.post(rent_refresh().url, {}).then((response) => {
-
-        local_rents.value = response.data.rents
-        local_free_locks.value = response.data.free_locks
-    })
-        .catch((error) => {
-            console.log(error);
-
-        })
-        .finally(() => {
-
-        });
-
-
-}
 
 
 
-const local_rents = ref()
-const local_free_locks = ref()
 
 
 const open = ref(false)
 const selLock = ref()
 
 const selectedFreeLock = computed(() =>
-    local_free_locks.value.find(freelock => freelock.id === selLock.value),
+    props.free_locks.find(freelock => freelock.id === selLock.value),
 )
 
 function selectLock(selectedValue) {
@@ -395,7 +382,7 @@ const openDetachDialog = (rent, lock) => {
 
 
         <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mx-3">
-            <Card v-for="rent in local_rents" :key="rent.id" class="relative">
+            <Card v-for="rent in rents" :key="rent.id" class="relative">
                 <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
                     }}</span>
                 <CardHeader class="px-2">
@@ -410,10 +397,10 @@ const openDetachDialog = (rent, lock) => {
                     <CardAction class="flex flex-col md:flex-row gap-3 ">
 
 
-                        <Button  class="order-last md:order-first" variant="design" @click="openAssignDialog(rent)">
+                        <Button class="order-last md:order-first" variant="design" @click="openAssignDialog(rent)">
                             Привязать замок
                         </Button>
-                        <Button  class="self-end" variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
+                        <Button class="self-end" variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
                             <CircleX />
                         </Button>
                     </CardAction>
@@ -464,9 +451,9 @@ const openDetachDialog = (rent, lock) => {
                                             <TooltipProvider>
                                                 <Tooltip>
                                                     <TooltipTrigger as-child>
-                                                        <Progress :model-value="lock.electric_quantity" class="w-[30%]"
-                                                             />
-                                                             <!--
+                                                        <Progress :model-value="lock.electric_quantity"
+                                                            class="w-[30%]" />
+                                                        <!--
                                                              :class="{
                                                                 'bg-green-500': lock.electric_quantity >= 70,
                                                                 'bg-yellow-500': lock.electric_quantity >= 30 && lock.electric_quantity < 70,
@@ -527,7 +514,7 @@ const openDetachDialog = (rent, lock) => {
                                 <CommandList>
                                     <CommandEmpty>Свободных замков не найдено.</CommandEmpty>
                                     <CommandGroup>
-                                        <CommandItem v-for="freelock in local_free_locks" :key="freelock.id"
+                                        <CommandItem v-for="freelock in free_locks" :key="freelock.id"
                                             :value="freelock.id" @select="(ev) => {
                                                 selectLock(ev.detail.value)
                                             }">

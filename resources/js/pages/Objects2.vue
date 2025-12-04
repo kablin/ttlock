@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown, ChevronsUpDownIcon } from 'lucide-vue-next'
-import axios from 'axios';
+
 
 
 import {
@@ -107,11 +107,11 @@ const breadcrumbs = [
 
 
 
-
+/*
 const local_rents = ref([])
 const local_free_locks = ref([])
 
-
+*/
 
 
 const props = defineProps({
@@ -126,7 +126,7 @@ const props = defineProps({
 
 
 
-
+/*
 watchEffect(() => {
 
     console.log(props.free_locks);
@@ -134,36 +134,38 @@ watchEffect(() => {
     local_free_locks.value = JSON.parse(JSON.stringify(props.free_locks))
 })
 
+*/
 
 
 
 
 
+const newRent = () => {
+    if (newObjectName.value.trim()) {
 
-const newRent = (rent, lock) => {
-
-    router.post(rent_create2().url, { 'name': newObjectName.value, 'description': newObjectDescription.value },
-        {
-            preserveScroll: true,
-            preserveState: true,
-            history: false,
-            onFinish: () => {
-                successCreateSchow.value = true
-                successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
-            },
-            onError: (errors) => {
-                console.log('Validation errors:', errors)
+        router.post(rent_create2().url, { 'name': newObjectName.value, 'description': newObjectDescription.value },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                history: false,
+                onFinish: () => {
+                    successCreateSchow.value = true
+                    successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
+                },
+                onError: (errors) => {
+                    console.log('Validation errors:', errors)
+                }
             }
-        }
 
-    );
+        );
+    }
     return true
 }
 
 
 
 
-const saveRent = (rent, lock) => {
+const saveRent = () => {
 
     router.post(rent_update2().url, { 'rent_id': currentRent?.value.id, 'name': currentRent?.value.name.trim(), 'description': currentRent?.value.description.trim() },
         {
@@ -390,16 +392,16 @@ function onDragEnd() {
                 class="  md:col-span-2 min-h-[50px] border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
                 <div class="my-3 font-bold mx-auto text-lg">Свободные замки</div>
 
-                <div @dragover.prevent @drop="onFree()"  :class="{'bg-green-200': isDrag == true, }"
+                <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
                     class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
 
-                    <div v-if="local_free_locks && local_free_locks.length === 0"
-                        class="text-gray-500 text-sm flex justify-center">
+                    <div v-if="free_locks && free_locks.length === 0" class="text-gray-500 text-sm flex justify-center">
                         <p>Нет свободных замков</p>
                     </div>
 
-                    <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1" v-for="lock in local_free_locks" :key="lock.id"
-                        draggable="true" @dragstart="onDragStart(lock)"  @dragend="onDragEnd()" >
+                    <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1"
+                        v-for="lock in free_locks" :key="lock.id" draggable="true" @dragstart="onDragStart(lock)"
+                        @dragend="onDragEnd()">
                         <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
 
                         <Collapsible>
@@ -476,7 +478,7 @@ function onDragEnd() {
                 <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
                     <div class="my-3 mx-auto font-bold text-lg">Объекты</div>
 
-                    <div v-for="rent in local_rents" :key="rent.id">
+                    <div v-for="rent in rents" :key="rent.id">
 
 
 
@@ -484,7 +486,7 @@ function onDragEnd() {
 
                         <Card class="relative my-2 pt-6 pb-0">
                             <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                            }}</span>
+                                }}</span>
                             <CardHeader class="px-2">
                                 <CardTitle class=""> {{ rent.name }}
 
@@ -502,15 +504,15 @@ function onDragEnd() {
                                 </CardAction>
                             </CardHeader>
                             <CardContent class="tg-zone min-h-[80px]" @dragover.prevent @drop="onAdd(rent)"
-                            
-                            :class="{'bg-green-200': isDrag == true, }"  >
+                                :class="{ 'bg-green-200': isDrag == true, }">
 
 
 
-                                <Card class="w-full cursor-pointer relative gap-2 my-1 py-3 border-green-300 border-1" v-for="lock in rent.locks" :key="lock.id"
-                                    draggable="true" @dragstart="onDragStart(lock)"  @dragend="onDragEnd()" >
+                                <Card class="w-full cursor-pointer relative gap-2 my-1 py-3 border-green-300 border-1"
+                                    v-for="lock in rent.locks" :key="lock.id" draggable="true"
+                                    @dragstart="onDragStart(lock)" @dragend="onDragEnd()">
                                     <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id
-                                    }}</span>
+                                        }}</span>
 
                                     <Collapsible>
 
@@ -519,7 +521,8 @@ function onDragEnd() {
                                             <CollapsibleTrigger class="flex   ">
                                                 <ChevronsUpDown
                                                     class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
-                                                <CardTitle class="flex cursor-pointer items-center">{{ lock.lock_alias }}
+                                                <CardTitle class="flex cursor-pointer items-center">{{ lock.lock_alias
+                                                    }}
                                                 </CardTitle>
                                             </CollapsibleTrigger>
                                             <CardAction>
