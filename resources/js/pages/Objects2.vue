@@ -300,6 +300,12 @@ function onAdd(rent) {
 }
 
 
+function onDragEnd() {
+    isDrag.value = false
+
+}
+
+
 </script>
 
 <template>
@@ -392,8 +398,8 @@ function onAdd(rent) {
                         <p>Нет свободных замков</p>
                     </div>
 
-                    <Card class="w-full cursor-pointer relative gap-2 my-1 py-3" v-for="lock in local_free_locks" :key="lock.id"
-                        draggable="true" @dragstart="onDragStart(lock)" >
+                    <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1" v-for="lock in local_free_locks" :key="lock.id"
+                        draggable="true" @dragstart="onDragStart(lock)"  @dragend="onDragEnd()" >
                         <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
 
                         <Collapsible>
@@ -501,19 +507,19 @@ function onAdd(rent) {
 
 
 
-                                <Card class="w-full cursor-pointer relative gap-2 my-1 py-3" v-for="lock in rent.locks" :key="lock.id"
-                                    draggable="true" @dragstart="onDragStart(lock)">
+                                <Card class="w-full cursor-pointer relative gap-2 my-1 py-3 border-green-300 border-1" v-for="lock in rent.locks" :key="lock.id"
+                                    draggable="true" @dragstart="onDragStart(lock)"  @dragend="onDragEnd()" >
                                     <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id
                                     }}</span>
 
                                     <Collapsible>
 
-                                        <CardHeader class=" flex items-center justify-between">
+                                        <CardHeader class=" flex cursor-pointer items-center justify-between">
 
                                             <CollapsibleTrigger class="flex   ">
                                                 <ChevronsUpDown
                                                     class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
-                                                <CardTitle class="flex items-center">{{ lock.lock_alias }}
+                                                <CardTitle class="flex cursor-pointer items-center">{{ lock.lock_alias }}
                                                 </CardTitle>
                                             </CollapsibleTrigger>
                                             <CardAction>
