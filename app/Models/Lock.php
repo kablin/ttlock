@@ -15,6 +15,7 @@ use App\Traits\OptionValueTrait;
 use App\Models\LockEvent;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Lock extends Model
 {
@@ -34,9 +35,9 @@ class Lock extends Model
     }
 */
 
-    public function rent()
+    public function rents()
     {
-        return $this->belongsTo(Rent::class);
+        return $this->belongsToMany(Rent::class);
     }
 
 

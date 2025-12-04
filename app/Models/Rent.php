@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Rent extends Model
 {
@@ -30,7 +31,7 @@ class Rent extends Model
 
     public function locks()
     {
-        return $this->hasMany(Lock::class);
+        return $this->belongsToMany(Lock::class);
     }
 
     public function children()

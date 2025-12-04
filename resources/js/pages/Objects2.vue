@@ -1,6 +1,6 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { objects, rent_create2, rent_update2, rent_delete2, rent_attach_lock2, rent_detach_lock2 } from '@/routes';
+import { objects, rent_create2, rent_update2, rent_delete2, rent_attach_lock2, rent_detach_lock2 , rent_dattach_lock2} from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
@@ -209,17 +209,40 @@ const attachLock = (rent, lock) => {
 }
 
 
+const dattachLock = (rent, lock, rent2) => {
 
-const detachLock = (lock) => {
-
-    router.post(rent_detach_lock2().url, { 'lock_id': lock.id },
+    router.post(rent_dattach_lock2().url, { 'rent_id': rent.id, 'lock_id': lock.id,'drent_id': rent2.id,  },
         {
             preserveScroll: true,
             preserveState: true,
             history: false,
             onFinish: () => {
                 successCreateSchow.value = true
-                successCreateText.value = 'Замок ' + lock.lock_alias + ' отвязан от объекта  '
+                successCreateText.value = 'Замок ' + lock.lock_alias + ' привязан к объекту ' + rent.name
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+
+    );
+
+    return true
+}
+
+
+
+const detachLock = (lock,rent) => {
+
+    router.post(rent_detach_lock2().url, {  'rent_id': rent.id, 'lock_id': lock.id },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Замок ' + lock.lock_alias + ' отвязан от объекта  ' + rent.name
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -280,6 +303,7 @@ const openDeleteDialog = (rent) => {
 
 
 const dragItem = ref()
+const dragRromRent = ref()
 const isDrag = ref(false)
 
 function onDragStart(item) {
@@ -289,21 +313,37 @@ function onDragStart(item) {
 }
 
 
+function onDragStart2(item,rent) {
+    dragItem.value = item
+    dragRromRent.value = rent
+    isDrag.value = true
+
+}
+
+
+
 function onFree() {
     isDrag.value = false
-    detachLock(dragItem.value)
+    detachLock(dragItem.value,dragRromRent.value)
+    dragRromRent.value =null
 }
 
 
 function onAdd(rent) {
     isDrag.value = false
-    attachLock(rent, dragItem.value)
+    if (dragRromRent.value)
+        dattachLock(rent, dragItem.value,dragRromRent.value)
+
+    else attachLock(rent, dragItem.value)
+
+   dragRromRent.value =null
 
 }
 
 
 function onDragEnd() {
     isDrag.value = false
+     dragRromRent.value =null
 
 }
 
@@ -325,7 +365,7 @@ function onDragEnd() {
                     stroke="#545F71" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            Создайте объекты в которые установлены умные замки, и привяжите замки к ним, перетаскивая их мышкой.
+            Привязка замков к объектам
         </Badge>
 
 
@@ -337,7 +377,7 @@ function onDragEnd() {
 
             </Alert>
         </div>
-        <div class="flex  mx-10  mb-6">
+        <!--div class="flex  mx-10  mb-6">
             <Dialog>
 
                 <DialogTrigger as-child>
@@ -379,7 +419,7 @@ function onDragEnd() {
                 </DialogContent>
 
             </Dialog>
-        </div>
+        </div-->
 
 
 
@@ -390,7 +430,7 @@ function onDragEnd() {
 
             <div
                 class="  md:col-span-2 min-h-[50px] border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
-                <div class="my-3 font-bold mx-auto text-lg">Свободные замки</div>
+                <div class="my-3 font-bold mx-auto text-lg">Замки</div>
 
                 <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
                     class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
@@ -484,9 +524,9 @@ function onDragEnd() {
 
 
 
-                        <Card class="relative my-2 pt-6 pb-0">
+                        <Card class="relative my-2 pt-6 pb-2">
                             <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                                }}</span>
+                            }}</span>
                             <CardHeader class="px-2">
                                 <CardTitle class=""> {{ rent.name }}
 
@@ -495,24 +535,24 @@ function onDragEnd() {
                                     {{ rent.description }}
                                 </CardDescription>
                                 <CardAction class="flex gap-3 ">
-                                    <Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
+                                    <!--Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
                                         <Pencil />
                                     </Button>
                                     <Button variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
                                         <CircleX />
-                                    </Button>
+                                    </Button-->
                                 </CardAction>
                             </CardHeader>
-                            <CardContent class="tg-zone min-h-[80px]" @dragover.prevent @drop="onAdd(rent)"
+                            <CardContent class=" min-h-[80px]" @dragover.prevent @drop="onAdd(rent)"
                                 :class="{ 'bg-green-200': isDrag == true, }">
 
 
 
                                 <Card class="w-full cursor-pointer relative gap-2 my-1 py-3 border-green-300 border-1"
                                     v-for="lock in rent.locks" :key="lock.id" draggable="true"
-                                    @dragstart="onDragStart(lock)" @dragend="onDragEnd()">
+                                    @dragstart="onDragStart2(lock,rent)" @dragend="onDragEnd()">
                                     <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id
-                                        }}</span>
+                                    }}</span>
 
                                     <Collapsible>
 
@@ -522,7 +562,7 @@ function onDragEnd() {
                                                 <ChevronsUpDown
                                                     class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
                                                 <CardTitle class="flex cursor-pointer items-center">{{ lock.lock_alias
-                                                    }}
+                                                }}
                                                 </CardTitle>
                                             </CollapsibleTrigger>
                                             <CardAction>

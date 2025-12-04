@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('rents/update2', [\App\Http\Controllers\RentController::class, 'update2'])->name('rent_update2');
 
     Route::post('rents/attach_lock2', [\App\Http\Controllers\RentController::class, 'attach_lock2'])->name('rent_attach_lock2');
+    Route::post('rents/dattach_lock2', [\App\Http\Controllers\RentController::class, 'dattach_lock2'])->name('rent_dattach_lock2');
     Route::post('rents/detach_lock2', [\App\Http\Controllers\RentController::class, 'detach_lock2'])->name('rent_detach_lock2');
 
 

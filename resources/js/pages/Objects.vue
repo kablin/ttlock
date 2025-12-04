@@ -197,7 +197,7 @@ const attachLock = () => {
 
 const detachLock = () => {
     if (currentLock.value) {
-        router.post(rent_detach_lock().url, { 'lock_id': currentLock.value.id },
+        router.post(rent_detach_lock().url, { 'lock_id': currentLock.value.id, 'rent_id': currentRent.value.id },
             {
                 preserveScroll: true,
                 preserveState: true,
@@ -317,20 +317,19 @@ const openDetachDialog = (rent, lock) => {
                     d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
                     stroke="#545F71" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-
-            Создайте объекты в которые установлены умные замки, и привяжите замки к ним
+                 Привязка замков к объектам
         </Badge>
 
 
 
-        <div class="grid   items-start gap-4 mx-10">
+        <div class="grid mb-5  items-start gap-4 mx-10">
             <Alert v-if="successCreateSchow" @click="successCreateSchow = false">
                 <CheckCircle2Icon :size="16" />
                 <AlertTitle class="text-green-500">{{ successCreateText }}</AlertTitle>
 
             </Alert>
         </div>
-        <div class="flex  m-10 ">
+        <!--div class="flex  m-10 ">
             <Dialog>
 
                 <DialogTrigger as-child>
@@ -372,7 +371,7 @@ const openDetachDialog = (rent, lock) => {
                 </DialogContent>
 
             </Dialog>
-        </div>
+        </div-->
 
 
 
@@ -387,9 +386,9 @@ const openDetachDialog = (rent, lock) => {
                     }}</span>
                 <CardHeader class="px-2">
                     <CardTitle class=""> {{ rent.name }}
-                        <Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
+                        <!--Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
                             <Pencil />
-                        </Button>
+                        </Button-->
                     </CardTitle>
                     <CardDescription>
                         {{ rent.description }}
@@ -400,9 +399,9 @@ const openDetachDialog = (rent, lock) => {
                         <Button class="order-last md:order-first" variant="design" @click="openAssignDialog(rent)">
                             Привязать замок
                         </Button>
-                        <Button class="self-end" variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
+                        <!--Button class="self-end" variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
                             <CircleX />
-                        </Button>
+                        </Button-->
                     </CardAction>
                 </CardHeader>
                 <CardContent>
@@ -410,7 +409,7 @@ const openDetachDialog = (rent, lock) => {
 
 
 
-                    <Card class="w-full  relative gap-2 my-1 py-3" v-for="lock in rent.locks" :key="lock.id">
+                    <Card class="w-full  relative gap-2 my-1 py-3 border-1 border-green-300" v-for="lock in rent.locks" :key="lock.id">
                         <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
 
                         <Collapsible>
