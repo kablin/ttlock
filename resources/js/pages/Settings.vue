@@ -112,7 +112,7 @@ const saveTtlockCredential = async () => {
                         <div class="flex">
                             <Input :type="showPassword ? 'text' : 'password'" class="" 
                                 placeholder="пароль" v-model="credential_password" />
-                            <Button @click="togglePassword">
+                            <Button @click="togglePassword" variant="design">
                                 <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12" stroke="#ffffff" stroke-width="2"

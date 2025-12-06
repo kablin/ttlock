@@ -13,7 +13,7 @@ import { Link } from '@inertiajs/vue3';
 
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Profile',
+        title: 'Профиль',
         href: editProfile(),
     },
     {
@@ -21,17 +21,17 @@ const sidebarNavItems: NavItem[] = [
         href: settings(),
     },
     {
-        title: 'Password',
+        title: 'Пароль',
         href: editPassword(),
     },
   /*  {
         title: 'Two-Factor Auth',
         href: show(),
     },*/
-    {
-        title: 'Appearance',
+    /*{
+        title: 'Внешний вид',
         href: editAppearance(),
-    },
+    },*/
 ];
 
 const currentPath = typeof window !== undefined ? window.location.pathname : '';
@@ -39,7 +39,7 @@ const currentPath = typeof window !== undefined ? window.location.pathname : '';
 
 <template>
     <div class="px-4 py-6">
-        <Heading title="Settings" description="Manage your profile and account settings" />
+        <Heading title="Настройки" description="Управляйте своим профилем и настройками учетной записи" />
 
         <div class="flex flex-col lg:flex-row lg:space-x-12">
             <aside class="w-full max-w-xl lg:w-48">
