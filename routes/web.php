@@ -59,9 +59,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-    Route::post('rents/refresh', [\App\Http\Controllers\RentController::class, 'refresh'])->name('rent_refresh');
-    
-    
+
+    Route::post('rents/page', [\App\Http\Controllers\RentController::class, 'page'])->name('rent_rent_page');
+
+
+
+
+    //gropups
+
+    Route::get('/groups', [\App\Http\Controllers\GroupController::class, 'index'])->name('groups');
+
+    Route::post('groups/create', [\App\Http\Controllers\GroupController::class, 'create'])->name('group_create');
+    Route::post('groups/delete', [\App\Http\Controllers\GroupController::class, 'delete'])->name('group_delete');
+    Route::post('groups/update', [\App\Http\Controllers\GroupController::class, 'update'])->name('group_update');
+
+    Route::post('groups/attach_lock', [\App\Http\Controllers\GroupController::class, 'attach_lock'])->name('group_attach_lock');
+    Route::post('groups/detach_lock', [\App\Http\Controllers\GroupController::class, 'detach_lock'])->name('group_detach_lock');
+    Route::post('groups/dattach_lock', [\App\Http\Controllers\GroupController::class, 'dattach_lock'])->name('group_dattach_lock');
+
+
+
 
 
 

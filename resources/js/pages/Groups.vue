@@ -1,6 +1,6 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { objects, rent_create2, rent_update2, rent_delete2, rent_attach_lock2, rent_detach_lock2, rent_dattach_lock2, rent_rent_page } from '@/routes';
+import { groups, group_create, group_delete, group_update, group_attach_lock, group_detach_lock , group_dattach_lock} from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,6 @@ import {
     PaginationItem,
     PaginationNext,
     PaginationPrevious,
-
 } from '@/components/ui/pagination'
 
 
@@ -96,23 +95,17 @@ const successCreateText = ref('')
 const isChangeDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
 
-const currentRent = ref(null)
+const currentGroup = ref(null)
 
 
 const breadcrumbs = [
     {
-        title: 'Мои объекты',
-        href: objects().url,
+        title: 'Мои группы',
+        href: groups().url,
     },
 ];
 
 
-
-/*
-const local_rents = ref([])
-const local_free_locks = ref([])
-
-*/
 
 
 const props = defineProps({
@@ -120,6 +113,9 @@ const props = defineProps({
         type: Object
     },
     free_locks: {
+        type: Object
+    },
+    groups_list: {
         type: Object
     },
 
@@ -130,18 +126,19 @@ const props = defineProps({
 
 
 
-
-const newRent = () => {
+const newGroup = () => {
     if (newObjectName.value.trim()) {
 
-        router.post(rent_create2().url, { 'name': newObjectName.value, 'description': newObjectDescription.value },
+        router.post(group_create().url, { 'name': newObjectName.value, 'description': newObjectDescription.value },
             {
                 preserveScroll: true,
                 preserveState: true,
                 history: false,
                 onFinish: () => {
                     successCreateSchow.value = true
-                    successCreateText.value = 'Объект ' + newObjectName.value + ' создан'
+                    successCreateText.value = 'Группа ' + newObjectName.value + ' создана'
+                    newObjectName.value = ''
+                    newObjectDescription.value = ''
                 },
                 onError: (errors) => {
                     console.log('Validation errors:', errors)
@@ -156,16 +153,16 @@ const newRent = () => {
 
 
 
-const saveRent = () => {
+const saveGroup = () => {
 
-    router.post(rent_update2().url, { 'rent_id': currentRent?.value.id, 'name': currentRent?.value.name.trim(), 'description': currentRent?.value.description.trim() },
+    router.post(group_update().url, { 'group_id': currentGroup?.value.id, 'name': currentGroup?.value.name.trim(), 'description': currentGroup?.value.description.trim() },
         {
             preserveScroll: true,
             preserveState: true,
             history: false,
             onFinish: () => {
                 successCreateSchow.value = true
-                successCreateText.value = 'Объект ' + currentRent?.value.name + ' изменен'
+                successCreateText.value = 'Группа ' + currentGroup?.value.name + ' изменена'
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -177,56 +174,16 @@ const saveRent = () => {
 }
 
 
+const attachLock = (group, lock) => {
 
-
-
-
-const goToPage = (page) => {
-
-    router.post(rent_rent_page().url, { 'rent_page': page, 'lock_page': props.free_locks.current_page },
-        {
-            preserveScroll: true,
-            preserveState: true,
-            history: false,
-            onFinish: () => {
-            },
-            onError: (errors) => {
-                console.log('Validation errors:', errors)
-            }
-        }
-    );
-    return true
-}
-
-const goToLockPage = (page) => {
-
-    router.post(rent_rent_page().url, { 'rent_page': props.rents.current_page, 'lock_page': page },
-        {
-            preserveScroll: true,
-            preserveState: true,
-            history: false,
-            onFinish: () => {
-            },
-            onError: (errors) => {
-                console.log('Validation errors:', errors)
-            }
-        }
-    );
-    return true
-}
-
-
-
-const attachLock = (rent, lock) => {
-
-    router.post(rent_attach_lock2().url, {'lock_page': props.free_locks.current_page , 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
+    router.post(group_attach_lock().url, { 'group_id': group.id, 'lock_id': lock.id },
         {
             preserveScroll: true,
             preserveState: true,
             history: false,
             onFinish: () => {
                 successCreateSchow.value = true
-                successCreateText.value = 'Замок ' + lock.lock_alias + ' привязан к объекту ' + rent.name
+                successCreateText.value = 'Замок ' + lock.lock_alias + ' привязан к группе ' + group.name
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -240,25 +197,16 @@ const attachLock = (rent, lock) => {
 }
 
 
+const dattachLock = (group, lock, group2) => {
 
-
-
-
-
-
-
-
-
-const dattachLock = (rent, lock, rent2) => {
-
-    router.post(rent_dattach_lock2().url, {'lock_page': props.free_locks.current_page , 'rent_page': props.rents.current_page,  'rent_id': rent.id, 'lock_id': lock.id, 'drent_id': rent2.id, },
+    router.post(group_dattach_lock().url, { 'group_id': group.id, 'lock_id': lock.id,'dgroup_id': group2.id,  },
         {
             preserveScroll: true,
             preserveState: true,
             history: false,
             onFinish: () => {
                 successCreateSchow.value = true
-                successCreateText.value = 'Замок ' + lock.lock_alias + ' привязан к объекту ' + rent.name
+                successCreateText.value = 'Замок ' + lock.lock_alias + ' привязан к группе ' + group.name
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -273,16 +221,16 @@ const dattachLock = (rent, lock, rent2) => {
 
 
 
-const detachLock = (lock, rent) => {
+const detachLock = (lock,group) => {
 
-    router.post(rent_detach_lock2().url, { 'lock_page': props.free_locks.current_page , 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
+    router.post(group_detach_lock().url, {  'group_id': group.id, 'lock_id': lock.id },
         {
             preserveScroll: true,
             preserveState: true,
             history: false,
             onFinish: () => {
                 successCreateSchow.value = true
-                successCreateText.value = 'Замок ' + lock.lock_alias + ' отвязан от объекта  ' + rent.name
+                successCreateText.value = 'Замок ' + lock.lock_alias + ' отвязан от группы  ' + group.name
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -301,16 +249,16 @@ const detachLock = (lock, rent) => {
 
 
 
-const deleteRent = (rent, lock) => {
+const deleteGroup = () => {
 
-    router.post(rent_delete2().url, { 'rent_id': currentRent?.value.id },
+    router.post(group_delete().url, { 'group_id': currentGroup?.value.id },
         {
             preserveScroll: true,
             preserveState: true,
             history: false,
             onFinish: () => {
                 successCreateSchow.value = true
-                successCreateText.value = 'Объект ' + currentRent?.value.name + ' удален'
+                successCreateText.value = 'Группа ' + currentGroup?.value.name + ' удалена'
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -324,14 +272,14 @@ const deleteRent = (rent, lock) => {
 
 
 
-const openChangeDialog = (rent) => {
-    currentRent.value = Object.assign({}, rent)
+const openChangeDialog = (group) => {
+    currentGroup.value = Object.assign({}, group)
     isChangeDialogOpen.value = true
 };
 
 
-const openDeleteDialog = (rent) => {
-    currentRent.value = Object.assign({}, rent)
+const openDeleteDialog = (group) => {
+    currentGroup.value = Object.assign({}, group)
     isDeleteDialogOpen.value = true
 };
 
@@ -343,7 +291,7 @@ const openDeleteDialog = (rent) => {
 
 
 const dragItem = ref()
-const dragRromRent = ref()
+const dragRromGroup = ref()
 const isDrag = ref(false)
 
 function onDragStart(item) {
@@ -353,9 +301,9 @@ function onDragStart(item) {
 }
 
 
-function onDragStart2(item, rent) {
+function onDragStart2(item,group) {
     dragItem.value = item
-    dragRromRent.value = rent
+    dragRromGroup.value = group
     isDrag.value = true
 
 }
@@ -364,26 +312,26 @@ function onDragStart2(item, rent) {
 
 function onFree() {
     isDrag.value = false
-    detachLock(dragItem.value, dragRromRent.value)
-    dragRromRent.value = null
+    detachLock(dragItem.value,dragRromGroup.value)
+    dragRromGroup.value =null
 }
 
 
-function onAdd(rent) {
+function onAdd(group) {
     isDrag.value = false
-    if (dragRromRent.value)
-        dattachLock(rent, dragItem.value, dragRromRent.value)
+    if (dragRromGroup.value)
+        dattachLock(group, dragItem.value,dragRromGroup.value)
 
-    else attachLock(rent, dragItem.value)
+    else attachLock(group, dragItem.value)
 
-    dragRromRent.value = null
+   dragRromGroup.value =null
 
 }
 
 
 function onDragEnd() {
     isDrag.value = false
-    dragRromRent.value = null
+     dragRromGroup.value =null
 
 }
 
@@ -394,7 +342,7 @@ function onDragEnd() {
 
 
 
-    <Head title="Мои объекты" />
+    <Head title="Мои группы" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
 
@@ -405,7 +353,7 @@ function onDragEnd() {
                     stroke="#545F71" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            Привязка замков к объектам
+            Привязка замков и объектов к группам
         </Badge>
 
 
@@ -417,19 +365,19 @@ function onDragEnd() {
 
             </Alert>
         </div>
-        <!--div class="flex  mx-10  mb-6">
+        <div class="flex  mx-10  mb-6">
             <Dialog>
 
                 <DialogTrigger as-child>
                     <Button variant="design">
-                        Новый объект
+                        Новая группа
                     </Button>
                 </DialogTrigger>
                 <DialogContent class="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Новый объект</DialogTitle>
+                        <DialogTitle>Новая группа</DialogTitle>
                         <DialogDescription>
-                            Добавьте новый объект в котором установлены умные замки TTLock
+                            Добавьте новую группу, с которой можно связать замки и объекты
                         </DialogDescription>
                     </DialogHeader>
                     <div class="grid gap-4">
@@ -450,8 +398,8 @@ function onDragEnd() {
 
                         </DialogClose>
                         <DialogClose as-child>
-                            <Button @click="newRent()" variant="design">
-                                Добавить
+                            <Button @click="newGroup()" variant="design">
+                                Создать
                             </Button>
                         </DialogClose>
 
@@ -459,7 +407,7 @@ function onDragEnd() {
                 </DialogContent>
 
             </Dialog>
-        </div-->
+        </div>
 
 
 
@@ -475,13 +423,12 @@ function onDragEnd() {
                 <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
                     class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
 
-                    <div v-if="free_locks && free_locks.data.length === 0"
-                        class="text-gray-500 text-sm flex justify-center">
+                    <div v-if="free_locks && free_locks.length === 0" class="text-gray-500 text-sm flex justify-center">
                         <p>Нет свободных замков</p>
                     </div>
 
                     <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1"
-                        v-for="lock in free_locks.data" :key="lock.id" draggable="true" @dragstart="onDragStart(lock)"
+                        v-for="lock in free_locks" :key="lock.id" draggable="true" @dragstart="onDragStart(lock)"
                         @dragend="onDragEnd()">
                         <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
 
@@ -535,67 +482,66 @@ function onDragEnd() {
 
 
 
-                <Pagination class="my-4 self-end" v-model:page="free_locks.current_page"
-                    :items-per-page="free_locks.per_page" :total="free_locks.total"
-                    :default-page="free_locks.current_page">
-                    <PaginationContent>
-                        <template v-for="(item, index) in free_locks.links" :key="index">
-                            <PaginationPrevious v-if="index == 0" @click.prevent="goToLockPage(item.page)" />
-                            <PaginationNext v-else-if="index == (free_locks.links.length - 1)"
-                                @click.prevent="goToLockPage(item.page)" />
-                            <PaginationItem
-                                v-else-if="(free_locks.current_page - 2 <= item.page) && (free_locks.current_page + 2 >= item.page)"
-                                :value="item.page" :is-active="item.page === free_locks.current_page"
-                                @click.prevent="goToLockPage(item.page)">
-                                {{ item.page }}
+                <Pagination class="self-end my-4" v-slot="{ page }" :items-per-page="10" :total="30" :default-page="2">
+                    <PaginationContent v-slot="{ items }">
+                        <PaginationPrevious />
+
+                        <template v-for="(item, index) in items" :key="index">
+                            <PaginationItem v-if="item.type === 'page'" :value="item.value"
+                                :is-active="item.value === page">
+                                {{ item.value }}
                             </PaginationItem>
                         </template>
+
+                        <PaginationEllipsis :index="4" />
+
+                        <PaginationNext />
                     </PaginationContent>
                 </Pagination>
-
 
             </div>
 
             <div class="md:col-span-4 0">
 
                 <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
-                    <div class="my-3 mx-auto font-bold text-lg">Объекты</div>
+                    <div class="my-3 mx-auto font-bold text-lg">Группы</div>
+                   
 
-                    <div v-for="rent in rents.data" :key="rent.id">
+                    <div v-for="group in groups_list" :key="group.id">
 
 
 
 
 
                         <Card class="relative my-2 pt-6 pb-2">
-                            <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                                }}</span>
+                            <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ group.id
+                            }}</span>
                             <CardHeader class="px-2">
-                                <CardTitle class=""> {{ rent.name }}
+                                <CardTitle class=""> {{ group.name }}
 
                                 </CardTitle>
                                 <CardDescription>
-                                    {{ rent.description }}
+                                    {{ group.description }}
                                 </CardDescription>
                                 <CardAction class="flex gap-3 ">
-                                    <!--Button variant="design_outline" size="icon" @click="openChangeDialog(rent)">
+                                    <Button variant="design_outline" size="icon" @click="openChangeDialog(group)">
                                         <Pencil />
                                     </Button>
-                                    <Button variant="destructive2" size="icon" @click="openDeleteDialog(rent)">
+                                    <Button variant="destructive2" size="icon" @click="openDeleteDialog(group)">
                                         <CircleX />
-                                    </Button-->
+                                    </Button>
                                 </CardAction>
                             </CardHeader>
-                            <CardContent class=" min-h-[80px]" @dragover.prevent @drop="onAdd(rent)"
+                            <CardContent class=" min-h-[80px]" @dragover.prevent @drop="onAdd(group)"
                                 :class="{ 'bg-green-200': isDrag == true, }">
 
 
 
                                 <Card class="w-full cursor-pointer relative gap-2 my-1 py-3 border-green-300 border-1"
-                                    v-for="lock in rent.locks" :key="lock.id" draggable="true"
-                                    @dragstart="onDragStart2(lock, rent)" @dragend="onDragEnd()">
+                                    v-for="lock in group.locks" :key="lock.id" draggable="true"
+                                    @dragstart="onDragStart2(lock,group)" @dragend="onDragEnd()">
                                     <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id
-                                        }}</span>
+                                    }}</span>
 
                                     <Collapsible>
 
@@ -605,7 +551,7 @@ function onDragEnd() {
                                                 <ChevronsUpDown
                                                     class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
                                                 <CardTitle class="flex cursor-pointer items-center">{{ lock.lock_alias
-                                                    }}
+                                                }}
                                                 </CardTitle>
                                             </CollapsibleTrigger>
                                             <CardAction>
@@ -655,10 +601,10 @@ function onDragEnd() {
 
 
 
-                                <div v-if="rent.locks.length === 0"
+                                <div v-if="group.locks.length === 0"
                                     class="text-gray-500 text-sm flex my-auto items-center justify-center ">
                                     <div>
-                                        <p>Нет привязанных замков</p>
+                                        <p>Нет связей</p>
                                     </div>
 
 
@@ -669,20 +615,21 @@ function onDragEnd() {
                     </div>
 
 
-                    <Pagination class="my-4 self-end" v-model:page="rents.current_page" :items-per-page="rents.per_page"
-                        :total="rents.total" :default-page="rents.current_page">
-                        <PaginationContent>
-                            <template v-for="(item, index) in rents.links" :key="index">
-                                <PaginationPrevious v-if="index == 0" @click.prevent="goToPage(item.page)" />
-                                <PaginationNext v-else-if="index == (rents.links.length - 1)"
-                                    @click.prevent="goToPage(item.page)" />
-                                <PaginationItem
-                                    v-else-if="(rents.current_page - 2 <= item.page) && (rents.current_page + 2 >= item.page)"
-                                    :value="item.page" :is-active="item.page === rents.current_page"
-                                    @click.prevent="goToPage(item.page)">
-                                    {{ item.page }}
+                    <Pagination class="my-4 self-end" v-slot="{ page }" :items-per-page="10" :total="30"
+                        :default-page="2">
+                        <PaginationContent v-slot="{ items }">
+                            <PaginationPrevious />
+
+                            <template v-for="(item, index) in items" :key="index">
+                                <PaginationItem v-if="item.type === 'page'" :value="item.value"
+                                    :is-active="item.value === page">
+                                    {{ item.value }}
                                 </PaginationItem>
                             </template>
+
+                            <PaginationEllipsis :index="4" />
+
+                            <PaginationNext />
                         </PaginationContent>
                     </Pagination>
 
@@ -715,17 +662,17 @@ function onDragEnd() {
 
             <DialogContent class="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Изменить объект {{ currentRent?.name }}</DialogTitle>
+                    <DialogTitle>Изменить группу {{ currentGroup?.name }}</DialogTitle>
 
                 </DialogHeader>
                 <div class="grid gap-4">
                     <div class="grid gap-3">
                         <Label for="name-1">Название</Label>
-                        <Input id="name-1" name="name" v-model="currentRent.name" />
+                        <Input id="name-1" name="name" v-model="currentGroup.name" />
                     </div>
                     <div class="grid gap-3">
                         <Label for="username-1">Описание</Label>
-                        <Textarea placeholder="" v-model="currentRent.description" />
+                        <Textarea placeholder="" v-model="currentGroup.description" />
                     </div>
                 </div>
                 <DialogFooter>
@@ -736,7 +683,7 @@ function onDragEnd() {
 
                     </DialogClose>
                     <DialogClose as-child>
-                        <Button @click="saveRent()" variant="design">
+                        <Button @click="saveGroup()" variant="design">
                             Сохранить
                         </Button>
                     </DialogClose>
@@ -752,15 +699,15 @@ function onDragEnd() {
 
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Удалить объект {{ currentRent?.name }}?</AlertDialogTitle>
+                    <AlertDialogTitle>Удалить группу {{ currentGroup?.name }}?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Объект {{ currentRent?.name }} будет удален. Все связанные с ним замки можно будет привязать к
-                        другим объектам.
+                        Группа {{ currentGroup?.name }} будет удалена. Все связанные с ней замки и объекты можно будет привязать к
+                        другим группам.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Отменить</AlertDialogCancel>
-                    <AlertDialogAction :class="cn(buttonVariants({ variant: 'destructive2' }))" @click="deleteRent()">
+                    <AlertDialogAction :class="cn(buttonVariants({ variant: 'destructive2' }))" @click="deleteGroup()">
                         Удалить</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

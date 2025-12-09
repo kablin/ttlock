@@ -17,15 +17,20 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->unsignedBigInteger('user_id');
-            $table->string('groupable_type');
         });
 
-        Schema::create('groupable', function (Blueprint $table) {
+        Schema::create('groupables', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->unsignedBigInteger('group_id');
             $table->unsignedBigInteger('groupable_id');
-            
+
             $table->string('groupable_type');
+
+            $table->foreign('group_id')
+                ->references('id')
+                ->on('groups')
+                ->onDelete('cascade');
         });
     }
 
@@ -35,5 +40,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('groups');
+        Schema::dropIfExists('groupables');
     }
 };

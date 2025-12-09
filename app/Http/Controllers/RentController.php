@@ -12,6 +12,159 @@ use Illuminate\Support\Facades\Validator;
 
 class RentController extends Controller
 {
+
+
+
+
+
+  public function objects2(Request $request)
+  {
+    $rent_page = $request->input('rent_page', 1);
+
+    $lock_page = $request->input('lock_page', 1);
+
+    $rents = auth()->user()->rents()->with('locks')->orderBy('id')
+      ->paginate(6, ['*'], 'rent_page', $rent_page);
+
+    $free_locks = auth()->user()->locks()->orderBy('id')
+      ->paginate(12, ['*'], 'lock_page', $lock_page);
+    return Inertia::render('Objects2', ['rents' => $rents, 'free_locks' => $free_locks, 'success' => session('success')]);
+  }
+
+
+
+
+  public function page(Request $request)
+  {
+
+    $validator = Validator::make($request->all(), [
+      'rent_page' => 'required',
+      'lock_page' => 'required',
+
+    ]);
+    $validated = $validator->safe()->only(['rent_page', 'lock_page']);
+    return to_route('objects2', ['rent_page' => $validated['rent_page'], 'lock_page' => $validated['lock_page']])->with('success', '');
+  }
+
+
+
+
+
+
+
+  public function attach_lock2(Request $request)
+  {
+
+    $validator = Validator::make($request->all(), [
+      'rent_id' => 'required|exists:rents,id',
+      'lock_id' => 'required|exists:locks,id',
+      'rent_page' => 'required',
+      'lock_page' => 'required',
+
+    ]);
+
+    $validated = $validator->safe()->only(['rent_id', 'lock_id', 'rent_page', 'lock_page']);
+
+    if ($validator->fails()) {
+      return response()->json(['status' => false], 400);
+    }
+
+
+    $rent = Rent::find($validated['rent_id']);
+
+
+    $rent->locks()->syncWithoutDetaching([$validated['lock_id']]);
+
+
+    return to_route('objects2', ['rent_page' => $validated['rent_page'], 'lock_page' => $validated['lock_page']])->with('success', '');
+  }
+
+
+
+
+
+
+  public function dattach_lock2(Request $request)
+  {
+
+    $validator = Validator::make($request->all(), [
+      'rent_id' => 'required|exists:rents,id',
+      'drent_id' => 'required|exists:rents,id',
+      'lock_id' => 'required|exists:locks,id',
+      'rent_page' => 'required',
+      'lock_page' => 'required',
+
+    ]);
+
+    $validated = $validator->safe()->only(['rent_id', 'lock_id', 'drent_id', 'rent_page', 'lock_page']);
+
+    if ($validator->fails()) {
+      return response()->json(['status' => false], 400);
+    }
+
+
+
+    $rent = Rent::find($validated['rent_id']);
+    $drent = Rent::find($validated['drent_id']);
+    $lock = Lock::find($validated['lock_id']);
+
+    $rent->locks()->syncWithoutDetaching([$validated['lock_id']]);
+    $drent->locks()->detach($lock);
+
+    return to_route('objects2', ['rent_page' => $validated['rent_page'], 'lock_page' => $validated['lock_page']])->with('success', '');
+  }
+
+
+
+
+
+
+  public function detach_lock2(Request $request)
+  {
+
+    $validator = Validator::make($request->all(), [
+      'lock_id' => 'required|exists:locks,id',
+      'rent_id' => 'required|exists:rents,id',
+      'rent_page' => 'required',
+      'lock_page' => 'required',
+    ]);
+
+    $validated = $validator->safe()->only(['lock_id', 'rent_id', 'rent_page', 'lock_page']);
+
+    if ($validator->fails()) {
+      return response()->json(['status' => false], 400);
+    }
+
+    $rent = Rent::find($validated['rent_id']);
+    $lock = Lock::find($validated['lock_id']);
+
+    $rent->locks()->detach($lock);
+
+    return to_route('objects2', ['rent_page' => $validated['rent_page'], 'lock_page' => $validated['lock_page']])->with('success', '');
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   public function index(Request $request)
   {
     $rents = auth()->user()->parent_rents()->with('children')
@@ -20,6 +173,8 @@ class RentController extends Controller
     //  dd($rents);
     return Inertia::render('RentsObjects', ['rents' => $rents,]);
   }
+
+
 
 
   public function objects(Request $request)
@@ -34,22 +189,6 @@ class RentController extends Controller
     //  dd($rents);
     return Inertia::render('Objects', ['rents' => $rents, 'free_locks' => $free_locks, 'success' => session('success')]);
   }
-
-
-  public function objects2(Request $request)
-  {
-    $rents = auth()->user()->rents()->with('locks')->orderBy('id')
-      ->get();
-
-    //$free_locks = auth()->user()->locks()->free()->orderBy('id')
-    $free_locks = auth()->user()->locks()->orderBy('id')
-      ->get();
-    return Inertia::render('Objects2', ['rents' => $rents, 'free_locks' => $free_locks, 'success' => session('success')]);
-  }
-
-
-
-
 
 
 
@@ -120,10 +259,6 @@ class RentController extends Controller
 
 
 
-
-
-
-
   public function attach_lock(Request $request)
   {
 
@@ -183,104 +318,6 @@ class RentController extends Controller
     //return response()->json(['status' => true]);
   }
 
-
-
-
-
-
-
-
-
-  public function attach_lock2(Request $request)
-  {
-
-    $validator = Validator::make($request->all(), [
-      'rent_id' => 'required|exists:rents,id',
-      'lock_id' => 'required|exists:locks,id',
-
-    ]);
-
-    $validated = $validator->safe()->only(['rent_id', 'lock_id']);
-
-    if ($validator->fails()) {
-      return response()->json(['status' => false], 400);
-    }
-
-    // Lock::where(['id' => $validated['lock_id'], 'user_id' => auth()->user()->id])->update(['rent_id' => $validated['rent_id']]);
-
-
-    $rent = Rent::find($validated['rent_id']);
-   // $lock = Lock::find($validated['lock_id']);
-
-    $rent->locks()->syncWithoutDetaching([$validated['lock_id']]);
-    //return Inertia::render('Objects2', ['rents' => $rents, 'free_locks' => $free_locks]);
-    return to_route('objects2')->with('success', '');
-  }
-
-
-
-
-
-
-  public function dattach_lock2(Request $request)
-  {
-
-    $validator = Validator::make($request->all(), [
-      'rent_id' => 'required|exists:rents,id',
-      'drent_id' => 'required|exists:rents,id',
-      'lock_id' => 'required|exists:locks,id',
-
-    ]);
-
-    $validated = $validator->safe()->only(['rent_id', 'lock_id','drent_id']);
-
-    if ($validator->fails()) {
-      return response()->json(['status' => false], 400);
-    }
-
-    // Lock::where(['id' => $validated['lock_id'], 'user_id' => auth()->user()->id])->update(['rent_id' => $validated['rent_id']]);
-
-
-    $rent = Rent::find($validated['rent_id']);
-    $drent = Rent::find($validated['drent_id']);
-    $lock = Lock::find($validated['lock_id']);
-
-    $rent->locks()->syncWithoutDetaching([$validated['lock_id']]);
-    $drent->locks()->detach($lock);
-    //return Inertia::render('Objects2', ['rents' => $rents, 'free_locks' => $free_locks]);
-    return to_route('objects2')->with('success', '');
-  }
-
-
-
-
-
-
-  public function detach_lock2(Request $request)
-  {
-
-    $validator = Validator::make($request->all(), [
-      'lock_id' => 'required|exists:locks,id',
-      'rent_id' => 'required|exists:rents,id',
-    ]);
-
-    $validated = $validator->safe()->only(['lock_id','rent_id']);
-
-    if ($validator->fails()) {
-      return response()->json(['status' => false], 400);
-    }
-
-    //  Lock::where(['id' => $validated['lock_id'], 'user_id' => auth()->user()->id])->update(['rent_id' => null]);
-
-    $rent = Rent::find($validated['rent_id']);
-    $lock = Lock::find($validated['lock_id']);
-
-    $rent->locks()->detach($lock);
-
-    return to_route('objects2')->with('success', '');
-
-    //return Inertia::render('Objects2', ['rents' => $rents, 'free_locks' => $free_locks]);
-  }
 
 
 
