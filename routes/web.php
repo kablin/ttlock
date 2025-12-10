@@ -77,7 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('groups/detach_lock', [\App\Http\Controllers\GroupController::class, 'detach_lock'])->name('group_detach_lock');
     Route::post('groups/dattach_lock', [\App\Http\Controllers\GroupController::class, 'dattach_lock'])->name('group_dattach_lock');
 
-
+    Route::post('groups/page', [\App\Http\Controllers\GroupController::class, 'page'])->name('groups_page');
 
 
 

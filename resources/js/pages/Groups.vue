@@ -1,6 +1,6 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { groups, group_create, group_delete, group_update, group_attach_lock, group_detach_lock , group_dattach_lock} from '@/routes';
+import { groups, group_create, group_delete, group_update, group_attach_lock, group_detach_lock, group_dattach_lock, groups_page } from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown, ChevronsUpDownIcon } from 'lucide-vue-next'
-
+import debounce from 'debounce';
 
 
 import {
@@ -106,6 +106,9 @@ const breadcrumbs = [
 ];
 
 
+const rent_search = ref('')
+const lock_search = ref('')
+const group_search = ref('')
 
 
 const props = defineProps({
@@ -118,10 +121,56 @@ const props = defineProps({
     groups_list: {
         type: Object
     },
+    rent_search: {
+        type: String
+    },
+    lock_search: {
+        type: String
+    },
+    group_search: {
+        type: String
+    },
+
 
 });
 
 
+
+onMounted(() => {
+    rent_search.value = props.rent_search
+    lock_search.value = props.lock_search
+    group_search.value = props.group_search
+
+    console.log(props.group_search)
+
+})
+
+
+const debouncedSearch = debounce(() => {
+    goToPage(1, 1, 1)
+}, 500)
+
+
+
+const goToPage = (group_page, lock_page, rent_page) => {
+
+    router.post(groups_page().url, {
+        'group_page': group_page, 'rent_page': rent_page, 'lock_page': lock_page,
+        'rent_search': rent_search.value, 'lock_search': lock_search.value, 'group_search': group_search.value
+    },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
+            onFinish: () => {
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+    );
+    return true
+}
 
 
 
@@ -139,6 +188,10 @@ const newGroup = () => {
                     successCreateText.value = 'Группа ' + newObjectName.value + ' создана'
                     newObjectName.value = ''
                     newObjectDescription.value = ''
+
+                    rent_search.value = ''
+                    lock_search.value = ''
+                    group_search.value = ''
                 },
                 onError: (errors) => {
                     console.log('Validation errors:', errors)
@@ -163,6 +216,11 @@ const saveGroup = () => {
             onFinish: () => {
                 successCreateSchow.value = true
                 successCreateText.value = 'Группа ' + currentGroup?.value.name + ' изменена'
+
+
+                rent_search.value = ''
+                lock_search.value = ''
+                group_search.value = ''
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -176,7 +234,11 @@ const saveGroup = () => {
 
 const attachLock = (group, lock) => {
 
-    router.post(group_attach_lock().url, { 'group_id': group.id, 'lock_id': lock.id },
+    router.post(group_attach_lock().url, {
+        'rent_search': rent_search.value, 'lock_search': lock_search.value, 'group_search': group_search.value,
+        'group_page': props.groups_list.current_page, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page,
+        'group_id': group.id, 'lock_id': lock.id
+    },
         {
             preserveScroll: true,
             preserveState: true,
@@ -199,7 +261,11 @@ const attachLock = (group, lock) => {
 
 const dattachLock = (group, lock, group2) => {
 
-    router.post(group_dattach_lock().url, { 'group_id': group.id, 'lock_id': lock.id,'dgroup_id': group2.id,  },
+    router.post(group_dattach_lock().url, {
+        'rent_search': rent_search.value, 'lock_search': lock_search.value, 'group_search': group_search.value,
+        'group_page': props.groups_list.current_page, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page,
+        'group_id': group.id, 'lock_id': lock.id, 'dgroup_id': group2.id,
+    },
         {
             preserveScroll: true,
             preserveState: true,
@@ -221,9 +287,13 @@ const dattachLock = (group, lock, group2) => {
 
 
 
-const detachLock = (lock,group) => {
+const detachLock = (lock, group) => {
 
-    router.post(group_detach_lock().url, {  'group_id': group.id, 'lock_id': lock.id },
+    router.post(group_detach_lock().url, {
+        'rent_search': rent_search.value, 'lock_search': lock_search.value, 'group_search': group_search.value,
+        'group_page': props.groups_list.current_page, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page,
+        'group_id': group.id, 'lock_id': lock.id
+    },
         {
             preserveScroll: true,
             preserveState: true,
@@ -259,6 +329,11 @@ const deleteGroup = () => {
             onFinish: () => {
                 successCreateSchow.value = true
                 successCreateText.value = 'Группа ' + currentGroup?.value.name + ' удалена'
+
+
+                rent_search.value = ''
+                lock_search.value = ''
+                group_search.value = ''
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -301,7 +376,7 @@ function onDragStart(item) {
 }
 
 
-function onDragStart2(item,group) {
+function onDragStart2(item, group) {
     dragItem.value = item
     dragRromGroup.value = group
     isDrag.value = true
@@ -312,26 +387,26 @@ function onDragStart2(item,group) {
 
 function onFree() {
     isDrag.value = false
-    detachLock(dragItem.value,dragRromGroup.value)
-    dragRromGroup.value =null
+    detachLock(dragItem.value, dragRromGroup.value)
+    dragRromGroup.value = null
 }
 
 
 function onAdd(group) {
     isDrag.value = false
     if (dragRromGroup.value)
-        dattachLock(group, dragItem.value,dragRromGroup.value)
+        dattachLock(group, dragItem.value, dragRromGroup.value)
 
     else attachLock(group, dragItem.value)
 
-   dragRromGroup.value =null
+    dragRromGroup.value = null
 
 }
 
 
 function onDragEnd() {
     isDrag.value = false
-     dragRromGroup.value =null
+    dragRromGroup.value = null
 
 }
 
@@ -420,15 +495,18 @@ function onDragEnd() {
                 class="  md:col-span-2 min-h-[50px] border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
                 <div class="my-3 font-bold mx-auto text-lg">Замки</div>
 
+                <Input v-model="lock_search" placeholder="поиск..." class="mb-8 border-2" @input="debouncedSearch" />
+
                 <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
                     class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
 
-                    <div v-if="free_locks && free_locks.length === 0" class="text-gray-500 text-sm flex justify-center">
+                    <div v-if="free_locks && free_locks.data.length === 0"
+                        class="text-gray-500 text-sm flex justify-center">
                         <p>Нет свободных замков</p>
                     </div>
 
                     <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1"
-                        v-for="lock in free_locks" :key="lock.id" draggable="true" @dragstart="onDragStart(lock)"
+                        v-for="lock in free_locks.data" :key="lock.id" draggable="true" @dragstart="onDragStart(lock)"
                         @dragend="onDragEnd()">
                         <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
 
@@ -482,20 +560,22 @@ function onDragEnd() {
 
 
 
-                <Pagination class="self-end my-4" v-slot="{ page }" :items-per-page="10" :total="30" :default-page="2">
-                    <PaginationContent v-slot="{ items }">
-                        <PaginationPrevious />
-
-                        <template v-for="(item, index) in items" :key="index">
-                            <PaginationItem v-if="item.type === 'page'" :value="item.value"
-                                :is-active="item.value === page">
-                                {{ item.value }}
+                <Pagination class="my-4 self-end" v-model:page="free_locks.current_page"
+                    :items-per-page="free_locks.per_page" :total="free_locks.total"
+                    :default-page="free_locks.current_page">
+                    <PaginationContent>
+                        <template v-for="(item, index) in free_locks.links" :key="index">
+                            <PaginationPrevious v-if="index == 0"
+                                @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)" />
+                            <PaginationNext v-else-if="index == (free_locks.links.length - 1)"
+                                @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)" />
+                            <PaginationItem
+                                v-else-if="(free_locks.current_page - 2 <= item.page) && (free_locks.current_page + 2 >= item.page)"
+                                :value="item.page" :is-active="item.page === free_locks.current_page"
+                                @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)">
+                                {{ item.page }}
                             </PaginationItem>
                         </template>
-
-                        <PaginationEllipsis :index="4" />
-
-                        <PaginationNext />
                     </PaginationContent>
                 </Pagination>
 
@@ -505,9 +585,10 @@ function onDragEnd() {
 
                 <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
                     <div class="my-3 mx-auto font-bold text-lg">Группы</div>
-                   
+                    <Input v-model="group_search" placeholder="поиск..." class="mb-8 border-2"
+                        @input="debouncedSearch" />
 
-                    <div v-for="group in groups_list" :key="group.id">
+                    <div v-for="group in groups_list.data" :key="group.id">
 
 
 
@@ -539,7 +620,7 @@ function onDragEnd() {
 
                                 <Card class="w-full cursor-pointer relative gap-2 my-1 py-3 border-green-300 border-1"
                                     v-for="lock in group.locks" :key="lock.id" draggable="true"
-                                    @dragstart="onDragStart2(lock,group)" @dragend="onDragEnd()">
+                                    @dragstart="onDragStart2(lock, group)" @dragend="onDragEnd()">
                                     <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id
                                     }}</span>
 
@@ -615,21 +696,22 @@ function onDragEnd() {
                     </div>
 
 
-                    <Pagination class="my-4 self-end" v-slot="{ page }" :items-per-page="10" :total="30"
-                        :default-page="2">
-                        <PaginationContent v-slot="{ items }">
-                            <PaginationPrevious />
-
-                            <template v-for="(item, index) in items" :key="index">
-                                <PaginationItem v-if="item.type === 'page'" :value="item.value"
-                                    :is-active="item.value === page">
-                                    {{ item.value }}
+                    <Pagination class="my-4 self-end" v-model:page="groups_list.current_page"
+                        :items-per-page="groups_list.per_page" :total="groups_list.total"
+                        :default-page="groups_list.current_page">
+                        <PaginationContent>
+                            <template v-for="(item, index) in groups_list.links" :key="index">
+                                <PaginationPrevious v-if="index == 0"
+                                    @click.prevent="goToPage(item.page, free_locks.current_page, rents.current_page)" />
+                                <PaginationNext v-else-if="index == (groups_list.links.length - 1)"
+                                    @click.prevent="goToPage(item.page, free_locks.current_page, rents.current_page)" />
+                                <PaginationItem
+                                    v-else-if="(groups_list.current_page - 2 <= item.page) && (groups_list.current_page + 2 >= item.page)"
+                                    :value="item.page" :is-active="item.page === groups_list.current_page"
+                                    @click.prevent="goToPage(item.page, free_locks.current_page, rents.current_page)">
+                                    {{ item.page }}
                                 </PaginationItem>
                             </template>
-
-                            <PaginationEllipsis :index="4" />
-
-                            <PaginationNext />
                         </PaginationContent>
                     </Pagination>
 
@@ -701,7 +783,9 @@ function onDragEnd() {
                 <AlertDialogHeader>
                     <AlertDialogTitle>Удалить группу {{ currentGroup?.name }}?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Группа {{ currentGroup?.name }} будет удалена. Все связанные с ней замки и объекты можно будет привязать к
+                        Группа {{ currentGroup?.name }} будет удалена. Все связанные с ней замки и объекты можно будет
+                        привязать
+                        к
                         другим группам.
                     </AlertDialogDescription>
                 </AlertDialogHeader>

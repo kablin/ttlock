@@ -15,17 +15,42 @@ class GroupController extends Controller
 {
     public function index(Request $request)
     {
-        $rents = auth()->user()->rents()->with('locks')->orderBy('id')
-            ->get();
 
-        $groups = auth()->user()->groups()->with('locks', 'rents')->orderBy('id')
-            ->get();
-
+        $rent_page = $request->input('rent_page', 1);
+        $lock_page = $request->input('lock_page', 1);
+        $group_page = $request->input('group_page', 1);
 
 
-        $free_locks = auth()->user()->locks()->orderBy('id')->get();
+        $rents = auth()->user()->rents()->with('locks')->orderBy('id');
+        if ($request->has('rent_search')) {
+            $rents = $rents->where('name', 'ilike', '%' . $request->rent_search . '%');
+        }
+        $rents = $rents->paginate(12, ['*'], 'rent_page', $rent_page);
 
-        return Inertia::render('Groups', ['rents' => $rents, 'groups_list' => $groups, 'free_locks' => $free_locks, 'success' => session('success')]);
+
+        $free_locks = auth()->user()->locks()->orderBy('id');
+        if ($request->has('lock_search')) {
+            $free_locks = $free_locks->where('lock_alias', 'ilike', '%' . $request->lock_search . '%');
+        }
+        $free_locks = $free_locks->paginate(12, ['*'], 'lock_page', $lock_page);
+
+
+
+        $groups = auth()->user()->groups()->with('locks', 'rents')->orderBy('id');
+        if ($request->has('group_search')) {
+            $groups = $groups->where('name', 'ilike', '%' . $request->group_search . '%');
+        }
+        $groups = $groups->paginate(12, ['*'], 'group_page', $group_page);
+
+
+        $params = ['rents' => $rents, 'free_locks' => $free_locks, 'groups_list' => $groups, 'success' => session('success')];
+        if ($request->has('rent_search'))  $params['rent_search'] = $request->rent_search;
+        if ($request->has('lock_search'))  $params['lock_search'] = $request->lock_search;
+        if ($request->has('group_search'))  $params['group_search'] = $request->group_search;
+
+
+
+        return Inertia::render('Groups', $params);
     }
 
 
@@ -106,9 +131,16 @@ class GroupController extends Controller
             'group_id' => 'required|exists:groups,id',
             'lock_id' => 'required|exists:locks,id',
 
+            'rent_page' => 'required',
+            'lock_page' => 'required',
+            'group_page' => 'required',
+            'lock_search' => 'nullable',
+            'rent_search' => 'nullable',
+            'group_search' => 'nullable'
+
         ]);
 
-        $validated = $validator->safe()->only(['group_id', 'lock_id']);
+        $validated = $validator->safe()->only(['group_id', 'lock_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search', 'group_page', 'group_search']);
 
         if ($validator->fails()) {
             return response()->json(['status' => false], 400);
@@ -125,9 +157,17 @@ class GroupController extends Controller
 
         $group->locks()->syncWithoutDetaching([$validated['lock_id']]);
 
+        $params = [
+            'lock_search' => $validated['lock_search'] ?? '',
+            'rent_search' => $validated['rent_search'] ?? '',
+            'group_search' => $validated['group_search'] ?? '',
+            'rent_page' => $validated['rent_page'],
+            'lock_page' => $validated['lock_page'],
+            'group_page' => $validated['group_page']
+        ];
 
 
-        return to_route('groups')->with('success', '');
+        return to_route('groups', $params)->with('success', '');
     }
 
 
@@ -144,9 +184,17 @@ class GroupController extends Controller
             'dgroup_id' => 'required|exists:groups,id',
             'lock_id' => 'required|exists:locks,id',
 
+            'rent_page' => 'required',
+            'lock_page' => 'required',
+            'group_page' => 'required',
+            'lock_search' => 'nullable',
+            'rent_search' => 'nullable',
+            'group_search' => 'nullable'
+
+
         ]);
 
-        $validated = $validator->safe()->only(['group_id', 'lock_id', 'dgroup_id']);
+        $validated = $validator->safe()->only(['group_id', 'lock_id', 'dgroup_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search', 'group_page', 'group_search']);
 
         if ($validator->fails()) {
             return response()->json(['status' => false], 400);
@@ -159,7 +207,18 @@ class GroupController extends Controller
 
         $group->locks()->syncWithoutDetaching([$validated['lock_id']]);
         $dgroup->locks()->detach($lock);
-        return to_route('groups')->with('success', '');
+
+        $params = [
+            'lock_search' => $validated['lock_search'] ?? '',
+            'rent_search' => $validated['rent_search'] ?? '',
+            'group_search' => $validated['group_search'] ?? '',
+            'rent_page' => $validated['rent_page'],
+            'lock_page' => $validated['lock_page'],
+            'group_page' => $validated['group_page']
+        ];
+
+
+        return to_route('groups', $params)->with('success', '');
     }
 
 
@@ -173,9 +232,17 @@ class GroupController extends Controller
         $validator = Validator::make($request->all(), [
             'lock_id' => 'required|exists:locks,id',
             'group_id' => 'required|exists:groups,id',
+
+            'rent_page' => 'required',
+            'lock_page' => 'required',
+            'group_page' => 'required',
+            'lock_search' => 'nullable',
+            'rent_search' => 'nullable',
+            'group_search' => 'nullable'
+
         ]);
 
-        $validated = $validator->safe()->only(['lock_id', 'group_id']);
+        $validated = $validator->safe()->only(['lock_id', 'group_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search', 'group_page', 'group_search']);
 
         if ($validator->fails()) {
             return response()->json(['status' => false], 400);
@@ -186,6 +253,52 @@ class GroupController extends Controller
 
         $group->locks()->detach($lock);
 
-        return to_route('groups')->with('success', '');
+        $params = [
+            'lock_search' => $validated['lock_search'] ?? '',
+            'rent_search' => $validated['rent_search'] ?? '',
+            'group_search' => $validated['group_search'] ?? '',
+            'rent_page' => $validated['rent_page'],
+            'lock_page' => $validated['lock_page'],
+            'group_page' => $validated['group_page']
+        ];
+
+
+        return to_route('groups', $params)->with('success', '');
+    }
+
+
+
+
+    public function page(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'rent_page' => 'required',
+            'lock_page' => 'required',
+            'group_page' => 'required',
+            'lock_search' => 'nullable',
+            'rent_search' => 'nullable',
+            'group_search' => 'nullable'
+
+        ]);
+
+
+
+        $validated = $validator->safe()->only(['rent_page', 'lock_page', 'lock_search', 'rent_search', 'group_page', 'group_search']);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false], 400);
+        }
+
+        $params = [
+            'lock_search' => $validated['lock_search'] ?? '',
+            'rent_search' => $validated['rent_search'] ?? '',
+            'group_search' => $validated['group_search'] ?? '',
+            'rent_page' => $validated['rent_page'],
+            'lock_page' => $validated['lock_page'],
+            'group_page' => $validated['group_page']
+        ];
+
+        return to_route('groups',$params)->with('success', '');
     }
 }

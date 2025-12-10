@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea'
+import debounce from 'debounce';
 import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown, ChevronsUpDownIcon } from 'lucide-vue-next'
 
 
@@ -98,6 +99,9 @@ const isDeleteDialogOpen = ref(false)
 
 const currentRent = ref(null)
 
+const rent_search = ref('')
+const lock_search = ref('')
+
 
 const breadcrumbs = [
     {
@@ -115,6 +119,13 @@ const local_free_locks = ref([])
 */
 
 
+onMounted(() => {
+    rent_search.value = props.rent_search
+    lock_search.value = props.lock_search
+
+
+})
+
 const props = defineProps({
     rents: {
         type: Object
@@ -122,11 +133,19 @@ const props = defineProps({
     free_locks: {
         type: Object
     },
+    rent_search: {
+        type: String
+    },
+    lock_search: {
+        type: String
+    },
 
 });
 
 
-
+const debouncedSearch = debounce(() => {
+    goToPage(1, 1)
+}, 800)
 
 
 
@@ -181,9 +200,9 @@ const saveRent = () => {
 
 
 
-const goToPage = (page) => {
+const goToPage = (page, lock_page) => {
 
-    router.post(rent_rent_page().url, { 'rent_page': page, 'lock_page': props.free_locks.current_page },
+    router.post(rent_rent_page().url, { 'rent_page': page, 'lock_page': lock_page, 'rent_search': rent_search.value, 'lock_search': lock_search.value },
         {
             preserveScroll: true,
             preserveState: true,
@@ -197,29 +216,11 @@ const goToPage = (page) => {
     );
     return true
 }
-
-const goToLockPage = (page) => {
-
-    router.post(rent_rent_page().url, { 'rent_page': props.rents.current_page, 'lock_page': page },
-        {
-            preserveScroll: true,
-            preserveState: true,
-            history: false,
-            onFinish: () => {
-            },
-            onError: (errors) => {
-                console.log('Validation errors:', errors)
-            }
-        }
-    );
-    return true
-}
-
 
 
 const attachLock = (rent, lock) => {
 
-    router.post(rent_attach_lock2().url, {'lock_page': props.free_locks.current_page , 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
+    router.post(rent_attach_lock2().url, { 'rent_search': rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
         {
             preserveScroll: true,
             preserveState: true,
@@ -251,7 +252,7 @@ const attachLock = (rent, lock) => {
 
 const dattachLock = (rent, lock, rent2) => {
 
-    router.post(rent_dattach_lock2().url, {'lock_page': props.free_locks.current_page , 'rent_page': props.rents.current_page,  'rent_id': rent.id, 'lock_id': lock.id, 'drent_id': rent2.id, },
+    router.post(rent_dattach_lock2().url, { 'rent_search': rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id, 'drent_id': rent2.id, },
         {
             preserveScroll: true,
             preserveState: true,
@@ -275,7 +276,7 @@ const dattachLock = (rent, lock, rent2) => {
 
 const detachLock = (lock, rent) => {
 
-    router.post(rent_detach_lock2().url, { 'lock_page': props.free_locks.current_page , 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
+    router.post(rent_detach_lock2().url, { 'rent_search': rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
         {
             preserveScroll: true,
             preserveState: true,
@@ -471,7 +472,7 @@ function onDragEnd() {
             <div
                 class="  md:col-span-2 min-h-[50px] border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
                 <div class="my-3 font-bold mx-auto text-lg">Замки</div>
-
+                <Input v-model="lock_search" placeholder="поиск..." class="mb-8 border-2" @input="debouncedSearch" />
                 <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
                     class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
 
@@ -540,13 +541,14 @@ function onDragEnd() {
                     :default-page="free_locks.current_page">
                     <PaginationContent>
                         <template v-for="(item, index) in free_locks.links" :key="index">
-                            <PaginationPrevious v-if="index == 0" @click.prevent="goToLockPage(item.page)" />
+                            <PaginationPrevious v-if="index == 0"
+                                @click.prevent="goToPage(rents.current_page, item.page)" />
                             <PaginationNext v-else-if="index == (free_locks.links.length - 1)"
-                                @click.prevent="goToLockPage(item.page)" />
+                                @click.prevent="goToPage(rents.current_page, item.page)" />
                             <PaginationItem
                                 v-else-if="(free_locks.current_page - 2 <= item.page) && (free_locks.current_page + 2 >= item.page)"
                                 :value="item.page" :is-active="item.page === free_locks.current_page"
-                                @click.prevent="goToLockPage(item.page)">
+                                @click.prevent="goToPage(rents.current_page, item.page)">
                                 {{ item.page }}
                             </PaginationItem>
                         </template>
@@ -561,11 +563,10 @@ function onDragEnd() {
                 <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
                     <div class="my-3 mx-auto font-bold text-lg">Объекты</div>
 
+                    <Input v-model="rent_search" placeholder="поиск..." class="mb-8 border-2"
+                        @input="debouncedSearch" />
+
                     <div v-for="rent in rents.data" :key="rent.id">
-
-
-
-
 
                         <Card class="relative my-2 pt-6 pb-2">
                             <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
@@ -673,13 +674,14 @@ function onDragEnd() {
                         :total="rents.total" :default-page="rents.current_page">
                         <PaginationContent>
                             <template v-for="(item, index) in rents.links" :key="index">
-                                <PaginationPrevious v-if="index == 0" @click.prevent="goToPage(item.page)" />
+                                <PaginationPrevious v-if="index == 0"
+                                    @click.prevent="goToPage(item.page, free_locks.current_page)" />
                                 <PaginationNext v-else-if="index == (rents.links.length - 1)"
-                                    @click.prevent="goToPage(item.page)" />
+                                    @click.prevent="goToPage(item.page, free_locks.current_page)" />
                                 <PaginationItem
                                     v-else-if="(rents.current_page - 2 <= item.page) && (rents.current_page + 2 >= item.page)"
                                     :value="item.page" :is-active="item.page === rents.current_page"
-                                    @click.prevent="goToPage(item.page)">
+                                    @click.prevent="goToPage(item.page, free_locks.current_page)">
                                     {{ item.page }}
                                 </PaginationItem>
                             </template>
