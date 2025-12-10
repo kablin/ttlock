@@ -478,7 +478,7 @@ function onDragEnd() {
 
                     <div v-if="free_locks && free_locks.data.length === 0"
                         class="text-gray-500 text-sm flex justify-center">
-                        <p>Нет свободных замков</p>
+                         <p>Замки не найдены</p>
                     </div>
 
                     <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1"

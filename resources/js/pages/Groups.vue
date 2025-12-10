@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown, ChevronsUpDownIcon } from 'lucide-vue-next'
 import debounce from 'debounce';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 
 import {
@@ -493,98 +494,185 @@ function onDragEnd() {
 
             <div
                 class="  md:col-span-2 min-h-[50px] border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
-                <div class="my-3 font-bold mx-auto text-lg">Замки</div>
 
-                <Input v-model="lock_search" placeholder="поиск..." class="mb-8 border-2" @input="debouncedSearch" />
+                <Tabs default-value="locks" class="h-full flex flex-col ">
+                    <TabsList class=" w-full mt-3">
+                        <TabsTrigger value="locks">
+                            <div class=" font-bold mx-auto text-lg">Замки</div>
+                        </TabsTrigger>
+                        <TabsTrigger value="rents">
+                            <div class=" font-bold mx-auto text-lg">Объекты</div>
 
-                <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
-                    class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
-
-                    <div v-if="free_locks && free_locks.data.length === 0"
-                        class="text-gray-500 text-sm flex justify-center">
-                        <p>Нет свободных замков</p>
-                    </div>
-
-                    <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1"
-                        v-for="lock in free_locks.data" :key="lock.id" draggable="true" @dragstart="onDragStart(lock)"
-                        @dragend="onDragEnd()">
-                        <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
-
-                        <Collapsible>
-
-                            <CardHeader class=" flex items-center justify-between">
-
-                                <CollapsibleTrigger class="flex   ">
-                                    <ChevronsUpDown class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
-                                    <CardTitle class="flex items-center">{{ lock.lock_alias }}</CardTitle>
-                                </CollapsibleTrigger>
-                                <CardAction>
-                                </CardAction>
-                            </CardHeader>
-                            <CollapsibleContent>
-                                <CardContent>
-                                    <ul class="mt-3">
-                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                            Имя<span>{{ lock.lock_name }}</span>
-                                        </li>
-                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                            Мастер ключ<span>{{ lock.no_key_pwd }}</span>
-                                        </li>
-                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                            TTlock Id<span>{{ lock.lock_id }}</span>
-                                        </li>
-
-                                        <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                            Заряд батареи
-
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger as-child>
-                                                        <Progress :model-value="lock.electric_quantity"
-                                                            class="w-[30%]" />
-
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <span>{{ lock.electric_quantity }}%</span>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </li>
-                                    </ul>
-                                </CardContent>
-                            </CollapsibleContent>
-                        </Collapsible>
-                    </Card>
-                </div>
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="locks" class="h-full justify-center flex-col  flex">
 
 
 
 
-                <Pagination class="my-4 self-end" v-model:page="free_locks.current_page"
-                    :items-per-page="free_locks.per_page" :total="free_locks.total"
-                    :default-page="free_locks.current_page">
-                    <PaginationContent>
-                        <template v-for="(item, index) in free_locks.links" :key="index">
-                            <PaginationPrevious v-if="index == 0"
-                                @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)" />
-                            <PaginationNext v-else-if="index == (free_locks.links.length - 1)"
-                                @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)" />
-                            <PaginationItem
-                                v-else-if="(free_locks.current_page - 2 <= item.page) && (free_locks.current_page + 2 >= item.page)"
-                                :value="item.page" :is-active="item.page === free_locks.current_page"
-                                @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)">
-                                {{ item.page }}
-                            </PaginationItem>
-                        </template>
-                    </PaginationContent>
-                </Pagination>
+
+                        <!--div class="my-3 font-bold mx-auto text-lg">Замки</div-->
+
+                        <Input v-model="lock_search" placeholder="поиск..." class="mb-8 border-2"
+                            @input="debouncedSearch" />
+
+                        <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
+                            class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
+
+                            <div v-if="free_locks && free_locks.data.length === 0"
+                                class="text-gray-500 text-sm flex justify-center">
+                                <p>Замки не найдены</p>
+                            </div>
+
+                            <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1"
+                                v-for="lock in free_locks.data" :key="lock.id" draggable="true"
+                                @dragstart="onDragStart(lock)" @dragend="onDragEnd()">
+                                <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
+
+                                <Collapsible>
+
+                                    <CardHeader class=" flex items-center justify-between">
+
+                                        <CollapsibleTrigger class="flex   ">
+                                            <ChevronsUpDown
+                                                class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
+                                            <CardTitle class="flex items-center">{{ lock.lock_alias }}</CardTitle>
+                                        </CollapsibleTrigger>
+                                        <CardAction>
+                                        </CardAction>
+                                    </CardHeader>
+                                    <CollapsibleContent>
+                                        <CardContent>
+                                            <ul class="mt-3">
+                                                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                    Имя<span>{{ lock.lock_name }}</span>
+                                                </li>
+                                                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                    Мастер ключ<span>{{ lock.no_key_pwd }}</span>
+                                                </li>
+                                                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                    TTlock Id<span>{{ lock.lock_id }}</span>
+                                                </li>
+
+                                                <li class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                    Заряд батареи
+
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger as-child>
+                                                                <Progress :model-value="lock.electric_quantity"
+                                                                    class="w-[30%]" />
+
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <span>{{ lock.electric_quantity }}%</span>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </li>
+                                            </ul>
+                                        </CardContent>
+                                    </CollapsibleContent>
+                                </Collapsible>
+                            </Card>
+                        </div>
+
+
+
+
+                        <Pagination class="my-4 self-end" v-model:page="free_locks.current_page"
+                            :items-per-page="free_locks.per_page" :total="free_locks.total"
+                            :default-page="free_locks.current_page">
+                            <PaginationContent>
+                                <template v-for="(item, index) in free_locks.links" :key="index">
+                                    <PaginationPrevious v-if="index == 0"
+                                        @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)" />
+                                    <PaginationNext v-else-if="index == (free_locks.links.length - 1)"
+                                        @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)" />
+                                    <PaginationItem
+                                        v-else-if="(free_locks.current_page - 2 <= item.page) && (free_locks.current_page + 2 >= item.page)"
+                                        :value="item.page" :is-active="item.page === free_locks.current_page"
+                                        @click.prevent="goToPage(groups_list.current_page, item.page, rents.current_page)">
+                                        {{ item.page }}
+                                    </PaginationItem>
+                                </template>
+                            </PaginationContent>
+                        </Pagination>
+
+
+
+                    </TabsContent>
+                    <TabsContent value="rents" class="h-full justify-center flex-col  flex">
+                        <Input v-model="rent_search" placeholder="поиск..." class="mb-8 border-2"
+                            @input="debouncedSearch" />
+
+
+
+
+<div @dragover.prevent @drop="onFree()" :class="{ 'bg-blue-200': isDrag == true, }"
+                            class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
+
+                            <div v-if="rents && rents.data.length === 0"
+                                class="text-gray-500 text-sm flex justify-center">
+                                <p>Нет объектов</p>
+                            </div>
+
+                            <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-blue-300 border-1"
+                                v-for="rent in rents.data" :key="rent.id" draggable="true"
+                                @dragstart="onDragStart(lock)" @dragend="onDragEnd()">
+                                <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ rent.id }}</span>
+
+                                <Collapsible>
+
+                                    <CardHeader class=" flex items-center justify-between">
+
+                                        <CollapsibleTrigger class="flex   ">
+                                            <ChevronsUpDown
+                                                class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
+                                            <CardTitle class="flex items-center">{{ rent.name }}</CardTitle>
+                                        </CollapsibleTrigger>
+                                        <CardAction>
+                                        </CardAction>
+                                    </CardHeader>
+                                    <CollapsibleContent>
+                                        <CardContent>
+                                           {{ rent.description }}
+                                        </CardContent>
+                                    </CollapsibleContent>
+                                </Collapsible>
+                            </Card>
+                        </div>
+
+
+
+
+                        <Pagination class="my-4 self-end" v-model:page="rents.current_page"
+                            :items-per-page="rents.per_page" :total="rents.total" :default-page="rents.current_page">
+                            <PaginationContent>
+                                <template v-for="(item, index) in rents.links" :key="index">
+                                    <PaginationPrevious v-if="index == 0"
+                                        @click.prevent="goToPage(groups_list.current_page, free_locks.current_page, item.page)" />
+                                    <PaginationNext v-else-if="index == (rents.links.length - 1)"
+                                        @click.prevent="goToPage(groups_list.current_page, free_locks.current_page, item.page)" />
+                                    <PaginationItem
+                                        v-else-if="(rents.current_page - 2 <= item.page) && (rents.current_page + 2 >= item.page)"
+                                        :value="item.page" :is-active="item.page === rents.current_page"
+                                        @click.prevent="goToPage(groups_list.current_page, free_locks.current_page, item.page)">
+                                        {{ item.page }}
+                                    </PaginationItem>
+                                </template>
+                            </PaginationContent>
+                        </Pagination>
+
+                    </TabsContent>
+                </Tabs>
 
             </div>
 
             <div class="md:col-span-4 0">
 
                 <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
-                    <div class="my-3 mx-auto font-bold text-lg">Группы</div>
+                    <div class="my-5 mx-auto font-bold text-lg">Группы</div>
                     <Input v-model="group_search" placeholder="поиск..." class="mb-8 border-2"
                         @input="debouncedSearch" />
 
