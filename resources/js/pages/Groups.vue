@@ -1,6 +1,6 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { groups, group_create, group_delete, group_update, group_attach_lock, group_detach_lock, group_dattach_lock, groups_page } from '@/routes';
+import { groups, group_create, group_delete, group_update, group_attach_lock, group_attach_rent, group_detach_lock, group_detach_rent, group_dattach_lock, group_dattach_rent, groups_page } from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
@@ -142,7 +142,7 @@ onMounted(() => {
     lock_search.value = props.lock_search
     group_search.value = props.group_search
 
-    console.log(props.group_search)
+   
 
 })
 
@@ -260,6 +260,38 @@ const attachLock = (group, lock) => {
 }
 
 
+
+
+const attachRent = (group, rent) => {
+
+    router.post(group_attach_rent().url, {
+        'rent_search': rent_search.value, 'lock_search': lock_search.value, 'group_search': group_search.value,
+        'group_page': props.groups_list.current_page, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page,
+        'group_id': group.id, 'rent_id': rent.id
+    },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Объект ' + rent.name + ' привязан к группе ' + group.name
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+
+    );
+
+    return true
+}
+
+
+
+
+
 const dattachLock = (group, lock, group2) => {
 
     router.post(group_dattach_lock().url, {
@@ -274,6 +306,34 @@ const dattachLock = (group, lock, group2) => {
             onFinish: () => {
                 successCreateSchow.value = true
                 successCreateText.value = 'Замок ' + lock.lock_alias + ' привязан к группе ' + group.name
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+
+    );
+
+    return true
+}
+
+
+
+const dattachRent = (group, rent, group2) => {
+
+    router.post(group_dattach_rent().url, {
+        'rent_search': rent_search.value, 'lock_search': lock_search.value, 'group_search': group_search.value,
+        'group_page': props.groups_list.current_page, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page,
+        'group_id': group.id, 'rent_id': rent.id, 'dgroup_id': group2.id,
+    },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Объект ' + rent.name + ' привязан к группе ' + group.name
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors)
@@ -314,6 +374,36 @@ const detachLock = (lock, group) => {
 
     return true
 }
+
+
+
+const detachRent = (rent, group) => {
+
+    router.post(group_detach_rent().url, {
+        'rent_search': rent_search.value, 'lock_search': lock_search.value, 'group_search': group_search.value,
+        'group_page': props.groups_list.current_page, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page,
+        'group_id': group.id, 'rent_id': rent.id
+    },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            history: false,
+            onFinish: () => {
+                successCreateSchow.value = true
+                successCreateText.value = 'Объект ' + rent.name + ' отвязан от группы  ' + group.name
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors)
+            }
+        }
+
+
+    );
+
+
+    return true
+}
+
 
 
 
@@ -370,15 +460,18 @@ const dragItem = ref()
 const dragRromGroup = ref()
 const isDrag = ref(false)
 
-function onDragStart(item) {
+function onDragStart(item, type) {
     dragItem.value = item
+    dragItem.value['type'] = type
     isDrag.value = true
 
 }
 
 
-function onDragStart2(item, group) {
+
+function onDragStart2(item, group, type) {
     dragItem.value = item
+    dragItem.value['type'] = type
     dragRromGroup.value = group
     isDrag.value = true
 
@@ -388,18 +481,29 @@ function onDragStart2(item, group) {
 
 function onFree() {
     isDrag.value = false
-    detachLock(dragItem.value, dragRromGroup.value)
+
+    if (dragItem.value['type'] == 'lock')
+        detachLock(dragItem.value, dragRromGroup.value)
+    else
+        detachRent(dragItem.value, dragRromGroup.value)
     dragRromGroup.value = null
 }
 
 
 function onAdd(group) {
     isDrag.value = false
-    if (dragRromGroup.value)
-        dattachLock(group, dragItem.value, dragRromGroup.value)
-
-    else attachLock(group, dragItem.value)
-
+    if (dragRromGroup.value) {
+        if (dragItem.value['type'] == 'lock')
+            dattachLock(group, dragItem.value, dragRromGroup.value)
+        else
+            dattachRent(group, dragItem.value, dragRromGroup.value)
+    }
+    else {
+        if (dragItem.value['type'] == 'lock')
+            attachLock(group, dragItem.value)
+        else
+            attachRent(group, dragItem.value)
+    }
     dragRromGroup.value = null
 
 }
@@ -517,7 +621,7 @@ function onDragEnd() {
                             @input="debouncedSearch" />
 
                         <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
-                            class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
+                            class=" flex-1  min-h-[50px] items-center flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
 
                             <div v-if="free_locks && free_locks.data.length === 0"
                                 class="text-gray-500 text-sm flex justify-center">
@@ -526,7 +630,7 @@ function onDragEnd() {
 
                             <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1"
                                 v-for="lock in free_locks.data" :key="lock.id" draggable="true"
-                                @dragstart="onDragStart(lock)" @dragend="onDragEnd()">
+                                @dragstart="onDragStart(lock, 'lock')" @dragend="onDragEnd()">
                                 <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id }}</span>
 
                                 <Collapsible>
@@ -609,7 +713,7 @@ function onDragEnd() {
 
 
 
-<div @dragover.prevent @drop="onFree()" :class="{ 'bg-blue-200': isDrag == true, }"
+                        <div @dragover.prevent @drop="onFree()" :class="{ 'bg-blue-200': isDrag == true, }"
                             class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
 
                             <div v-if="rents && rents.data.length === 0"
@@ -617,9 +721,9 @@ function onDragEnd() {
                                 <p>Нет объектов</p>
                             </div>
 
-                            <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-blue-300 border-1"
+                            <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-blue-400 border-1"
                                 v-for="rent in rents.data" :key="rent.id" draggable="true"
-                                @dragstart="onDragStart(lock)" @dragend="onDragEnd()">
+                                @dragstart="onDragStart(rent, 'rent')" @dragend="onDragEnd()">
                                 <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ rent.id }}</span>
 
                                 <Collapsible>
@@ -636,7 +740,7 @@ function onDragEnd() {
                                     </CardHeader>
                                     <CollapsibleContent>
                                         <CardContent>
-                                           {{ rent.description }}
+                                            {{ rent.description }}
                                         </CardContent>
                                     </CollapsibleContent>
                                 </Collapsible>
@@ -671,20 +775,19 @@ function onDragEnd() {
 
             <div class="md:col-span-4 0">
 
-                <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
+                <div class="border-dashed border-2 px-4  h-full w-full flex flex-col border-gray-500">
                     <div class="my-5 mx-auto font-bold text-lg">Группы</div>
                     <Input v-model="group_search" placeholder="поиск..." class="mb-8 border-2"
                         @input="debouncedSearch" />
 
-                    <div v-for="group in groups_list.data" :key="group.id">
+
+                    <div class=" flex-1  min-h-[50px] items-center flex  justify-center flex-col ">
 
 
 
-
-
-                        <Card class="relative my-2 pt-6 pb-2">
+                        <Card v-for="group in groups_list.data" :key="group.id" class="relative my-2 pt-6 pb-2 w-full">
                             <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ group.id
-                            }}</span>
+                                }}</span>
                             <CardHeader class="px-2">
                                 <CardTitle class=""> {{ group.name }}
 
@@ -708,9 +811,9 @@ function onDragEnd() {
 
                                 <Card class="w-full cursor-pointer relative gap-2 my-1 py-3 border-green-300 border-1"
                                     v-for="lock in group.locks" :key="lock.id" draggable="true"
-                                    @dragstart="onDragStart2(lock, group)" @dragend="onDragEnd()">
+                                    @dragstart="onDragStart2(lock, group, 'lock')" @dragend="onDragEnd()">
                                     <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id
-                                    }}</span>
+                                        }}</span>
 
                                     <Collapsible>
 
@@ -719,8 +822,9 @@ function onDragEnd() {
                                             <CollapsibleTrigger class="flex   ">
                                                 <ChevronsUpDown
                                                     class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
-                                                <CardTitle class="flex cursor-pointer items-center">{{ lock.lock_alias
-                                                }}
+                                                <CardTitle class="flex cursor-pointer items-center">{{
+                                                    lock.lock_alias
+                                                    }}
                                                 </CardTitle>
                                             </CollapsibleTrigger>
                                             <CardAction>
@@ -769,8 +873,47 @@ function onDragEnd() {
                                 </Card>
 
 
+                                <Card class="w-full cursor-pointer relative gap-2 my-1 py-3 border-blue-400 border-1"
+                                    v-for="rent in group.rents" :key="rent.id" draggable="true"
+                                    @dragstart="onDragStart2(rent, group, 'rent')" @dragend="onDragEnd()">
+                                    <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ rent.id
+                                        }}</span>
 
-                                <div v-if="group.locks.length === 0"
+                                    <Collapsible>
+
+                                        <CardHeader class=" flex cursor-pointer items-center justify-between">
+
+                                            <CollapsibleTrigger class="flex   ">
+                                                <ChevronsUpDown
+                                                    class="border-2 rounded-3xl shadow-xs hover:bg-accent me-2" />
+                                                <CardTitle class="flex cursor-pointer items-center">{{
+                                                    rent.name
+                                                    }}
+                                                </CardTitle>
+                                            </CollapsibleTrigger>
+                                            <CardAction>
+
+                                            </CardAction>
+                                        </CardHeader>
+                                        <CollapsibleContent>
+                                            <CardContent>
+
+                                                {{ rent.description }}
+
+                                                  <ul class="mt-3">
+                                                    <li v-for="lock in rent.locks"
+                                                        class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                        Замок<span>{{ lock.lock_alias }}</span>
+                                                    </li>
+                                                  </ul>
+                                            </CardContent>
+                                        </CollapsibleContent>
+                                    </Collapsible>
+                                </Card>
+
+
+
+                                <div v-if="group.locks.length === 0 && group.rents.length === 0"
                                     class="text-gray-500 text-sm flex my-auto items-center justify-center ">
                                     <div>
                                         <p>Нет связей</p>
@@ -781,10 +924,10 @@ function onDragEnd() {
                             </CardContent>
                         </Card>
 
+
                     </div>
 
-
-                    <Pagination class="my-4 self-end" v-model:page="groups_list.current_page"
+                    <Pagination class="my-4 self-end " v-model:page="groups_list.current_page"
                         :items-per-page="groups_list.per_page" :total="groups_list.total"
                         :default-page="groups_list.current_page">
                         <PaginationContent>

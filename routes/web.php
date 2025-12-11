@@ -16,10 +16,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
 
-
-    Route::get('dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\DashboarController::class, 'index'])->name('dashboard');
 
 
     Route::get('wizard', function () {
@@ -76,6 +73,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('groups/attach_lock', [\App\Http\Controllers\GroupController::class, 'attach_lock'])->name('group_attach_lock');
     Route::post('groups/detach_lock', [\App\Http\Controllers\GroupController::class, 'detach_lock'])->name('group_detach_lock');
     Route::post('groups/dattach_lock', [\App\Http\Controllers\GroupController::class, 'dattach_lock'])->name('group_dattach_lock');
+
+
+    Route::post('groups/attach_rent', [\App\Http\Controllers\GroupController::class, 'attach_rent'])->name('group_attach_rent');
+    Route::post('groups/detach_rent', [\App\Http\Controllers\GroupController::class, 'detach_rent'])->name('group_detach_rent');
+    Route::post('groups/dattach_rent', [\App\Http\Controllers\GroupController::class, 'dattach_rent'])->name('group_dattach_rent');
+
+
 
     Route::post('groups/page', [\App\Http\Controllers\GroupController::class, 'page'])->name('groups_page');
 

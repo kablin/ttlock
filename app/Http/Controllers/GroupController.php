@@ -36,11 +36,11 @@ class GroupController extends Controller
 
 
 
-        $groups = auth()->user()->groups()->with('locks', 'rents')->orderBy('id');
+        $groups = auth()->user()->groups()->with('locks', 'rents','rents.locks')->orderBy('id');
         if ($request->has('group_search')) {
             $groups = $groups->where('name', 'ilike', '%' . $request->group_search . '%');
         }
-        $groups = $groups->paginate(12, ['*'], 'group_page', $group_page);
+        $groups = $groups->paginate(6, ['*'], 'group_page', $group_page);
 
 
         $params = ['rents' => $rents, 'free_locks' => $free_locks, 'groups_list' => $groups, 'success' => session('success')];
@@ -265,6 +265,160 @@ class GroupController extends Controller
 
         return to_route('groups', $params)->with('success', '');
     }
+
+
+
+
+
+
+
+
+
+
+    public function attach_rent(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'group_id' => 'required|exists:groups,id',
+            'rent_id' => 'required|exists:rents,id',
+
+            'rent_page' => 'required',
+            'lock_page' => 'required',
+            'group_page' => 'required',
+            'lock_search' => 'nullable',
+            'rent_search' => 'nullable',
+            'group_search' => 'nullable'
+
+        ]);
+
+        $validated = $validator->safe()->only(['group_id', 'rent_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search', 'group_page', 'group_search']);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false], 400);
+        }
+
+
+        $group = Group::find($validated['group_id']);
+
+        //        $lock = Lock::find($validated['lock_id']);
+
+        //      $group->locks()->attach($validated['lock_id']);
+
+
+
+        $group->rents()->syncWithoutDetaching([$validated['rent_id']]);
+
+        $params = [
+            'lock_search' => $validated['lock_search'] ?? '',
+            'rent_search' => $validated['rent_search'] ?? '',
+            'group_search' => $validated['group_search'] ?? '',
+            'rent_page' => $validated['rent_page'],
+            'lock_page' => $validated['lock_page'],
+            'group_page' => $validated['group_page']
+        ];
+
+
+        return to_route('groups', $params)->with('success', '');
+    }
+
+
+
+
+
+
+
+    public function dattach_rent(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'group_id' => 'required|exists:groups,id',
+            'dgroup_id' => 'required|exists:groups,id',
+            'rent_id' => 'required|exists:rents,id',
+
+            'rent_page' => 'required',
+            'lock_page' => 'required',
+            'group_page' => 'required',
+            'lock_search' => 'nullable',
+            'rent_search' => 'nullable',
+            'group_search' => 'nullable'
+
+
+        ]);
+
+        $validated = $validator->safe()->only(['group_id', 'rent_id', 'dgroup_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search', 'group_page', 'group_search']);
+        if ($validator->fails()) {
+            return response()->json(['status' => false], 400);
+        }
+
+
+        $group = Group::find($validated['group_id']);
+        $dgroup = Group::find($validated['dgroup_id']);
+        $rent = Rent::find($validated['rent_id']);
+
+        $group->rents()->syncWithoutDetaching([$validated['rent_id']]);
+        $dgroup->rents()->detach($rent);
+
+        $params = [
+            'lock_search' => $validated['lock_search'] ?? '',
+            'rent_search' => $validated['rent_search'] ?? '',
+            'group_search' => $validated['group_search'] ?? '',
+            'rent_page' => $validated['rent_page'],
+            'lock_page' => $validated['lock_page'],
+            'group_page' => $validated['group_page']
+        ];
+
+
+        return to_route('groups', $params)->with('success', '');
+    }
+
+
+
+
+
+
+    public function detach_rent(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'rent_id' => 'required|exists:rents,id',
+            'group_id' => 'required|exists:groups,id',
+
+            'rent_page' => 'required',
+            'lock_page' => 'required',
+            'group_page' => 'required',
+            'lock_search' => 'nullable',
+            'rent_search' => 'nullable',
+            'group_search' => 'nullable'
+
+        ]);
+
+        $validated = $validator->safe()->only(['rent_id', 'group_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search', 'group_page', 'group_search']);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false], 400);
+        }
+
+        $group = Group::find($validated['group_id']);
+        $rent = Rent::find($validated['rent_id']);
+
+        $group->rents()->detach($rent);
+
+        $params = [
+            'lock_search' => $validated['lock_search'] ?? '',
+            'rent_search' => $validated['rent_search'] ?? '',
+            'group_search' => $validated['group_search'] ?? '',
+            'rent_page' => $validated['rent_page'],
+            'lock_page' => $validated['lock_page'],
+            'group_page' => $validated['group_page']
+        ];
+
+
+        return to_route('groups', $params)->with('success', '');
+    }
+
+
+
+
 
 
 

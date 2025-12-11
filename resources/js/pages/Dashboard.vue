@@ -1,10 +1,27 @@
-<script setup lang="ts">
+<script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
+import { ref, onMounted, computed } from 'vue'
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next'
+import { cn } from "@/lib/utils"
+
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+
 
 
 import {
@@ -18,12 +35,34 @@ import {
 } from '@/components/ui/card'
 
 
-const breadcrumbs: BreadcrumbItem[] = [
+const breadcrumbs = [
     {
         title: 'Информация',
         href: dashboard().url,
     },
 ];
+
+
+const props = defineProps({
+    locks: {
+        type: Object
+    },
+
+
+});
+
+const open = ref(false)
+const selLock = ref()
+
+const selectedFreeLock = computed(() =>
+    props.locks.find(freelock => freelock.id === selLock.value),
+)
+
+function selectLock(selectedValue) {
+    selLock.value = selectedValue === selLock.value ? '' : selectedValue
+    open.value = false
+}
+
 </script>
 
 <template>
@@ -79,7 +118,39 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </Card>
             </div>
 
-            <p class="text-2xl font-bold">Быстрые действия</p>
+            <p class="text-2xl font-bold">Быстрые действия с замком</p>
+
+
+
+
+            <Popover v-model:open="open" class="">
+                <PopoverTrigger as-child>
+                    <Button variant="outline" role="combobox" :aria-expanded="open" class=" justify-between">
+                        {{ selectedFreeLock?.lock_alias || "Выберите замок..." }}
+                        <ChevronsUpDownIcon class="opacity-50" />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent class="w-[var(--reka-popover-trigger-width)] p-0" :side-offset="5" align="start">
+
+                    <Command class="w-full">
+                        <CommandInput class="h-9" placeholder="Выбор замка..." />
+                        <CommandList>
+                            <CommandEmpty>Свободных замков не найдено.</CommandEmpty>
+                            <CommandGroup>
+                                <CommandItem v-for="lock in locks" :key="lock.id" :value="lock.id" @select="(ev) => {
+                                    selectLock(ev.detail.value)
+                                }">
+                                    {{ lock.lock_alias }}
+                                    <CheckIcon :class="cn(
+                                        'ml-auto',
+                                        selLock === lock.id ? 'opacity-100' : 'opacity-0',
+                                    )" />
+                                </CommandItem>
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
 
 
             <div class="grid auto-rows-min gap-4 md:grid-cols-4">
@@ -106,10 +177,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </Card>
 
 
-                 <Card class="rounded-none py-3 gap-0 shadow-xs">
+                <Card class="rounded-none py-3 gap-0 shadow-xs">
                     <CardHeader>
                         <CardDescription>
-                           Добавить замок | объект
+                            Добавить замок | объект
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="flex items-center justify-end">
