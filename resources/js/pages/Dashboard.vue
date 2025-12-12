@@ -74,9 +74,10 @@ function selectRent(selectedValue) {
 }
 
 
+const selectedLock = ref();
 
-const selectLock = () => {
-    alert('!!!')
+const selectLock = (lock) => {
+   selectedLock.value = lock
 }
 
 
@@ -183,7 +184,7 @@ const selectLock = () => {
                 </div>
 
                 <div v-if="selectedRent.locks.length" class="mt-5 font-bold text-center"> Замки</div>
-
+{{ selectedLock }}
                 <Table v-if="selectedRent.locks.length" class="mt-2">
                     
                     <TableHeader>
@@ -200,9 +201,9 @@ const selectLock = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="lock in selectedRent.locks" @click="selectLock()" :key="lock.id">
+                        <TableRow   :class="{ 'border-2   bg-green-500 hover:bg-green-500': lock.id == selectedLock.id }"  v-for="lock in selectedRent.locks" @click="selectLock(lock)" :key="lock.id">
                             <TableCell class="font-medium">
-                                {{ lock.lock_id }}
+                                {{ lock.lock_id }}  
                             </TableCell>
                             <TableCell>{{ lock.lock_name }}</TableCell>
                             <TableCell>{{ lock.lock_alias }}</TableCell>
