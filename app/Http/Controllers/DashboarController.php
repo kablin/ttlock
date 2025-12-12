@@ -15,16 +15,9 @@ class DashboarController extends Controller
 {
     public function index(Request $request)
     {
-
-        $locks = auth()->user()->locks()->with('rents')->orderBy('id');
-        if ($request->has('lock_search')) {
-            $rents = $locks->where('name', 'ilike', '%' . $request->lock_search . '%');
-        }
-        $locks =  $locks->get();
-        // $rents = $rents->paginate(12, ['*'], 'rent_page', $rent_page);
-
+        $rents = auth()->user()->rents()->with('locks')->orderBy('id')->get();
         $params = [
-            'locks' => $locks,
+            'rents' => $rents,
             'success' => session('success')
         ];
 

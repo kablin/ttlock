@@ -18,10 +18,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', [\App\Http\Controllers\DashboarController::class, 'index'])->name('dashboard');
 
+    Route::get('/wizard', [\App\Http\Controllers\WizardController::class, 'index'])->name('wizard');
 
-    Route::get('wizard', function () {
-        return Inertia::render('Wizard');
-    })->name('wizard');
+    Route::post('wizard/attach_lock', [\App\Http\Controllers\WizardController::class, 'attach_lock'])->name('wizard_attach_lock');
+    Route::post('wizard/detach_lock', [\App\Http\Controllers\WizardController::class, 'detach_lock'])->name('wizard_detach_lock');
+    Route::post('wizard/dattach_lock', [\App\Http\Controllers\WizardController::class, 'dattach_lock'])->name('wizard_dattach_lock');
+
+
+     Route::post('wizard/page', [\App\Http\Controllers\WizardController::class, 'page'])->name('wizard_page');
+
 
     /*
     Route::get('rents_objects', function () {

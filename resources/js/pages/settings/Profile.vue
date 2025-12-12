@@ -83,7 +83,7 @@ const user = page.props.auth.user;
                         </p>
 
                         <div v-if="status === 'verification-link-sent'" class="mt-2 text-sm font-medium text-green-600">
-                            Письмо со ссылкой для верификации отправлено н аваш арес.
+                            Письмо со ссылкой для верификации отправлено на ваш адрес.
                         </div>
                     </div>
 

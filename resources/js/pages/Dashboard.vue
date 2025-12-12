@@ -23,6 +23,15 @@ import {
 } from '@/components/ui/popover'
 
 
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
 
 import {
     Card,
@@ -44,7 +53,7 @@ const breadcrumbs = [
 
 
 const props = defineProps({
-    locks: {
+    rents: {
         type: Object
     },
 
@@ -52,16 +61,24 @@ const props = defineProps({
 });
 
 const open = ref(false)
-const selLock = ref()
 
-const selectedFreeLock = computed(() =>
-    props.locks.find(freelock => freelock.id === selLock.value),
+
+const selRent = ref()
+
+const selectedRent = computed(() =>
+    props.rents.find(rent => rent.id === selRent.value),
 )
-
-function selectLock(selectedValue) {
-    selLock.value = selectedValue === selLock.value ? '' : selectedValue
+function selectRent(selectedValue) {
+    selRent.value = selectedValue === selRent.value ? '' : selectedValue
     open.value = false
 }
+
+function selectLock() {
+    alert('!!!')
+}
+
+
+
 
 </script>
 
@@ -126,24 +143,24 @@ function selectLock(selectedValue) {
             <Popover v-model:open="open" class="">
                 <PopoverTrigger as-child>
                     <Button variant="outline" role="combobox" :aria-expanded="open" class=" justify-between">
-                        {{ selectedFreeLock?.lock_alias || "Выберите замок..." }}
+                        {{ selectedRent?.name || "Выберите объект..." }}
                         <ChevronsUpDownIcon class="opacity-50" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent class="w-[var(--reka-popover-trigger-width)] p-0" :side-offset="5" align="start">
 
                     <Command class="w-full">
-                        <CommandInput class="h-9" placeholder="Выбор замка..." />
+                        <CommandInput class="h-9" placeholder="Выбор объекта..." />
                         <CommandList>
-                            <CommandEmpty>Свободных замков не найдено.</CommandEmpty>
+                            <CommandEmpty>Объектов не найдено.</CommandEmpty>
                             <CommandGroup>
-                                <CommandItem v-for="lock in locks" :key="lock.id" :value="lock.id" @select="(ev) => {
-                                    selectLock(ev.detail.value)
+                                <CommandItem v-for="rent in rents" :key="rent.id" :value="rent.id" @select="(ev) => {
+                                    selectRent(ev.detail.value)
                                 }">
-                                    {{ lock.lock_alias }}
+                                    {{ rent.name }}
                                     <CheckIcon :class="cn(
                                         'ml-auto',
-                                        selLock === lock.id ? 'opacity-100' : 'opacity-0',
+                                        selRent === rent.id ? 'opacity-100' : 'opacity-0',
                                     )" />
                                 </CommandItem>
                             </CommandGroup>
@@ -151,6 +168,62 @@ function selectLock(selectedValue) {
                     </Command>
                 </PopoverContent>
             </Popover>
+
+
+            <div v-if="selectedRent">
+
+                <div class="grid   gap-3 grid-cols-[max-content_1fr]">
+
+                    <p class="font-bold me-5">Объект:</p>
+                    <p class="  text-gray-500">{{ selectedRent?.name }}</p>
+                    <p class="font-bold me-6"> Описание:</p>
+                    <p class="  text-gray-500">{{ selectedRent?.description }}</p>
+
+                </div>
+
+                <div v-if="selectedRent.locks.length" class="mt-5 font-bold text-center"> Замки</div>
+
+                <Table v-if="selectedRent.locks.length" class="mt-2">
+                    
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead class="w-[100px]">
+                                Ид
+                            </TableHead>
+                            <TableHead>Название</TableHead>
+                            <TableHead>Имя</TableHead>
+                            <TableHead>Заряд</TableHead>
+                            <TableHead class="text-right">
+                                Действие
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="lock in selectedRent.locks" @click="selectLock()" :key="lock.id">
+                            <TableCell class="font-medium">
+                                {{ lock.lock_id }}
+                            </TableCell>
+                            <TableCell>{{ lock.lock_name }}</TableCell>
+                            <TableCell>{{ lock.lock_alias }}</TableCell>
+                            <TableCell>{{ lock.electric_quantity }}</TableCell>
+                            <TableCell class="text-right">
+
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+
+                <div v-else class="text-center"> К данному объекту не привязан ни один замок</div>
+
+
+
+            </div>
+
+
+
+
+
+
 
 
             <div class="grid auto-rows-min gap-4 md:grid-cols-4">
