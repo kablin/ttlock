@@ -73,10 +73,11 @@ function selectRent(selectedValue) {
     open.value = false
 }
 
-function selectLock() {
+
+
+const selectLock = () => {
     alert('!!!')
 }
-
 
 
 
