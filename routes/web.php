@@ -109,7 +109,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
+
+    //
+
     Route::post('/v1/get_lock_list', [\App\Http\Controllers\CallbackApiController::class, 'getLockList'])->name('getLockList');
+    Route::post('/v1/open_lock', [\App\Http\Controllers\CallbackApiController::class, 'openLock'])->name('openLock');
     Route::post('/v1/get_job_result/{job_id}', [\App\Http\Controllers\CallbackApiController::class, 'getJobResult'])->name('getJobResult');
 });
 

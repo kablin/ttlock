@@ -115,8 +115,6 @@ const getLocks = async () => {
             }
         })
 
-
-
         //   pollForResult(response.data.job_id)
 
     } catch (error: any) {

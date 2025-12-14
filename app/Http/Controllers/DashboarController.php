@@ -9,6 +9,7 @@ use App\Models\Rent;
 use App\Models\Group;
 use App\Models\Lock;
 use Illuminate\Support\Facades\Validator;
+use denis660\Centrifugo\Centrifugo;
 
 
 class DashboarController extends Controller
@@ -16,14 +17,19 @@ class DashboarController extends Controller
     public function index(Request $request)
     {
         $rents = auth()->user()->rents()->with('locks')->orderBy('id')->get();
+
+        $centrifugo =  resolve(Centrifugo::class);
+        $token = $centrifugo->generateConnectionToken((string)Auth::id(), 0, [
+            'name' => Auth::user()->name,
+        ], ['api:open_lock-' . (string)Auth::id()]);
+
+
         $params = [
             'rents' => $rents,
+            'token' => $token,
             'success' => session('success')
         ];
 
         return Inertia::render('Dashboard', $params);
     }
-
-
-
 }

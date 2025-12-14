@@ -1,12 +1,18 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard } from '@/routes';
+import { dashboard, openLock } from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import { ref, onMounted, computed } from 'vue'
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
-import { CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next'
+import { CheckIcon, ChevronsUpDownIcon, KeyRound, LockKeyholeOpen } from 'lucide-vue-next'
 import { cn } from "@/lib/utils"
+
+
+import { Centrifuge } from 'centrifuge'
+import { usePage } from '@inertiajs/vue3';
+import axios from 'axios';
+
 
 import {
     Command,
@@ -21,6 +27,13 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
+
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 
 import {
@@ -43,6 +56,17 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 const breadcrumbs = [
     {
@@ -56,20 +80,72 @@ const props = defineProps({
     rents: {
         type: Object
     },
-
+    centrifugo_listener:
+    {
+        type: String,
+        required: true,
+    },
+    token: {
+        type: String
+    },
 
 });
 
 const open = ref(false)
-
+const isOpenLockDialogOpen = ref(false)
+const waitApiOpenLock = ref(false)
+const page = usePage();
+const lockMessage = ref('')
 
 const selRent = ref()
+
+
+
+
+
+
+onMounted(async () => {
+
+
+
+
+    const centrifuge = new Centrifuge(props.centrifugo_listener, {
+        token: props.token
+    })
+
+    const sub = centrifuge.newSubscription('api:open_lock-' + page.props.auth.user.id)
+
+    //получение сообщений по веб.сокет
+    sub.on('publication', (ctx) => {
+       // console.log(ctx)
+        waitApiOpenLock.value = false
+        isOpenLockDialogOpen.value = true
+
+        lockMessage.value = ctx?.data?.msg
+    })
+
+
+
+    centrifuge.on('error', function (ctx) {
+        console.log('ERROR: ', ctx);
+        waitApiOpenLock.value = false
+        isOpenLockDialogOpen.value = true
+        lockMessage.value = 'Ошибка'
+    })
+
+    centrifuge.connect()
+    sub.subscribe()
+})
+
+
 
 const selectedRent = computed(() =>
     props.rents.find(rent => rent.id === selRent.value),
 )
 function selectRent(selectedValue) {
     selRent.value = selectedValue === selRent.value ? '' : selectedValue
+    if (selectedRent.value?.locks.length > 0) selectedLock.value = selectedRent.value.locks[0]
+    else selectedLock.value = null
     open.value = false
 }
 
@@ -77,11 +153,31 @@ function selectRent(selectedValue) {
 const selectedLock = ref();
 
 const selectLock = (lock) => {
-   selectedLock.value = lock
+    selectedLock.value = lock
 }
 
 
 
+const addKey = (lock) => {
+    console.log('add')
+}
+
+
+const openLockfn = async (lock) => {
+   waitApiOpenLock.value = true
+    try {
+        const response = await axios.post(openLock().url, {'lock_id':lock.lock_id
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+    } catch (error) {
+        console.error('Error:', error)
+    } finally {
+        // loading.value = false
+    }
+}
 </script>
 
 <template>
@@ -103,7 +199,7 @@ const selectLock = (lock) => {
                     </CardContent>
                 </Card>
 
-
+                {{ centrifugo_listener }}
 
                 <Card class="rounded-none py-3 gap-0 shadow-xs">
                     <CardHeader>
@@ -184,9 +280,9 @@ const selectLock = (lock) => {
                 </div>
 
                 <div v-if="selectedRent.locks.length" class="mt-5 font-bold text-center"> Замки</div>
-{{ selectedLock }}
+
                 <Table v-if="selectedRent.locks.length" class="mt-2">
-                    
+
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-[100px]">
@@ -201,14 +297,50 @@ const selectLock = (lock) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow   :class="{ 'border-2   bg-green-500 hover:bg-green-500': lock.id == selectedLock.id }"  v-for="lock in selectedRent.locks" @click="selectLock(lock)" :key="lock.id">
+                        <TableRow
+                            :class="{ 'border-2  font-bold  bg-green-200 hover:bg-green-200': lock.id == selectedLock.id }"
+                            v-for="lock in selectedRent.locks" @click="selectLock(lock)" :key="lock.id">
                             <TableCell class="font-medium">
-                                {{ lock.lock_id }}  
+                                {{ lock.lock_id }}
                             </TableCell>
                             <TableCell>{{ lock.lock_name }}</TableCell>
                             <TableCell>{{ lock.lock_alias }}</TableCell>
                             <TableCell>{{ lock.electric_quantity }}</TableCell>
-                            <TableCell class="text-right">
+                            <TableCell class="text-right gap-4">
+
+
+
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button class="mx-2" variant="design_outline" size="icon"
+                                                @click="addKey(lock)">
+                                                <KeyRound />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <span>Добавить ключ</span>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button :disabled="waitApiOpenLock" class="mx-2" variant="design_outline"
+                                                size="icon" @click="openLockfn(lock)">
+                                                <LockKeyholeOpen />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <span v-if="waitApiOpenLock">Выполняется запрос на открытие замка</span>
+                                            <span v-else>Открыть замок</span>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+
+
+
 
                             </TableCell>
                         </TableRow>
@@ -221,54 +353,34 @@ const selectLock = (lock) => {
 
             </div>
 
+            <div v-if="selectedRent?.locks.length" class="mt-5 font-bold text-center"> Текущие ключи</div>
 
 
 
 
 
 
-
-            <div class="grid auto-rows-min gap-4 md:grid-cols-4">
-                <Card class="rounded-none  py-3 gap-0 shadow-xs">
-                    <CardHeader class="">
-                        <CardDescription>
-                            Выдать ключ
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="flex items-center justify-end">
-                        <Button variant="design_outline">Выдать</Button>
-                    </CardContent>
-                </Card>
-
-                <Card class="rounded-none py-3 gap-0 shadow-xs">
-                    <CardHeader>
-                        <CardDescription>
-                            Открыть замок
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="flex items-center justify-end">
-                        <Button variant="design_outline">Открыть</Button>
-                    </CardContent>
-                </Card>
-
-
-                <Card class="rounded-none py-3 gap-0 shadow-xs">
-                    <CardHeader>
-                        <CardDescription>
-                            Добавить замок | объект
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="flex items-center justify-end">
-                        <Button variant="design_outline">Добавить</Button>
-                    </CardContent>
-                </Card>
-
-
-            </div>
-            <div
-                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                <PlaceholderPattern />
-            </div>
         </div>
+
+
+
+        <AlertDialog v-model:open="isOpenLockDialogOpen">
+
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Открытие замка</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {{ lockMessage }}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Закрыть</AlertDialogCancel>
+
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
+
+
     </AppLayout>
 </template>

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\LockJob;
 use App\Models\Lock;
 use App\Services\TTLockService;
+use denis660\Centrifugo\Centrifugo;
 
 class OpenLockJob implements ShouldQueue
 {
@@ -54,7 +55,7 @@ class OpenLockJob implements ShouldQueue
 
             $servise =  new TTLockService($job->user);
 
-            $rezult = $servise->openLock( $lock);
+            $rezult = $servise->openLock($lock);
 
 
             $data['job'] = $job->job_id;
@@ -63,11 +64,20 @@ class OpenLockJob implements ShouldQueue
             $data['status'] = $rezult['status'];
             $data['data'] =  $rezult;
 
-            Http::withBody(json_encode($data), 'application/json')
-                //                ->withOptions([
-                //                    'headers' => ''
-                //                ])
-                ->post($job->user->callback);
+            if ($rezult['status']) $msg = "Замок " . $lock->lock_alias . " открыт";
+            else $msg = $rezult['msg'];
+
+            $centrifugo =  resolve(Centrifugo::class);
+            $centrifugo->publish('api:open_lock-' . $job->user->id, ['msg' => $msg, 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
+
+
+            if ($job->user->callback) {
+                Http::withBody(json_encode($data), 'application/json')
+                    //                ->withOptions([
+                    //                    'headers' => ''
+                    //                ])
+                    ->post($job->user->callback);
+            }
         }
     }
 }
