@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { lockList, getLockList, getJobResult, lockList_refresh } from '@/routes';
+import { lockList, getLockList,  lockList_refresh } from '@/routes';
 import { ref, onMounted } from 'vue'
 import { usePage } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';

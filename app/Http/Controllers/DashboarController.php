@@ -21,7 +21,9 @@ class DashboarController extends Controller
         $centrifugo =  resolve(Centrifugo::class);
         $token = $centrifugo->generateConnectionToken((string)Auth::id(), 0, [
             'name' => Auth::user()->name,
-        ], ['api:open_lock-' . (string)Auth::id()]);
+        ], ['api:open_lock-' . (string)Auth::id(),'api:get_codes_list-' . (string)Auth::id()]);
+
+        
 
 
         $params = [

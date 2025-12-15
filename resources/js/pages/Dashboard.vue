@@ -1,11 +1,11 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard, openLock } from '@/routes';
+import { dashboard, openLock, pincodes_list, getCodesList } from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import { ref, onMounted, computed } from 'vue'
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
-import { CheckIcon, ChevronsUpDownIcon, KeyRound, LockKeyholeOpen } from 'lucide-vue-next'
+import { CheckIcon, ChevronsUpDownIcon, KeyRound, CircleX, LockKeyholeOpen } from 'lucide-vue-next'
 import { cn } from "@/lib/utils"
 
 
@@ -13,6 +13,7 @@ import { Centrifuge } from 'centrifuge'
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import {
     Command,
@@ -94,10 +95,16 @@ const props = defineProps({
 const open = ref(false)
 const isOpenLockDialogOpen = ref(false)
 const waitApiOpenLock = ref(false)
+const waitApiSyncKeys = ref(false)
+
+
 const page = usePage();
 const lockMessage = ref('')
+const lockTitle = ref('')
 
 const selRent = ref()
+
+const keyList = ref()
 
 
 
@@ -105,9 +112,6 @@ const selRent = ref()
 
 
 onMounted(async () => {
-
-
-
 
     const centrifuge = new Centrifuge(props.centrifugo_listener, {
         token: props.token
@@ -117,10 +121,23 @@ onMounted(async () => {
 
     //получение сообщений по веб.сокет
     sub.on('publication', (ctx) => {
-       // console.log(ctx)
+        // console.log(ctx)
         waitApiOpenLock.value = false
         isOpenLockDialogOpen.value = true
+        lockTitle.value = "Замок открыт"
+        lockMessage.value = ctx?.data?.msg
+    })
 
+
+
+    const sub_locks = centrifuge.newSubscription('api:get_codes_list-' + page.props.auth.user.id)
+
+    //получение сообщений по веб.сокет
+    sub_locks.on('publication', (ctx) => {
+        console.log(ctx)
+        waitApiSyncKeys.value = false
+        isOpenLockDialogOpen.value = true
+        lockTitle.value = "Ключи синхронизированы"
         lockMessage.value = ctx?.data?.msg
     })
 
@@ -129,12 +146,15 @@ onMounted(async () => {
     centrifuge.on('error', function (ctx) {
         console.log('ERROR: ', ctx);
         waitApiOpenLock.value = false
+        waitApiSyncKeys.value = false
         isOpenLockDialogOpen.value = true
+        lockTitle.value = "Ошибка"
         lockMessage.value = 'Ошибка'
     })
 
     centrifuge.connect()
     sub.subscribe()
+    sub_locks.subscribe()
 })
 
 
@@ -144,7 +164,10 @@ const selectedRent = computed(() =>
 )
 function selectRent(selectedValue) {
     selRent.value = selectedValue === selRent.value ? '' : selectedValue
-    if (selectedRent.value?.locks.length > 0) selectedLock.value = selectedRent.value.locks[0]
+    if (selectedRent.value?.locks.length > 0) {
+        selectedLock.value = selectedRent.value.locks[0]
+        selectLock(selectedLock.value)
+    }
     else selectedLock.value = null
     open.value = false
 }
@@ -154,6 +177,17 @@ const selectedLock = ref();
 
 const selectLock = (lock) => {
     selectedLock.value = lock
+    axios.post(pincodes_list(lock.id).url).then((response) => {
+
+        keyList.value = response.data.pincodes
+    })
+        .catch((error) => {
+            console.log(error);
+
+        })
+        .finally(() => {
+
+        });
 }
 
 
@@ -164,9 +198,10 @@ const addKey = (lock) => {
 
 
 const openLockfn = async (lock) => {
-   waitApiOpenLock.value = true
+    waitApiOpenLock.value = true
     try {
-        const response = await axios.post(openLock().url, {'lock_id':lock.lock_id
+        const response = await axios.post(openLock().url, {
+            'lock_id': lock.lock_id
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -178,6 +213,28 @@ const openLockfn = async (lock) => {
         // loading.value = false
     }
 }
+
+
+
+const syncKeysfn = async (lock) => {
+    waitApiSyncKeys.value = true
+    try {
+        const response = await axios.post(getCodesList().url, {
+            'lock_id': lock.lock_id,
+            'page_number': 1,
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+    } catch (error) {
+        console.error('Error:', error)
+    } finally {
+        // loading.value = false
+    }
+}
+
+
 </script>
 
 <template>
@@ -199,7 +256,7 @@ const openLockfn = async (lock) => {
                     </CardContent>
                 </Card>
 
-                {{ centrifugo_listener }}
+
 
                 <Card class="rounded-none py-3 gap-0 shadow-xs">
                     <CardHeader>
@@ -305,7 +362,7 @@ const openLockfn = async (lock) => {
                             </TableCell>
                             <TableCell>{{ lock.lock_name }}</TableCell>
                             <TableCell>{{ lock.lock_alias }}</TableCell>
-                            <TableCell>{{ lock.electric_quantity }}</TableCell>
+                            <TableCell>{{ lock.electric_quantity }}%</TableCell>
                             <TableCell class="text-right gap-4">
 
 
@@ -353,14 +410,102 @@ const openLockfn = async (lock) => {
 
             </div>
 
-            <div v-if="selectedRent?.locks.length" class="mt-5 font-bold text-center"> Текущие ключи</div>
+
+            <div v-if="selectedLock">
+
+
+                <Tabs default-value="pins" class="h-full flex flex-col ">
+                    <TabsList class="  w-full mt-3">
+                        <TabsTrigger value="pins">
+                            <div class=" font-bold  text-lg">Текущие ключи</div>
+                        </TabsTrigger>
+                        <TabsTrigger value="logs">
+                            <div class=" font-bold  text-lg">Лог событий</div>
+
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="pins" class="h-full justify-center flex-col  flex">
 
 
 
+                        <Table v-if="keyList?.length" class="mt-2">
+
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead class="w-[100px]">
+                                        Ид
+                                    </TableHead>
+                                    <TableHead>Имя</TableHead>
+                                    <TableHead>Код</TableHead>
+                                    <TableHead>Действует с</TableHead>
+                                    <TableHead>Действует до</TableHead>
+                                    <TableHead>Загружен в замок</TableHead>
+                                    <TableHead class="text-right">
+                                        Действие
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="key in keyList" @click="selectLock(lock)" :key="key.id">
+                                    <TableCell class="font-medium">
+                                        {{ key.pin_code_id }}
+                                    </TableCell>
+                                    <TableCell>{{ key.code_name }}</TableCell>
+                                    <TableCell>{{ key.pin_code }}</TableCell>
+                                    <TableCell>{{ key.start }}</TableCell>
+                                    <TableCell>{{ key.end }}</TableCell>
+                                    <TableCell>
+                                        <CheckIcon v-if="key.is_load" />
+                                    </TableCell>
+                                    <TableCell class="text-right gap-4">
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger as-child>
+                                                    <Button variant="destructive2" size="icon">
+                                                        <CircleX />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <span>Удалить ключ</span>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
 
 
+                        <div class="flex items-center mt-5 gap-6 justify-begin mt-8">
 
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="design" :disabled="waitApiSyncKeys"
+                                            @click="syncKeysfn(selectedLock)">Синхронизировать с
+                                            TTLock</Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <span v-if="waitApiSyncKeys">Выполняется синхронизация</span>
+                                        <span v-else>Процесс синхронизации может занять неколько минут</span>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    </TabsContent>
+
+
+                    <TabsContent value="logs" class="h-full justify-center flex-col  flex">
+
+
+                    </TabsContent>
+                </Tabs>
+
+            </div>
         </div>
+
+
+
 
 
 
@@ -368,7 +513,7 @@ const openLockfn = async (lock) => {
 
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Открытие замка</AlertDialogTitle>
+                    <AlertDialogTitle> {{ lockTitle }}</AlertDialogTitle>
                     <AlertDialogDescription>
                         {{ lockMessage }}
                     </AlertDialogDescription>

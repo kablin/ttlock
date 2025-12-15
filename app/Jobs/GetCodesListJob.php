@@ -16,6 +16,7 @@ use App\Models\LockJob;
 use App\Models\Lock;
 use App\Models\LockPinCode;
 use App\Services\TTLockService;
+use denis660\Centrifugo\Centrifugo;
 
 class GetCodesListJob implements ShouldQueue
 {
@@ -34,7 +35,7 @@ class GetCodesListJob implements ShouldQueue
      */
     public function handle(): void
     {
-        
+
         if ($job = LockJob::find($this->job_id)) {
 
             $data['job'] = $job->job_id;
@@ -56,14 +57,24 @@ class GetCodesListJob implements ShouldQueue
 
             $servise =  new TTLockService($job->user);
 
-            $rezult = $servise->getKeyList( $lock, $this->page_number,$this->page_size);
+            $rezult = $servise->getKeyList($lock, $this->page_number, $this->page_size);
 
             $data['status'] = $rezult['status'];
             $data['data'] =  $rezult;
 
-            Http::withBody(json_encode($data), 'application/json')
-                ->post($job->user->callback);
 
+            if ($rezult['status']) $msg = "Ключи замка " . $lock->lock_alias . " синхронизированы";
+            else $msg = $rezult['msg'];
+
+            $centrifugo =  resolve(Centrifugo::class);
+            $centrifugo->publish('api:get_codes_list-' . $job->user->id, ['msg' => $msg, 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
+
+info('get_codes_list');
+            if ($job->user->callback) {
+
+                Http::withBody(json_encode($data), 'application/json')
+                    ->post($job->user->callback);
+            }
         }
     }
 }

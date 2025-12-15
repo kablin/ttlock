@@ -78,7 +78,7 @@ class CallbackApiController extends Controller
 
             //$validated = $validator->safe()->only(['lock_id', 'page_number', 'page_size',  'tag']);
             $validated = $validator->safe()->only(['lock_id', 'page_number',   'tag']);
-            return (new JobsService(auth()->user()->id))->getCodesList($validated['lock_id'], $validated['page_number'], 30, $validated['tag'] ?? '');
+            return (new JobsService(auth()->user()->id))->getCodesList($validated['lock_id'], $validated['page_number'], 100, $validated['tag'] ?? '');
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }
