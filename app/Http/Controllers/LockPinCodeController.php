@@ -18,8 +18,20 @@ class LockPinCodeController extends Controller
 {
     public function pincodesList(Request $request, $lock_id)
     {
-        $pincodes = auth()->user()->locks->find($lock_id)->pincodes;
+        $pincodes = auth()->user()->locks->find($lock_id)->pincodes()->paginate(10, ['*'], 'page',1);
+        //info($pincodes);
+        return response()->json(['pincodes' => $pincodes]);
+    }
 
+
+    public function page(Request $request, $lock_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'page' => 'required',
+        ]);
+
+        $validated = $validator->safe()->only(['page']);
+        $pincodes = auth()->user()->locks->find($lock_id)->pincodes()->paginate(10, ['*'], 'page', $validated['page']);
         return response()->json(['pincodes' => $pincodes]);
     }
 }

@@ -16,6 +16,7 @@ use App\Models\LockJob;
 use App\Models\Lock;
 use App\Models\LockPinCode;
 use App\Services\TTLockService;
+use denis660\Centrifugo\Centrifugo;
 
 class DeleteKeyJob implements ShouldQueue
 {
@@ -27,18 +28,19 @@ class DeleteKeyJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $counter,private int $job_id, private int $lock_id, private int  $pwdID) {}
+    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int  $pwdID) {}
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
+        
         $data['method'] = 'delete_code_from_lock';
         if ($job = LockJob::find($this->job_id)) {
 
             $data['tag'] = json_decode($job->tag);
-            
+
             $lock = Lock::find($this->lock_id);
             if (!$this->lock_id) {
                 $data['job'] = $job->job_id;
@@ -57,42 +59,45 @@ class DeleteKeyJob implements ShouldQueue
 
             $servise =  new TTLockService($job->user);
 
-            $rezult = $servise->deleteKey( $lock,$this->pwdID);
-            if($rezult['status']==true) 
-            LockPinCode::where('pin_code_id',$this->pwdID)->delete();
+            $rezult = $servise->deleteKey($lock, $this->pwdID);
+            if ($rezult['status'] == true)
+                LockPinCode::where('pin_code_id', $this->pwdID)->delete();
 
 
             $data['job'] = $job->job_id;
             $data['method'] = 'delete_code_from_lock';
             $data['data'] =  $rezult;
             $data['status'] =  $rezult['status'];
-            if($rezult['status']==true) 
-            {
+            if ($rezult['status'] == true) {
                 $data['msg'] = "Ключ успешно удален";
-
-            }
-            else if ($this->counter>=5)
-            {
-                $data['msg'] = "Ошибка удаления ключа. ".$rezult['msg'].' Количество попыток исчерпано';
-
-            }
-
-            else
-            {
-                $data['msg'] = "Ошибка удаления ключа. ".$rezult['msg'].' Следеющая попытка удаления ключа чере 20 минут';
+            } else if ($this->counter >= 5) {
+                $data['msg'] = "Ошибка удаления ключа. " . $rezult['msg'] . ' Количество попыток исчерпано';
+            } else {
+                $data['msg'] = "Ошибка удаления ключа. " . $rezult['msg'] . ' Следеющая попытка удаления ключа чере 20 минут';
                 DeleteKeyJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,  $this->pwdID)->onQueue('default')
-                ->chain([
-                    new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
-                ])
-                ->delay(now()->addMinutes(20));
+                    ->chain([
+                        new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
+                    ])
+                    ->delay(now()->addMinutes(20));
             }
 
 
-            Http::withBody(json_encode($data), 'application/json')
-                //                ->withOptions([
-                //                    'headers' => ''
-                //                ])
-                ->post($job->user->callback);
+            if ($rezult['status']) $msg = "Ключ удален";
+            else $msg = $rezult['msg'];
+
+            $centrifugo =  resolve(Centrifugo::class);
+            $centrifugo->publish('api:delete_code_from_lock-' . $job->user->id, ['msg' => $msg, 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
+
+
+
+
+            if ($job->user->callback) {
+                Http::withBody(json_encode($data), 'application/json')
+                    //                ->withOptions([
+                    //                    'headers' => ''
+                    //                ])
+                    ->post($job->user->callback);
+            }
         }
     }
 }

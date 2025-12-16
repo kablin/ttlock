@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use App\Models\LockJob;
 use App\Models\Lock;
+use Carbon\Carbon;
 use App\Models\LockPinCode;
 use App\Services\TTLockService;
 use denis660\Centrifugo\Centrifugo;
@@ -63,13 +64,29 @@ class GetCodesListJob implements ShouldQueue
             $data['data'] =  $rezult;
 
 
-            if ($rezult['status']) $msg = "Ключи замка " . $lock->lock_alias . " синхронизированы";
-            else $msg = $rezult['msg'];
+            if ($rezult['status']) {
+
+                LockPinCode::where(['lock_id' => $lock->id,])->update(['is_load' => false]);
+                foreach ($rezult['data']['list'] as $key) {
+                    LockPinCode::updateOrCreate(
+                        ['pin_code_id' => $key['keyboardPwdId'], 'lock_id' => $lock->id],
+                        [
+                            'is_load' => true,
+                            'pin_code' => $key['keyboardPwd'],
+                            'start' => $key['startDate'] ? Carbon::createFromTimestamp(round($key['startDate']/1000))->toDateTimeString() : null,
+                            'end' => $key['endDate'] ? Carbon::createFromTimestamp(round($key['endDate']/1000))->toDateTimeString() : null,
+                            'code_name' => $key['keyboardPwdName']
+                        ]
+                    );
+                }
+
+                $msg = "Ключи замка " . $lock->lock_alias . " синхронизированы";
+            } else $msg = $rezult['msg'];
 
             $centrifugo =  resolve(Centrifugo::class);
             $centrifugo->publish('api:get_codes_list-' . $job->user->id, ['msg' => $msg, 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
 
-info('get_codes_list');
+            //info('get_codes_list',$rezult);
             if ($job->user->callback) {
 
                 Http::withBody(json_encode($data), 'application/json')
