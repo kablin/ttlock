@@ -16,6 +16,7 @@ use App\Models\LockJob;
 use App\Models\Lock;
 use App\Models\LockPinCode;
 use App\Services\TTLockService;
+use denis660\Centrifugo\Centrifugo;
 
 class AddKeyToLockJob implements ShouldQueue
 {
@@ -27,14 +28,14 @@ class AddKeyToLockJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code, private string $code_name,private $begin = null, private $end = null) {}
+    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code, private string $code_name, private $begin = null, private $end = null) {}
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        
+
         if ($job = LockJob::find($this->job_id)) {
 
             $data['job'] = $job->job_id;
@@ -47,12 +48,16 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['data'] = 'Lock not found';
                 $data['msg'] = 'Неизвестный замок';
                 $data['status'] = false;
+                if ($job->user->callback) {
+                    Http::withBody(json_encode($data), 'application/json')
+                        //                ->withOptions([
+                        //                    'headers' => ''
+                        //                ])
+                        ->post($job->user->callback);
+                } else $msg = $data['msg'];
 
-                Http::withBody(json_encode($data), 'application/json')
-                    //                ->withOptions([
-                    //                    'headers' => ''
-                    //                ])
-                    ->post($job->user->callback);
+                $centrifugo =  resolve(Centrifugo::class);
+                $centrifugo->publish('api:add_code_to_lock-' . $job->user->id, ['msg' => $data['msg'], 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
 
                 return;
             }
@@ -63,9 +68,13 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "Нет оплаченного пакета кодов";
+                if ($job->user->callback) {
+                    Http::withBody(json_encode($data), 'application/json')
+                        ->post($job->user->callback);
+                }
+                $centrifugo =  resolve(Centrifugo::class);
+                $centrifugo->publish('api:add_code_to_lock-' . $job->user->id, ['msg' => $data['msg'], 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
 
-                Http::withBody(json_encode($data), 'application/json')
-                    ->post($job->user->callback);
                 return;
             }
 
@@ -74,18 +83,26 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "Окончилась дата действия пакета кодов";
+                if ($job->user->callback) {
+                    Http::withBody(json_encode($data), 'application/json')
+                        ->post($job->user->callback);
+                }
+                $centrifugo =  resolve(Centrifugo::class);
+                $centrifugo->publish('api:add_code_to_lock-' . $job->user->id, ['msg' => $data['msg'], 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
 
-                Http::withBody(json_encode($data), 'application/json')
-                    ->post($job->user->callback);
                 return;
             }
             if ($job->user->code_packet->count < 1 &&  $job->user->code_packet->count != -100) {
                 $data['status'] = false;
                 $data['codes_error'] = true;
                 $data['msg'] = "Закончился пакет кодов";
+                if ($job->user->callback) {
+                    Http::withBody(json_encode($data), 'application/json')
+                        ->post($job->user->callback);
+                }
+                $centrifugo =  resolve(Centrifugo::class);
+                $centrifugo->publish('api:add_code_to_lock-' . $job->user->id, ['msg' => $data['msg'], 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
 
-                Http::withBody(json_encode($data), 'application/json')
-                    ->post($job->user->callback);
                 return;
             }
 
@@ -94,7 +111,7 @@ class AddKeyToLockJob implements ShouldQueue
 
             $servise =  new TTLockService($job->user);
 
-            $key = $servise->newKey($this->code, $lock, $this->code_name,$this->begin, $this->end);
+            $key = $servise->newKey($this->code, $lock, $this->code_name, $this->begin, $this->end);
 
             if ($key['status']) {
                 LockPinCode::create([
@@ -104,6 +121,7 @@ class AddKeyToLockJob implements ShouldQueue
                     'start' =>  $this->begin,
                     'end' => $this->end,
                     'code_name' => $this->code_name,
+                    'is_load' => true,
                 ]);
 
                 if ($job->user->code_packet->count != -100) {
@@ -115,30 +133,38 @@ class AddKeyToLockJob implements ShouldQueue
             if ($key['status']) {
                 $data['status'] = true;
                 $data['msg'] = "Ключ успешно загружен";
-            }
-            else if ($this->counter>=5)
-            {
+            } else if ($this->counter >= 5) {
                 $data['status'] = false;
-                $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Количество попыток исчерпано.';
-            }
-            else
-            {
-                 $data['status'] = false;
-                $data['msg'] = "Ошибка загрузки ключа. ".$key['msg'].' Следеющая попытка загрузки ключа чере 20 минут';
-                AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,$this->code, $this->code_name, $this->begin, $this->end)->onQueue('default')
-                ->chain([
-                    new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
-                ])
-                ->delay(now()->addMinutes(20));
+                $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Количество попыток исчерпано.';
+            } else if ($key['error_code'] != -3007) {
+                $data['status'] = false;
+                $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Следеющая попытка загрузки ключа чере 20 минут';
+                AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id, $this->code, $this->code_name, $this->begin, $this->end)->onQueue('default')
+                    ->chain([
+                        new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
+                    ])
+                    ->delay(now()->addMinutes(20));
+            } else {
+                $data['status'] = false;
+                $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'];
             }
 
             info('Load key result', $key);
 
-            Http::withBody(json_encode($data), 'application/json')
-                //                ->withOptions([
-                //                    'headers' => ''
-                //                ])
-                ->post($job->user->callback);
+
+            if ($data['status']) $msg = "Код " . $this->code . ' загружен в замок ' . $lock->lock_alias;
+            else $msg = $data['msg'];
+
+            $centrifugo =  resolve(Centrifugo::class);
+            $centrifugo->publish('api:add_code_to_lock-' . $job->user->id, ['msg' => $msg, 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
+
+            if ($job->user->callback) {
+                Http::withBody(json_encode($data), 'application/json')
+                    //                ->withOptions([
+                    //                    'headers' => ''
+                    //                ])
+                    ->post($job->user->callback);
+            }
         }
     }
 }

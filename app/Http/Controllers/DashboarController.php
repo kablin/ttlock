@@ -29,11 +29,9 @@ class DashboarController extends Controller
 
         ]);
 
-
-
-
         $params = [
             'rents' => $rents,
+            'locks_count' =>  auth()->user()->locks->count(),
             'token' => $token,
             'success' => session('success')
         ];

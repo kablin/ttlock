@@ -25,7 +25,7 @@ const passwordInput = ref<InstanceType<typeof Input> | null>(null);
 
 <template>
     <div class="space-y-6">
-        <HeadingSmall title="Удалить аккаунт" description="Delete your account and all of its resources" />
+        <HeadingSmall title="Удалить аккаунт" description="Удалить ваш аккаунт со всеми данными" />
         <div class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
             <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
                 <p class="font-medium">Внимание</p>

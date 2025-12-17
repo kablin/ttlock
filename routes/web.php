@@ -87,6 +87,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('pincodes/page/{lock_id}', [\App\Http\Controllers\LockPinCodeController::class, 'page'])->name('pincodes_page');
 
 
+
+  //Logs
+  Route::get('lockevents', [\App\Http\Controllers\LockEventController::class, 'index'])->name('lockevents');
+
+  Route::post('lockevents/page/{lock_id}', [\App\Http\Controllers\LockEventController::class, 'lock_page'])->name('lockevents_lock_page');
+  Route::post('lockevents/page', [\App\Http\Controllers\LockEventController::class, 'page'])->name('lockevents_page');
+
+
   //Route::get('/rents_objects', [\App\Http\Controllers\RentController::class, 'index'])->name('rents_objects');
 
   //lock_list
@@ -112,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('/v1/get_codes_list', [\App\Http\Controllers\CallbackApiController::class, 'getCodesList'])->name('getCodesList');
   Route::post('/v1/delete_code_from_lock', [\App\Http\Controllers\CallbackApiController::class, 'deleteCode'])->name('deleteKey');
   Route::post('/v1/add_code_to_lock', [\App\Http\Controllers\CallbackApiController::class, 'addCodeToLock'])->name('addCodeToLock');
+
 
 
   // Route::post('/v1/get_job_result/{job_id}', [\App\Http\Controllers\CallbackApiController::class, 'getJobResult'])->name('getJobResult');

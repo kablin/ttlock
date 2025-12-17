@@ -1,11 +1,11 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard, openLock, pincodes_list, getCodesList, deleteKey, addCodeToLock, pincodes_page } from '@/routes';
+import { dashboard, openLock, pincodes_list, getCodesList, deleteKey, addCodeToLock, pincodes_page, lockevents_lock_page } from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import { ref, onMounted, computed } from 'vue'
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
-import { CheckIcon, ChevronsUpDownIcon, KeyRound, CircleX, LockKeyholeOpen } from 'lucide-vue-next'
+import { CheckIcon, ChevronsUpDownIcon, KeyRound, CircleX, LockKeyholeOpen, ChevronDownIcon } from 'lucide-vue-next'
 import { cn } from "@/lib/utils"
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,17 @@ import axios from 'axios';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { buttonVariants } from '@/components/ui/button'
+
+
+
+
+import { getLocalTimeZone, today } from '@internationalized/date'
+
+
+import { Calendar } from '@/components/ui/calendar'
+
+
+
 
 import {
     Command,
@@ -82,6 +93,13 @@ import {
 } from '@/components/ui/pagination'
 
 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 
 import {
@@ -116,6 +134,10 @@ const props = defineProps({
     token: {
         type: String
     },
+    locks_count: {
+        type: Number
+    },
+
 
 });
 
@@ -138,11 +160,27 @@ const lockTitle = ref('')
 const selRent = ref()
 
 const keyList = ref()
+const logList = ref()
+
 
 
 const selectedLock = ref();
 const selectedKey = ref();
 
+
+
+
+const addkeyType = ref("Клиент");
+
+
+
+const addkeyDateBegin = ref(today(getLocalTimeZone()))
+const addkeyDateEnd = ref(today(getLocalTimeZone()).add({ days: 2 }));
+const addkeyTimeBegin = ref("12:00");
+const addkeyTimeEnd = ref("12:00");
+
+const openCalendFrom = ref(false)
+const openCalendTo = ref(false)
 
 
 onMounted(async () => {
@@ -242,13 +280,14 @@ function selectRent(selectedValue) {
 const selectLock = (lock) => {
     selectedLock.value = lock
     refreshKeysList(lock)
+    goToLogPage(1)
 }
 
 
 
 const refreshKeysList = (lock) => {
     axios.post(pincodes_list(lock.id).url).then((response) => {
-      
+
         keyList.value = response.data.pincodes
     })
         .catch((error) => {
@@ -300,7 +339,7 @@ const openLockfn = async (lock) => {
 const deleteKeyfn = async () => {
     waitApiDeleteKey.value = true
     try {
-        
+
         const response = await axios.post(deleteKey().url, {
             'lock_id': selectedLock.value.lock_id,
             'code_id': selectedKey.value.pin_code_id,
@@ -315,8 +354,6 @@ const deleteKeyfn = async () => {
         // loading.value = false
     }
 }
-
-
 
 
 
@@ -340,12 +377,15 @@ const syncKeysfn = async (lock) => {
 }
 
 
-const createKeyfn = async (lock) => {
+const createKeyfn = async () => {
     waitApiAddKey.value = true
     try {
         const response = await axios.post(addCodeToLock().url, {
-            'lock_id': lock.lock_id,   //!!!!!!!
-            'page_number': 1,         //!!!!!!!
+            'lock_id': selectedLock.value.lock_id,
+            'code': null,
+            'code_name': addkeyType.value,
+            'begin': (addkeyDateBegin.value && addkeyTimeBegin.value) ? addkeyDateBegin.value + ' ' + addkeyTimeBegin.value : null,
+            'end': (addkeyDateEnd.value && addkeyTimeEnd.value) ? addkeyDateEnd.value + ' ' + addkeyTimeEnd.value : null,
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -366,6 +406,23 @@ const goToKeyPage = async (page) => {
 
     axios.post(pincodes_page(selectedLock.value.id).url, { 'page': page, }).then((response) => {
         keyList.value = response.data.pincodes
+    })
+        .catch((error) => {
+            console.log(error);
+
+        })
+        .finally(() => {
+
+        });
+    return true
+}
+
+
+
+const goToLogPage = async (page) => {
+
+    axios.post(lockevents_lock_page(selectedLock.value.id).url, { 'page': page, }).then((response) => {
+        logList.value = response.data.log_events
     })
         .catch((error) => {
             console.log(error);
@@ -408,7 +465,7 @@ const goToKeyPage = async (page) => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="flex items-center justify-between">
-                        <p class="text-lg mr-3 font-bold">10 | 15</p>
+                        <p class="text-lg mr-3 font-bold">{{ locks_count }} | {{ rents.length }}</p>
                         <CardAction>
                             <Button variant="design">Купить замки</Button>
 
@@ -513,8 +570,8 @@ const goToKeyPage = async (page) => {
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger as-child>
-                                            <Button class="mx-2" variant="design_outline" size="icon"
-                                                @click="addKey(lock)">
+                                            <Button :disabled="waitApiAddKey" class="mx-2" variant="design_outline"
+                                                size="icon" @click="addKey(lock)">
                                                 <KeyRound />
                                             </Button>
                                         </TooltipTrigger>
@@ -604,8 +661,8 @@ const goToKeyPage = async (page) => {
                                             <TooltipProvider>
                                                 <Tooltip>
                                                     <TooltipTrigger as-child>
-                                                        <Button variant="destructive2" size="icon" :disabled="waitApiDeleteKey" 
-                                                            @click="openDeleteDialog(key)">
+                                                        <Button variant="destructive2" size="icon"
+                                                            :disabled="waitApiDeleteKey" @click="openDeleteDialog(key)">
                                                             <CircleX />
                                                         </Button>
                                                     </TooltipTrigger>
@@ -661,6 +718,67 @@ const goToKeyPage = async (page) => {
 
 
                     <TabsContent value="logs" class="h-full justify-center flex-col  flex">
+
+
+
+
+                        <template v-if="logList && logList.data?.length">
+
+                            <Table class="mt-2">
+
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>
+                                            Ид
+                                        </TableHead>
+                                        <TableHead>Тип события</TableHead>
+                                        <TableHead>Тип</TableHead>
+                                        <TableHead>Успех с</TableHead>
+                                        <TableHead>Пользователь</TableHead>
+                                        <TableHead>Код</TableHead>
+                                        <TableHead>
+                                            Дата
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <TableRow v-for="log in logList.data" :key="log.id">
+                                        <TableCell class="font-medium">
+                                            {{ log.id }}
+                                        </TableCell>
+                                        <TableCell>{{ log.record_type_from_lock }}</TableCell>
+                                        <TableCell>{{ log.record_type }}</TableCell>
+                                        <TableCell>
+                                            <CheckIcon v-if="log.success" />
+                                        </TableCell>
+                                        <TableCell>{{ log.username }}</TableCell>
+                                        <TableCell>{{ log.keyboard_pwd }} </TableCell>
+                                        <TableCell>{{ log.created_at }} </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+
+
+                            <Pagination class="my-4 self-end" v-model:page="logList.current_page"
+                                :items-per-page="logList.per_page" :total="logList.total"
+                                :default-page="logList.current_page">
+                                <PaginationContent>
+                                    <template v-for="(item, index) in logList.links" :key="index">
+                                        <PaginationPrevious v-if="index == 0" @click.prevent="goToLogPage(item.page)" />
+                                        <PaginationNext v-else-if="index == (logList.links.length - 1)"
+                                            @click.prevent="goToLogPage(item.page)" />
+                                        <PaginationItem
+                                            v-else-if="(logList.current_page - 2 <= item.page) && (logList.current_page + 2 >= item.page)"
+                                            :value="item.page" :is-active="item.page === logList.current_page"
+                                            @click.prevent="goToLogPage(item.page)">
+                                            {{ item.page }}
+                                        </PaginationItem>
+                                    </template>
+                                </PaginationContent>
+                            </Pagination>
+
+                        </template>
+
 
 
                     </TabsContent>
@@ -722,14 +840,103 @@ const goToKeyPage = async (page) => {
 
                 </DialogHeader>
                 <div class="grid gap-4">
+
+
+
                     <div class="grid gap-3">
                         <Label for="name-1">Название</Label>
-                        <Input id="name-1" name="name" />
-                    </div>
-                    <div class="grid gap-3">
-                        <Label for="username-1">Описание</Label>
+
+                        <Select v-model="addkeyType">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Выберите тип ключа" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Клиент">
+                                    Клиент
+                                </SelectItem>
+                                <SelectItem value="Персонал">
+                                    Персонал
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
 
                     </div>
+
+
+
+                    <div class="flex gap-4">
+                        <div class="flex flex-col gap-3 w-6/12">
+                            <Label for="date-picker" class="px-1">
+                                Дата начала
+                            </Label>
+                            <Popover v-model:open="openCalendFrom">
+                                <PopoverTrigger as-child>
+                                    <Button id="date-picker" variant="outline"
+                                        class="w-full justify-between font-normal">
+                                        {{ addkeyDateBegin ?
+                                            addkeyDateBegin.toDate(getLocalTimeZone()).toLocaleDateString() :
+                                            "Выберите дату"
+                                        }}
+                                        <ChevronDownIcon />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent class="w-auto overflow-hidden p-0" align="start">
+                                    <Calendar locale="ru-RU" :model-value="addkeyDateBegin" @update:model-value="(value) => {
+                                        if (value) {
+                                            addkeyDateBegin = value
+                                            openCalendFrom = false
+                                        }
+                                    }" />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                        <div class="flex flex-col gap-3 w-6/12">
+                            <Label for="time-picker" class="px-1">
+                                Время начала
+                            </Label>
+                            <Input v-model="addkeyTimeBegin" id="time-picker" type="time" step="60"
+                                default-value="12:00"
+                                class="w-full bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none" />
+                        </div>
+                    </div>
+
+
+
+                    <div class="flex gap-4">
+                        <div class="flex flex-col gap-3 w-6/12">
+                            <Label for="date-picker2" class="px-1">
+                                Дата окончания
+                            </Label>
+                            <Popover v-model:open="openCalendTo">
+                                <PopoverTrigger as-child>
+                                    <Button id="date-picker2" variant="outline"
+                                        class="w-full justify-between font-normal">
+                                        {{ addkeyDateEnd ?
+                                            addkeyDateEnd.toDate(getLocalTimeZone()).toLocaleDateString() :
+                                            "Выберите дату"
+                                        }}
+                                        <ChevronDownIcon />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent class="w-auto overflow-hidden p-0" align="start">
+                                    <Calendar locale="ru-RU" :model-value="addkeyDateEnd" @update:model-value="(value) => {
+                                        if (value) {
+                                            addkeyDateEnd = value
+                                            openCalendTo = false
+                                        }
+                                    }" />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                        <div class="flex flex-col gap-3 w-6/12">
+                            <Label for="time-picker2" class="px-1">
+                                Время окончания
+                            </Label>
+                            <Input v-model="addkeyTimeEnd" id="time-picker2" type="time" step="60" default-value="12:00"
+                                class="w-full bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none" />
+                        </div>
+                    </div>
+
                 </div>
                 <DialogFooter>
                     <DialogClose as-child>
@@ -740,7 +947,7 @@ const goToKeyPage = async (page) => {
                     </DialogClose>
                     <DialogClose as-child>
                         <Button @click="createKeyfn()" variant="design">
-                            Сохранить
+                            Добавить
                         </Button>
                     </DialogClose>
 

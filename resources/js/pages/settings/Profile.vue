@@ -34,51 +34,52 @@ const user = page.props.auth.user;
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbItems">
+
         <Head title="Настройки профиля" />
 
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
                 <HeadingSmall title="Информация" description="Изменение имени и почтового адреса" />
 
-                <Form v-bind="ProfileController.update.form()" class="space-y-6" v-slot="{ errors, processing, recentlySuccessful }">
+                <Form v-bind="ProfileController.update.form()" class="space-y-6"
+                    v-slot="{ errors, processing, recentlySuccessful }">
                     <div class="grid gap-2">
                         <Label for="name">Имя</Label>
-                        <Input
-                            id="name"
-                            class="mt-1 block w-full"
-                            name="name"
-                            :default-value="user.name"
-                            required
-                            autocomplete="name"
-                            placeholder="Ваше имя"
-                        />
+                        <Input id="name" class="mt-1 block w-full" name="name" :default-value="user.name" required
+                            autocomplete="name" placeholder="Ваше имя" />
                         <InputError class="mt-2" :message="errors.name" />
                     </div>
 
+
+                    <div class="grid gap-2">
+                        <Label for="name">Телефон</Label>
+                        <Input id="phone" type="tel" class="mt-1 block w-full" name="phone" :default-value="user.phone" required
+                            autocomplete="phone" placeholder="Ваш телефон" />
+                        <InputError class="mt-2" :message="errors.phone" />
+                    </div>
+
+
+                    <div class="grid gap-2">
+                        <Label for="name">Телеграм</Label>
+                        <Input id="tg_chat_id" class="mt-1 block w-full" name="tg_chat_id" :default-value="user.tg_chat_id" 
+                             placeholder="Ваш Телеграм" />
+                        <InputError class="mt-2" :message="errors.tg_chat_id" />
+                    </div>
+
+
                     <div class="grid gap-2">
                         <Label for="email">Email </Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            class="mt-1 block w-full"
-                            name="email"
-                            :default-value="user.email"
-                            required
-                            autocomplete="username"
-                            placeholder="Email "
-                        />
+                        <Input id="email" type="email" class="mt-1 block w-full" name="email"
+                            :default-value="user.email" required autocomplete="username" placeholder="Email " />
                         <InputError class="mt-2" :message="errors.email" />
                     </div>
 
                     <div v-if="mustVerifyEmail && !user.email_verified_at">
                         <p class="-mt-4 text-sm text-muted-foreground">
-                           Ваш почтовый адрес не верифицирован
-                            <Link
-                                :href="send()"
-                                as="button"
-                                class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
-                            >
-                                Нажмите сюда чтобы отправить письмо для верификации.
+                            Ваш почтовый адрес не верифицирован
+                            <Link :href="send()" as="button"
+                                class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500">
+                            Нажмите сюда чтобы отправить письмо для верификации.
                             </Link>
                         </p>
 
@@ -88,14 +89,11 @@ const user = page.props.auth.user;
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <Button :disabled="processing" data-test="update-profile-button" variant="design">Сохранить</Button>
+                        <Button :disabled="processing" data-test="update-profile-button"
+                            variant="design">Сохранить</Button>
 
-                        <Transition
-                            enter-active-class="transition ease-in-out"
-                            enter-from-class="opacity-0"
-                            leave-active-class="transition ease-in-out"
-                            leave-to-class="opacity-0"
-                        >
+                        <Transition enter-active-class="transition ease-in-out" enter-from-class="opacity-0"
+                            leave-active-class="transition ease-in-out" leave-to-class="opacity-0">
                             <p v-show="recentlySuccessful" class="text-sm text-neutral-600">Сохранено.</p>
                         </Transition>
                     </div>
