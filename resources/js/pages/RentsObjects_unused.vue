@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { rents_objects } from '@/routes';
+//import { rents_objects } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
@@ -33,7 +33,7 @@ import {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Мои объекты',
-        href: rents_objects().url,
+        href: '#',
     },
 ];
 
