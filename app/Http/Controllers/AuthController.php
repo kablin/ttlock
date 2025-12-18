@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use App\Models\LockApiLog;
 
 
 class AuthController extends Controller
@@ -18,6 +19,15 @@ class AuthController extends Controller
     public function CreateUser(Request $request)
     {
         try {
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'CreateUser',
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->email),
+            ]);
+
+
 
             $validated = $request->validate([
 

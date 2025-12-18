@@ -9,6 +9,7 @@ use App\Models\Rent;
 use App\Models\Group;
 use App\Models\Lock;
 use Illuminate\Support\Facades\Validator;
+use App\Models\LockApiLog;
 
 
 class GroupController extends Controller
@@ -36,7 +37,7 @@ class GroupController extends Controller
 
 
 
-        $groups = auth()->user()->groups()->with('locks', 'rents','rents.locks')->orderBy('id');
+        $groups = auth()->user()->groups()->with('locks', 'rents', 'rents.locks')->orderBy('id');
         if ($request->has('group_search')) {
             $groups = $groups->where('name', 'ilike', '%' . $request->group_search . '%');
         }
@@ -59,6 +60,15 @@ class GroupController extends Controller
     public function create(Request $request)
     {
 
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'createGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
+
+
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'description' => 'nullable',
@@ -80,6 +90,16 @@ class GroupController extends Controller
 
     public function update(Request $request)
     {
+
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'updateGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
+
+
         $validator = Validator::make($request->all(), [
             'group_id' => 'required|exists:groups,id',
             'name' => 'required',
@@ -104,6 +124,16 @@ class GroupController extends Controller
     public function delete(Request $request)
     {
 
+
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'deleteGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
+
+
         $validator = Validator::make($request->all(), [
             'group_id' => 'required|exists:groups,id',
         ]);
@@ -126,6 +156,15 @@ class GroupController extends Controller
 
     public function attach_lock(Request $request)
     {
+
+
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'attachLockToGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
 
         $validator = Validator::make($request->all(), [
             'group_id' => 'required|exists:groups,id',
@@ -179,6 +218,15 @@ class GroupController extends Controller
     public function dattach_lock(Request $request)
     {
 
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'DattachLockToGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
+
+
         $validator = Validator::make($request->all(), [
             'group_id' => 'required|exists:groups,id',
             'dgroup_id' => 'required|exists:groups,id',
@@ -229,6 +277,14 @@ class GroupController extends Controller
     public function detach_lock(Request $request)
     {
 
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'detachLockToGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
+
         $validator = Validator::make($request->all(), [
             'lock_id' => 'required|exists:locks,id',
             'group_id' => 'required|exists:groups,id',
@@ -277,6 +333,15 @@ class GroupController extends Controller
 
     public function attach_rent(Request $request)
     {
+
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'attachRentToGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
+
 
         $validator = Validator::make($request->all(), [
             'group_id' => 'required|exists:groups,id',
@@ -330,6 +395,17 @@ class GroupController extends Controller
     public function dattach_rent(Request $request)
     {
 
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'DattachRentToGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
+
+
+
+
         $validator = Validator::make($request->all(), [
             'group_id' => 'required|exists:groups,id',
             'dgroup_id' => 'required|exists:groups,id',
@@ -378,6 +454,14 @@ class GroupController extends Controller
 
     public function detach_rent(Request $request)
     {
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'api_method' => 'detachRentToGroup',
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'params' => json_encode($request->all()),
+        ]);
+
 
         $validator = Validator::make($request->all(), [
             'rent_id' => 'required|exists:rents,id',
@@ -453,6 +537,6 @@ class GroupController extends Controller
             'group_page' => $validated['group_page']
         ];
 
-        return to_route('groups',$params)->with('success', '');
+        return to_route('groups', $params)->with('success', '');
     }
 }

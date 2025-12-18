@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
-
+use App\Models\LockApiLog;
 
 
 class SimpleApiController extends Controller
@@ -21,6 +21,16 @@ class SimpleApiController extends Controller
     public function setCallback(Request $request)
     {
         try {
+
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'setCallback',
+                'user_id' => $request->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
 
             $validator = Validator::make($request->all(), [
                 'callback' => 'required|string',
@@ -52,6 +62,15 @@ class SimpleApiController extends Controller
     public function getToken(Request $request)
     {
         try {
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'getToken',
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->email),
+            ]);
+
+
 
             $validator = Validator::make($request->all(), [
                 'email' => 'required|string|email',
@@ -92,10 +111,20 @@ class SimpleApiController extends Controller
     {
         try {
             //2025-08-28 15:43
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'getLockEvents',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
             $validator = Validator::make($request->all(), [
                 'personal' => 'boolean',
                 'lock_id' => 'required|integer',
-                'lock_record_type' => 'nullable|integer', 
+                'lock_record_type' => 'nullable|integer',
                 'record_type' => 'nullable|integer',
             ], [
                 'personal.boolean' => 'personal не boolean.',
@@ -127,7 +156,15 @@ class SimpleApiController extends Controller
     public function getLockEvents2(Request $request)
     {
         try {
-            //2025-08-28 15:43
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'getLockEvents2',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
             $validator = Validator::make($request->all(), [
                 'type' => 'required|integer',
                 'code' => 'integer',
@@ -163,7 +200,15 @@ class SimpleApiController extends Controller
     public function getEventsByCode(Request $request)
     {
         try {
-            //2025-08-28 15:43
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'getEventsByCode',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
             $validator = Validator::make($request->all(), [
                 'code' => 'required',
                 'lock_id' => 'required|integer',
@@ -196,6 +241,16 @@ class SimpleApiController extends Controller
     public function addCodePacket(Request $request)
     {
         try {
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'addCodePacket',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
             $validator = Validator::make($request->all(), [
                 'expired_at' => 'required|date_format:Y-m-d H:i',
                 'codes_count' => 'required|integer',
@@ -230,9 +285,19 @@ class SimpleApiController extends Controller
     public function setCodePacket(Request $request)
     {
         try {
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'setCodePacket',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
             $validator = Validator::make($request->all(), [
                 'codes_count' => 'required|integer',
-                 'expired_at' => 'nullable|date_format:Y-m-d H:i',
+                'expired_at' => 'nullable|date_format:Y-m-d H:i',
             ], [
                 'codes_count.required' => 'Не указан codes_count.',
                 'codes_count.integer' => 'codes_count не число.',
@@ -259,6 +324,15 @@ class SimpleApiController extends Controller
     public function getCodesCount(Request $request)
     {
         try {
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'getCodesCount',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
             return response()->json(JobsService::getCodesCount(), 200);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);

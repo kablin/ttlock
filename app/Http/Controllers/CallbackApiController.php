@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\CodePacket;
+use App\Models\LockApiLog;
 use App\Models\LocksCredential;
 use App\Services\JobsService;
 use Illuminate\Support\Facades\Hash;
@@ -19,11 +20,12 @@ class CallbackApiController extends Controller
 
 
 
-
+    /*
     public function getJobResult($job_id)
     {
         try {
 
+ 
             $job = auth()->user()->jobs()->where('job_id', $job_id)->first();
 
             if ($job && $job->status) {
@@ -35,12 +37,21 @@ class CallbackApiController extends Controller
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
-
+*/
 
 
     public function getLockList(Request $request)
     {
         try {
+
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'getLockList',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
 
             return (new JobsService(auth()->user()->id))->getLockList(json_decode($request->getContent())->tag ?? '');
         } catch (\Exception $e) {
@@ -52,7 +63,14 @@ class CallbackApiController extends Controller
     public function getCodesList(Request $request)
     {
         try {
-            //2025-08-28 15:43
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'getCodesList',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
             $validator = Validator::make($request->all(), [
                 'page_number' => 'required|integer',
                 // 'page_size' => 'required|integer',
@@ -93,7 +111,15 @@ class CallbackApiController extends Controller
         try {
             //2025-08-28 15:43
 
-            info($request['begin']);
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'addCodeToLock',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
             $validator = Validator::make($request->all(), [
                 'begin' => 'date_format:Y-m-d H:i',
                 'end' => 'date_format:Y-m-d H:i',
@@ -132,6 +158,17 @@ class CallbackApiController extends Controller
     {
         try {
             //2025-08-28 15:43
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'changeCode',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
+
             $validator = Validator::make($request->all(), [
                 'begin' => 'date_format:Y-m-d H:i',
                 'end' => 'date_format:Y-m-d H:i',
@@ -169,7 +206,15 @@ class CallbackApiController extends Controller
     public function passageModeOn(Request $request)
     {
         try {
-            //2025-08-28 15:43
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'passageModeOn',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
             $validator = Validator::make($request->all(), [
                 'lock_id' => 'required|integer',
                 'tag' => 'nullable',
@@ -197,7 +242,17 @@ class CallbackApiController extends Controller
     public function passageModeOff(Request $request)
     {
         try {
-            //2025-08-28 15:43
+
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'passageModeOff',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
             $validator = Validator::make($request->all(), [
                 'lock_id' => 'required|integer',
                 'tag' => 'nullable',
@@ -226,7 +281,15 @@ class CallbackApiController extends Controller
     public function openLock(Request $request)
     {
         try {
-            //2025-08-28 15:43
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'openLock',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
             $validator = Validator::make($request->all(), [
                 'lock_id' => 'required|integer',
                 'tag' => 'nullable',
@@ -254,7 +317,15 @@ class CallbackApiController extends Controller
     public function deleteCode(Request $request)
     {
         try {
-            //2025-08-28 15:43
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'deleteCode',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
             $validator = Validator::make($request->all(), [
                 'lock_id' => 'required|integer',
                 'code_id' => 'required|integer',

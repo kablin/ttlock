@@ -18,7 +18,7 @@ class LockPinCodeController extends Controller
 {
     public function pincodesList(Request $request, $lock_id)
     {
-        $pincodes = auth()->user()->locks->find($lock_id)->pincodes()->paginate(10, ['*'], 'page',1);
+        $pincodes = auth()->user()->locks->find($lock_id)->pincodes()->orderBy('id','desc')->paginate(10, ['*'], 'page',1);
         //info($pincodes);
         return response()->json(['pincodes' => $pincodes]);
     }
@@ -31,7 +31,7 @@ class LockPinCodeController extends Controller
         ]);
 
         $validated = $validator->safe()->only(['page']);
-        $pincodes = auth()->user()->locks->find($lock_id)->pincodes()->paginate(10, ['*'], 'page', $validated['page']);
+        $pincodes = auth()->user()->locks->find($lock_id)->pincodes()->orderBy('id','desc')->paginate(10, ['*'], 'page', $validated['page']);
         return response()->json(['pincodes' => $pincodes]);
     }
 }

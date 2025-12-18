@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Illuminate\Support\Arr;
+use App\Models\LockApiLog;
 
 
 class SettingsController extends Controller
@@ -30,6 +31,17 @@ class SettingsController extends Controller
 
     public function refreshToken(Request $request)
     {
+
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode( $request->ip()),
+            'api_method' => 'refreshToken',
+            'params' => json_encode($request->all()),
+
+        ]);
+
+
         $token = auth()->user()->createToken('ttlock');
         return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id], 200);
     }
@@ -41,56 +53,68 @@ class SettingsController extends Controller
 
     public function saveCredential(Request $request)
     {
-       try {
-      
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string',
-
-        ], [
-            'email.required' => 'Не указана учетная запись.',
-            'email.email' => 'Не верный формат email.',
-            'password.required' => 'Не указан пароль.',
-        ]);
+        try {
 
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'msg' => Arr::toCssClasses($validator->errors()->all())
-            ], 200);
-        }
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'api_method' => 'saveCredential',
+                'params' => json_encode($request->email),
 
-        $validated = $validator->safe()->only(['email', 'password']);
+            ]);
 
-        if (!testCredential($validated['email'], $validated['password'])) {
 
-            return response()->json([
-                'status' => false,
-                'error' => 1,
-                'message' => 'Error login to TTLock',
-                'msg' => 'Не удалось залогиниться в облако TTLock',
-            ], 200);
-        }
 
-        $credential = LocksCredential::updateOrCreate(['user_id' => auth()->user()->id], ['login' => $validated['email'], 'password' => $validated['password']]);
-        if (updateRefreshToken($credential)) {
-            return response()->json([
-                'status' => true,
-                'error' => 0,
-                'message' => 'User created successfully',
-                'msg' => 'Учетная запись ttlock сорхранена',
-            ], 200);
-        } else
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|string|email|max:255',
+                'password' => 'required|string',
 
-            return response()->json([
-                'status' => false,
-                'error' => 2,
-                'message' => 'Failed to set TTLock credential',
-                'msg' => 'Не получилось запистать данные для авторизации в TTLOCK',
-            ], 200);
-          } catch (\Exception $e) {
-         
+            ], [
+                'email.required' => 'Не указана учетная запись.',
+                'email.email' => 'Не верный формат email.',
+                'password.required' => 'Не указан пароль.',
+            ]);
+
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only(['email', 'password']);
+
+            if (!testCredential($validated['email'], $validated['password'])) {
+
+                return response()->json([
+                    'status' => false,
+                    'error' => 1,
+                    'message' => 'Error login to TTLock',
+                    'msg' => 'Не удалось залогиниться в облако TTLock',
+                ], 200);
+            }
+
+            $credential = LocksCredential::updateOrCreate(['user_id' => auth()->user()->id], ['login' => $validated['email'], 'password' => $validated['password']]);
+            if (updateRefreshToken($credential)) {
+                return response()->json([
+                    'status' => true,
+                    'error' => 0,
+                    'message' => 'User created successfully',
+                    'msg' => 'Учетная запись ttlock сорхранена',
+                ], 200);
+            } else
+
+                return response()->json([
+                    'status' => false,
+                    'error' => 2,
+                    'message' => 'Failed to set TTLock credential',
+                    'msg' => 'Не получилось запистать данные для авторизации в TTLOCK',
+                ], 200);
+        } catch (\Exception $e) {
+
             return  response()->json(['status' => false, 'error' => 3, 'msg' => 'Неизвестная ошибка', 'message' => 'Something wrong',], 200);
         }
     }

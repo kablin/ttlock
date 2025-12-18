@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Models\Rent;
 use App\Models\Lock;
 use Illuminate\Support\Facades\Validator;
+use App\Models\LockApiLog;
 
 
 class WizardController extends Controller
@@ -80,6 +81,15 @@ class WizardController extends Controller
   public function attach_lock(Request $request)
   {
 
+
+    LockApiLog::create([
+      'is_ttlock_result' => false,
+      'api_method' => 'attachLockToRentWizard',
+      'user_id' => auth()->user()->id,
+      'ip' => json_encode($request->ip()),
+      'params' => json_encode($request->all()),
+    ]);
+
     $validator = Validator::make($request->all(), [
       'rent_id' => 'required|exists:rents,id',
       'lock_id' => 'required|exists:locks,id',
@@ -113,6 +123,17 @@ class WizardController extends Controller
 
   public function dattach_lock(Request $request)
   {
+
+
+    LockApiLog::create([
+      'is_ttlock_result' => false,
+      'api_method' => 'DattachLockToRentWizard',
+      'user_id' => auth()->user()->id,
+      'ip' => json_encode($request->ip()),
+      'params' => json_encode($request->all()),
+    ]);
+
+
 
     $validator = Validator::make($request->all(), [
       'rent_id' => 'required|exists:rents,id',
@@ -151,6 +172,16 @@ class WizardController extends Controller
   public function detach_lock(Request $request)
   {
 
+
+
+    LockApiLog::create([
+      'is_ttlock_result' => false,
+      'api_method' => 'detachLockToRentWizard',
+      'user_id' => auth()->user()->id,
+      'ip' => json_encode($request->ip()),
+      'params' => json_encode($request->all()),
+    ]);
+
     $validator = Validator::make($request->all(), [
       'lock_id' => 'required|exists:locks,id',
       'rent_id' => 'required|exists:rents,id',
@@ -173,8 +204,4 @@ class WizardController extends Controller
 
     return to_route('wizard', ['lock_search' => $validated['lock_search'] ?? '', 'rent_search' => $validated['rent_search'] ?? '', 'rent_page' => $validated['rent_page'], 'lock_page' => $validated['lock_page']])->with('success', '');
   }
-
-
-
-
 }

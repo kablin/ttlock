@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Models\Rent;
 use App\Models\Lock;
 use Illuminate\Support\Facades\Validator;
+use App\Models\LockApiLog;
 
 
 class RentController extends Controller
@@ -83,6 +84,17 @@ class RentController extends Controller
   public function attach_lock2(Request $request)
   {
 
+    LockApiLog::create([
+      'is_ttlock_result' => false,
+      'api_method' => 'attachLockToRent',
+      'user_id' => auth()->user()->id,
+      'ip' => json_encode($request->ip()),
+      'params' => json_encode($request->all()),
+    ]);
+
+
+
+
     $validator = Validator::make($request->all(), [
       'rent_id' => 'required|exists:rents,id',
       'lock_id' => 'required|exists:locks,id',
@@ -116,6 +128,15 @@ class RentController extends Controller
 
   public function dattach_lock2(Request $request)
   {
+    LockApiLog::create([
+      'is_ttlock_result' => false,
+      'api_method' => 'DattachLockToRent',
+      'user_id' => auth()->user()->id,
+      'ip' => json_encode($request->ip()),
+      'params' => json_encode($request->all()),
+    ]);
+
+
 
     $validator = Validator::make($request->all(), [
       'rent_id' => 'required|exists:rents,id',
@@ -153,6 +174,15 @@ class RentController extends Controller
 
   public function detach_lock2(Request $request)
   {
+
+    LockApiLog::create([
+      'is_ttlock_result' => false,
+      'api_method' => 'detachLockToRent',
+      'user_id' => auth()->user()->id,
+      'ip' => json_encode($request->ip()),
+      'params' => json_encode($request->all()),
+    ]);
+
 
     $validator = Validator::make($request->all(), [
       'lock_id' => 'required|exists:locks,id',
