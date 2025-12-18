@@ -4,6 +4,8 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
 import type { BreadcrumbItemType } from '@/types';
 
+import { Headphones } from 'lucide-vue-next'
+
 import {
     Card,
     CardAction,
@@ -53,9 +55,18 @@ withDefaults(
                     </CardHeader>
                     <CardContent class="flex items-center">
                         <p class="text-md  lg:text-lg mr-3">10 | 500</p>
-                        <Badge variant="secondary" class="rounded-3xl hidden md:block"><p class="text-xs text-gray-800">Остаток | Общее количество</p> </Badge>
+                        <Badge variant="secondary" class="rounded-3xl hidden lg:block">
+                            <p class="text-xs  text-gray-800">Остаток | Общее количество</p>
+                        </Badge>
                     </CardContent>
                 </Card>
+
+
+                <a href="https://t.me/Renty_hosts_bot"
+                    class="flex gap-4 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <Headphones />
+                    <span class="hidden lg:block">Поддержка</span>
+                </a>
 
                 <button type="button" class="relative p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
 
@@ -67,7 +78,6 @@ withDefaults(
                     <!-- Бейдж уведомлений (опционально) -->
                     <!-- <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span> -->
                 </button>
-
 
 
 

@@ -308,12 +308,12 @@ function onDragEnd() {
 
     <AppShell variant="sidebar">
 
-        <AppContent variant="sidebar" class="overflow-x-hidden lg:mx-8">
+        <AppContent variant="sidebar" class="overflow-x-hidden   md:mx-3 lg:mx-8">
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
 
 
 
-             <p class="text-2xl font-bold">Мастер настройки</p>
+             <p class="text-2xl font-bold mx-1">Мастер настройки</p>
 
             <div class="h-full">
 
