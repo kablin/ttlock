@@ -112,6 +112,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
+//tarifs
+Route::get('/tarifs', [\App\Http\Controllers\TarifsController::class, 'index'])->name('tarifs');
+
 
   //  api
 

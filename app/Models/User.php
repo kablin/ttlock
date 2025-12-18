@@ -20,9 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var list<string>
      */
-    protected $guarded = [
-    
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,6 +43,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'last_query' => 'datetime',
             'password' => 'hashed',
+            'phone' => 'string',
+            'tg_chat_id' => 'string',
         ];
     }
 

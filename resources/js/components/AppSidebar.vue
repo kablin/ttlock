@@ -3,7 +3,7 @@ import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { dashboard, lockList, groups, wizard, lockevents, objects2 } from '@/routes';
+import { dashboard, lockList, groups, wizard, lockevents, objects2, tarifs } from '@/routes';
 import { edit as editProfile } from '@/routes/profile';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
@@ -34,6 +34,12 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Мои объекты',
         href: objects2(),
+        icon: LayoutGrid,
+    },
+
+    {
+        title: 'Тарифы',
+        href: tarifs(),
         icon: LayoutGrid,
     },
 
