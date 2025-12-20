@@ -82,7 +82,7 @@ nginxstart:
 	docker exec sptspttimeline-nginx nginx -s reload
 
 nginxe:  
-	docker cp /home/kablin/spttimeline/docker/default.conf sptspttimeline-nginx:/etc/nginx/conf.d/default.conf       
-	docker compose -f docker-compose.dev.yml  exec -T spt2nginx sh -c "nginx -s reload"
+	docker cp docker_files/default.conf ttlock-nginx:/etc/nginx/conf.d/default.conf       
+	docker compose -f docker-compose.dev.yml  exec -T ttlocknginx sh -c "nginx -s reload"
 
 	
