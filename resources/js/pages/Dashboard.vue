@@ -14,7 +14,7 @@ import { Centrifuge } from 'centrifuge'
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
 import { buttonVariants } from '@/components/ui/button'
 
 
@@ -538,7 +538,7 @@ const goToLogPage = async (page) => {
 
                 <div v-if="selectedRent.locks.length" class="mt-5 font-bold text-center"> Замки</div>
 
-                <Table v-if="selectedRent.locks.length" class="mt-2">
+                <Table v-if="selectedRent.locks.length" class="mt-2 bg-gray-200">
 
                     <TableHeader>
                         <TableRow>
@@ -614,88 +614,13 @@ const goToLogPage = async (page) => {
             <div v-if="selectedLock">
 
 
-                <Tabs default-value="pins" class="h-full flex flex-col ">
-                    <TabsList class="  w-full mt-3">
-                        <TabsTrigger value="pins">
-                            <div class=" font-bold  text-lg">Текущие ключи</div>
-                        </TabsTrigger>
-                        <TabsTrigger value="logs">
-                            <div class=" font-bold  text-lg">Лог событий</div>
+                <div class="xl:flex">
 
-                        </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="pins" class="h-full justify-center flex-col  flex">
-
-                        <template v-if="keyList && keyList.data?.length">
-
-                            <Table class="mt-2">
-
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead class="w-[100px]">
-                                            Ид
-                                        </TableHead>
-                                        <TableHead>Имя</TableHead>
-                                        <TableHead>Код</TableHead>
-                                        <TableHead>Действует с</TableHead>
-                                        <TableHead>Действует до</TableHead>
-                                        <TableHead>Загружен в замок</TableHead>
-                                        <TableHead class="text-right">
-                                            Действие
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow v-for="key in keyList.data" :key="key.id">
-                                        <TableCell class="font-medium">
-                                            {{ key.pin_code_id }}
-                                        </TableCell>
-                                        <TableCell>{{ key.code_name }}</TableCell>
-                                        <TableCell>{{ key.pin_code }}</TableCell>
-                                        <TableCell>{{ key.start }}</TableCell>
-                                        <TableCell>{{ key.end }}</TableCell>
-                                        <TableCell>
-                                            <CheckIcon v-if="key.is_load" />
-                                        </TableCell>
-                                        <TableCell class="text-right gap-4">
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger as-child>
-                                                        <Button variant="destructive2" size="icon"
-                                                            :disabled="waitApiDeleteKey" @click="openDeleteDialog(key)">
-                                                            <CircleX />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <span>Удалить ключ</span>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
+                    <div class="" v-if="keyList && keyList.data?.length">
+                        <div class=" font-bold  text-lg">Текущие ключи</div>
 
 
-                            <Pagination class="my-4 self-end" v-model:page="keyList.current_page"
-                                :items-per-page="keyList.per_page" :total="keyList.total"
-                                :default-page="keyList.current_page">
-                                <PaginationContent>
-                                    <template v-for="(item, index) in keyList.links" :key="index">
-                                        <PaginationPrevious v-if="index == 0" @click.prevent="goToKeyPage(item.page)" />
-                                        <PaginationNext v-else-if="index == (keyList.links.length - 1)"
-                                            @click.prevent="goToKeyPage(item.page)" />
-                                        <PaginationItem
-                                            v-else-if="(keyList.current_page - 2 <= item.page) && (keyList.current_page + 2 >= item.page)"
-                                            :value="item.page" :is-active="item.page === keyList.current_page"
-                                            @click.prevent="goToKeyPage(item.page)">
-                                            {{ item.page }}
-                                        </PaginationItem>
-                                    </template>
-                                </PaginationContent>
-                            </Pagination>
 
-                        </template>
 
                         <div class="flex items-center mt-5 gap-6 justify-begin mt-8">
 
@@ -714,80 +639,138 @@ const goToLogPage = async (page) => {
                                 </Tooltip>
                             </TooltipProvider>
                         </div>
-                    </TabsContent>
+
+                        <Table class="mt-2">
+
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead class="w-[100px]">
+                                        Ид
+                                    </TableHead>
+                                    <TableHead>Имя</TableHead>
+                                    <TableHead>Код</TableHead>
+                                    <TableHead>Действует с</TableHead>
+                                    <TableHead>Действует до</TableHead>
+                                    <TableHead>Загружен в замок</TableHead>
+                                    <TableHead class="text-right">
+                                        Действие
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="key in keyList.data" :key="key.id">
+                                    <TableCell class="font-medium">
+                                        {{ key.pin_code_id }}
+                                    </TableCell>
+                                    <TableCell>{{ key.code_name }}</TableCell>
+                                    <TableCell>{{ key.pin_code }}</TableCell>
+                                    <TableCell>{{ key.start }}</TableCell>
+                                    <TableCell>{{ key.end }}</TableCell>
+                                    <TableCell>
+                                        <CheckIcon v-if="key.is_load" />
+                                    </TableCell>
+                                    <TableCell class="text-right gap-4">
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger as-child>
+                                                    <Button variant="destructive2" size="icon"
+                                                        :disabled="waitApiDeleteKey" @click="openDeleteDialog(key)">
+                                                        <CircleX />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <span>Удалить ключ</span>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
 
 
-                    <TabsContent value="logs" class="h-full justify-center flex-col  flex">
+                        <Pagination class="my-4 self-end" v-model:page="keyList.current_page"
+                            :items-per-page="keyList.per_page" :total="keyList.total"
+                            :default-page="keyList.current_page">
+                            <PaginationContent>
+                                <template v-for="(item, index) in keyList.links" :key="index">
+                                    <PaginationPrevious v-if="index == 0" @click.prevent="goToKeyPage(item.page)" />
+                                    <PaginationNext v-else-if="index == (keyList.links.length - 1)"
+                                        @click.prevent="goToKeyPage(item.page)" />
+                                    <PaginationItem
+                                        v-else-if="(keyList.current_page - 2 <= item.page) && (keyList.current_page + 2 >= item.page)"
+                                        :value="item.page" :is-active="item.page === keyList.current_page"
+                                        @click.prevent="goToKeyPage(item.page)">
+                                        {{ item.page }}
+                                    </PaginationItem>
+                                </template>
+                            </PaginationContent>
+                        </Pagination>
+
+                    </div>
 
 
+                    <div v-if="logList && logList.data?.length" class="">
+
+                        <div class=" font-bold  text-lg">Лог событий</div>
+
+                        <Table class="mt-2">
+
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>
+                                        Ид
+                                    </TableHead>
+                                    <TableHead>Тип события</TableHead>
+                                    <TableHead>Тип</TableHead>
+                                    <TableHead>Успех с</TableHead>
+                                    <TableHead>Пользователь</TableHead>
+                                    <TableHead>Код</TableHead>
+                                    <TableHead>
+                                        Дата
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="log in logList.data" :key="log.id">
+                                    <TableCell class="font-medium">
+                                        {{ log.id }}
+                                    </TableCell>
+                                    <TableCell>{{ log.record_type_from_lock }}</TableCell>
+                                    <TableCell>{{ log.record_type }}</TableCell>
+                                    <TableCell>
+                                        <CheckIcon v-if="log.success" />
+                                    </TableCell>
+                                    <TableCell>{{ log.username }}</TableCell>
+                                    <TableCell>{{ log.keyboard_pwd }} </TableCell>
+                                    <TableCell>{{ log.created_at }} </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
 
 
-                        <template v-if="logList && logList.data?.length">
+                        <Pagination class="my-4 self-end" v-model:page="logList.current_page"
+                            :items-per-page="logList.per_page" :total="logList.total"
+                            :default-page="logList.current_page">
+                            <PaginationContent>
+                                <template v-for="(item, index) in logList.links" :key="index">
+                                    <PaginationPrevious v-if="index == 0" @click.prevent="goToLogPage(item.page)" />
+                                    <PaginationNext v-else-if="index == (logList.links.length - 1)"
+                                        @click.prevent="goToLogPage(item.page)" />
+                                    <PaginationItem
+                                        v-else-if="(logList.current_page - 2 <= item.page) && (logList.current_page + 2 >= item.page)"
+                                        :value="item.page" :is-active="item.page === logList.current_page"
+                                        @click.prevent="goToLogPage(item.page)">
+                                        {{ item.page }}
+                                    </PaginationItem>
+                                </template>
+                            </PaginationContent>
+                        </Pagination>
 
-                            <Table class="mt-2">
-
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>
-                                            Ид
-                                        </TableHead>
-                                        <TableHead>Тип события</TableHead>
-                                        <TableHead>Тип</TableHead>
-                                        <TableHead>Успех с</TableHead>
-                                        <TableHead>Пользователь</TableHead>
-                                        <TableHead>Код</TableHead>
-                                        <TableHead>
-                                            Дата
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow v-for="log in logList.data" :key="log.id">
-                                        <TableCell class="font-medium">
-                                            {{ log.id }}
-                                        </TableCell>
-                                        <TableCell>{{ log.record_type_from_lock }}</TableCell>
-                                        <TableCell>{{ log.record_type }}</TableCell>
-                                        <TableCell>
-                                            <CheckIcon v-if="log.success" />
-                                        </TableCell>
-                                        <TableCell>{{ log.username }}</TableCell>
-                                        <TableCell>{{ log.keyboard_pwd }} </TableCell>
-                                        <TableCell>{{ log.created_at }} </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-
-
-                            <Pagination class="my-4 self-end" v-model:page="logList.current_page"
-                                :items-per-page="logList.per_page" :total="logList.total"
-                                :default-page="logList.current_page">
-                                <PaginationContent>
-                                    <template v-for="(item, index) in logList.links" :key="index">
-                                        <PaginationPrevious v-if="index == 0" @click.prevent="goToLogPage(item.page)" />
-                                        <PaginationNext v-else-if="index == (logList.links.length - 1)"
-                                            @click.prevent="goToLogPage(item.page)" />
-                                        <PaginationItem
-                                            v-else-if="(logList.current_page - 2 <= item.page) && (logList.current_page + 2 >= item.page)"
-                                            :value="item.page" :is-active="item.page === logList.current_page"
-                                            @click.prevent="goToLogPage(item.page)">
-                                            {{ item.page }}
-                                        </PaginationItem>
-                                    </template>
-                                </PaginationContent>
-                            </Pagination>
-
-                        </template>
-
-
-
-                    </TabsContent>
-                </Tabs>
-
+                    </div>
+                </div>
             </div>
         </div>
-
-
 
 
 

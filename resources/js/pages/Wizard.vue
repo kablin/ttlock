@@ -313,12 +313,12 @@ function onDragEnd() {
 
 
 
-             <p class="text-2xl font-bold mx-1">Мастер настройки</p>
+            <p class="text-2xl font-bold mx-1">Мастер настройки</p>
 
             <div class="h-full">
 
 
-                
+
                 <Stepper v-model="stepIndex" class="block w-full my-4" v-slot="{ modelValue, prevStep, nextStep }">
 
                     <div class="flex w-full flex-col lg:flex-row flex-start gap-2">
@@ -680,7 +680,7 @@ function onDragEnd() {
 
                                             <Card class="relative my-2 pt-6 pb-2 gap-2">
                                                 <span class=" m-2 top-0 text-xs absolute text-gray-500">id:{{ rent.id
-                                                    }}</span>
+                                                }}</span>
                                                 <CardHeader class="px-2">
                                                     <CardTitle class=""> {{ rent.name }}
 
@@ -703,7 +703,7 @@ function onDragEnd() {
                                                         @dragstart="onDragStart2(lock, rent)" @dragend="onDragEnd()">
                                                         <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{
                                                             lock.id
-                                                            }}</span>
+                                                        }}</span>
                                                         <CardHeader class="  ">
                                                             <CardTitle class="">{{ lock.lock_alias }}</CardTitle>
                                                             <CardDescription>
@@ -779,7 +779,7 @@ function onDragEnd() {
                                                 v-for="lock in free_locks.data" :key="lock.id" draggable="true"
                                                 @dragstart="onDragStart(lock)" @dragend="onDragEnd()">
                                                 <span class=" m-1 top-0 text-xs absolute text-gray-500">id:{{ lock.id
-                                                    }}</span>
+                                                }}</span>
 
                                                 <CardHeader class="  ">
                                                     <CardTitle class="">{{ lock.lock_alias }}</CardTitle>
@@ -830,6 +830,11 @@ function onDragEnd() {
                                     <a :href="dashboard().url">
                                         Завершить настройку и перейти в
                                         панель управления
+                                    </a></Button>
+
+                                <Button variant="design" class="my-4 ">
+                                    <a :href="dashboard().url">
+                                        Настроить позже
                                     </a></Button>
                             </div>
 

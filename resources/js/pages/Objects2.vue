@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import debounce from 'debounce';
 import { CheckCircle2Icon, Pencil, CircleX, CheckIcon, ChevronsUpDown, ChevronsUpDownIcon } from 'lucide-vue-next'
 
-
+import { Checkbox } from '@/components/ui/checkbox';
 
 import {
     Tooltip,
@@ -101,7 +101,7 @@ const currentRent = ref(null)
 
 const rent_search = ref('')
 const lock_search = ref('')
-
+const sync_search = ref(false)
 
 const breadcrumbs = [
     {
@@ -202,7 +202,7 @@ const saveRent = () => {
 
 const goToPage = (page, lock_page) => {
 
-    router.post(rent_rent_page().url, { 'rent_page': page, 'lock_page': lock_page, 'rent_search': rent_search.value, 'lock_search': lock_search.value },
+    router.post(rent_rent_page().url, { 'rent_page': page, 'lock_page': lock_page, 'rent_search': sync_search.value ?  lock_search.value : rent_search.value, 'lock_search': lock_search.value },
         {
             preserveScroll: true,
             preserveState: true,
@@ -220,7 +220,7 @@ const goToPage = (page, lock_page) => {
 
 const attachLock = (rent, lock) => {
 
-    router.post(rent_attach_lock2().url, { 'rent_search': rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
+    router.post(rent_attach_lock2().url, { 'rent_search':  sync_search.value ?  lock_search.value : rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
         {
             preserveScroll: true,
             preserveState: true,
@@ -252,7 +252,7 @@ const attachLock = (rent, lock) => {
 
 const dattachLock = (rent, lock, rent2) => {
 
-    router.post(rent_dattach_lock2().url, { 'rent_search': rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id, 'drent_id': rent2.id, },
+    router.post(rent_dattach_lock2().url, { 'rent_search':  sync_search.value ?  lock_search.value : rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id, 'drent_id': rent2.id, },
         {
             preserveScroll: true,
             preserveState: true,
@@ -276,7 +276,7 @@ const dattachLock = (rent, lock, rent2) => {
 
 const detachLock = (lock, rent) => {
 
-    router.post(rent_detach_lock2().url, { 'rent_search': rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
+    router.post(rent_detach_lock2().url, { 'rent_search':  sync_search.value ?  lock_search.value : rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id },
         {
             preserveScroll: true,
             preserveState: true,
@@ -398,19 +398,24 @@ function onDragEnd() {
     <Head title="Мои объекты" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="flex">
+            <Badge variant="secondary"
+                class="text-xs mx-10 text-gray-800 break-words whitespace-normal max-w-[650px] my-5">
+                <svg class="mx-2" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
+                        stroke="#545F71" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
 
-        <Badge variant="secondary" class="text-xs mx-10 text-gray-800 break-words whitespace-normal max-w-[650px] my-5">
-            <svg class="mx-2" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M7.41667 9.41667H6.75V6.75H6.08333M6.75 4.08333H6.75667M12.75 6.75C12.75 10.0637 10.0637 12.75 6.75 12.75C3.43629 12.75 0.75 10.0637 0.75 6.75C0.75 3.43629 3.43629 0.75 6.75 0.75C10.0637 0.75 12.75 3.43629 12.75 6.75Z"
-                    stroke="#545F71" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+                Привязка замков к объектам
+            </Badge>
 
-            Привязка замков к объектам
-        </Badge>
-
-
-
+            <Label for="sync" class="flex items-center space-x-3">
+                <Checkbox id="sync" v-model="sync_search" />
+                <span>Синхронизировать поиск</span>
+            </Label>
+        </div>
         <div class="grid   items-start gap-4 mx-10">
             <Alert v-if="successCreateSchow" @click="successCreateSchow = false" class="mb-5">
                 <CheckCircle2Icon :size="16" />
@@ -478,7 +483,7 @@ function onDragEnd() {
 
                     <div v-if="free_locks && free_locks.data.length === 0"
                         class="text-gray-500 text-sm flex justify-center">
-                         <p>Замки не найдены</p>
+                        <p>Замки не найдены</p>
                     </div>
 
                     <Card class="w-full cursor-pointer relative gap-2 my-1 py-3  border-green-300 border-1"
@@ -563,7 +568,7 @@ function onDragEnd() {
                 <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
                     <div class="my-3 mx-auto font-bold text-lg">Объекты</div>
 
-                    <Input v-model="rent_search" placeholder="поиск..." class="mb-8 border-2"
+                    <Input v-if="!sync_search" v-model="rent_search" placeholder="поиск..." class="mb-8 border-2"
                         @input="debouncedSearch" />
 
                     <div v-for="rent in rents.data" :key="rent.id">
