@@ -59,6 +59,10 @@ const props = defineProps({
     tarifes: {
         type: Object
     },
+
+    phone: {
+        type: String
+    },
 });
 
 
@@ -66,7 +70,7 @@ const tarifPay = () => {
     axios.post(webhook_pay().url, { tarif_id: selectedTarif.value }).then((response) => {
         let data = response.data
         if (data.status) {
-            window.location.href = data.url 
+            window.location.href = data.url
         }
     })
         .catch((error) => {
@@ -137,7 +141,8 @@ const tarifPay = () => {
 
 
                     <CardAction class="flex mx-auto w-full">
-                        <Button @click="tarifPay" variant="design" class="w-full">Оплатить</Button>
+                        <Button v-if="phone" @click="tarifPay" variant="design" class="w-full">Оплатить</Button>
+                        <p v-else>  Необходимо указать номер телефона в настройках</p>
 
                     </CardAction>
                 </CardContent>

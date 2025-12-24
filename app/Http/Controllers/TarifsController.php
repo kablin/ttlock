@@ -20,9 +20,8 @@ class TarifsController extends Controller
     {
         $code_packet = auth()->user()->code_packet()->get();
 
-        $tarifs = Tarif::where('active',true)->get();
+        $tarifs = Tarif::where('active', true)->get();
         //dd(  $tarifs);
-        return  Inertia::render('Tarifs',['code_packet' => $code_packet, 'tarifes' =>$tarifs]);
+        return  Inertia::render('Tarifs', ['phone' =>   auth()->user()->phone, 'code_packet' => $code_packet, 'tarifes' => $tarifs]);
     }
-
 }
