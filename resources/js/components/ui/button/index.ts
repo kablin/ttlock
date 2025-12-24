@@ -15,7 +15,7 @@ export const buttonVariants = cva(
         outline:
           " border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         design:
-          'bg-design text-design-foreground shadow-xs hover:bg-design/90 rounded-[20px]',
+          'bg-design text-design-foreground shadow-xs hover:bg-design/90 rounded-[20px] hover:text-[#2D2D2D]',
         design_outline:
           'rounded-[20px] border-2 border-design  hover:border-design/80 bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-design/30 dark:border-design dark:hover:bg-design/50',
         secondary:

@@ -6,6 +6,11 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
 
+import '@fontsource/inter/400.css'    // normal
+import '@fontsource/inter/500.css'    // medium
+import '@fontsource/inter/600.css'    // semi-bold
+import '@fontsource/inter/700.css'    // bold
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({

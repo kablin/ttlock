@@ -1,6 +1,6 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { tarifs, lockevents_page } from '@/routes';
+import { tarifs, webhook_pay } from '@/routes';
 import { ref, onMounted } from 'vue'
 import { usePage } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { CheckIcon, CheckCircle2Icon } from 'lucide-vue-next'
 import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
+import { router } from '@inertiajs/vue3'
 
 import {
     Card,
@@ -58,18 +59,26 @@ const props = defineProps({
     tarifes: {
         type: Object
     },
-
-
-
 });
 
 
-
-
 const tarifPay = () => {
+    axios.post(webhook_pay().url, { tarif_id: selectedTarif.value }).then((response) => {
+        let data = response.data
+        if (data.status) {
+            window.location.href = data.url 
+        }
+    })
+        .catch((error) => {
+            console.log(error);
 
-    successSchow.value = true
-    successText.value = 'Успешно. Тариф подключен'
+        })
+        .finally(() => {
+
+        });
+
+    /* successSchow.value = true
+     successText.value = 'Успешно. Тариф подключен'*/
     return true
 }
 

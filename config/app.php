@@ -84,6 +84,12 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
+
+
+
+    'yookassa_shop_id' => env('YOO_KASSA_SHOP_ID'),
+    'yookassa_secret_key' => env('YOO_KASSA_SECRET_KEY'),
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

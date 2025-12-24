@@ -112,9 +112,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-//tarifs
-Route::get('/tarifs', [\App\Http\Controllers\TarifsController::class, 'index'])->name('tarifs');
+  //tarifs
+  Route::get('/tarifs', [\App\Http\Controllers\TarifsController::class, 'index'])->name('tarifs');
 
+
+
+  //youkassa
+   Route::post('/yookassa', [\App\Http\Controllers\YouKassaController::class,'webhook'])->name('webhook.yookassa');
+   Route::post('/pay', [\App\Http\Controllers\YouKassaController::class,'pay'])->name('webhook_pay');
+ 
 
   //  api
 
