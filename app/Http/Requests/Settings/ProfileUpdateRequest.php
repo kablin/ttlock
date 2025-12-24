@@ -18,7 +18,7 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['integer'],
-            'tg_chat_id' => ['integer'],
+            'tg_chat_id' => ['integer','nullable'],
             'email' => [
                 'required',
                 'string',
