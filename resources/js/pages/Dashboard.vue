@@ -614,7 +614,7 @@ const goToLogPage = async (page) => {
             <div v-if="selectedLock">
 
 
-                <div class="xl:flex">
+                <div class="xl:flex mt-5 gap-4">
 
                     <div class="" v-if="keyList && keyList.data?.length">
                         <div class=" font-bold  text-lg">Текущие ключи</div>
@@ -622,7 +622,7 @@ const goToLogPage = async (page) => {
 
 
 
-                        <div class="flex items-center mt-5 gap-6 justify-begin mt-8">
+                        <div class="flex items-center mt-3 gap-6 justify-begin ">
 
                             <TooltipProvider>
                                 <Tooltip>
@@ -712,7 +712,7 @@ const goToLogPage = async (page) => {
 
                     <div v-if="logList && logList.data?.length" class="">
 
-                        <div class=" font-bold  text-lg">Лог событий</div>
+                        <div class=" font-bold mb-12 text-lg">Лог событий</div>
 
                         <Table class="mt-2">
 

@@ -19,6 +19,7 @@ const page = usePage();
                 <SidebarMenuButton as-child :is-active="urlIsActive(item.href, page.url.split('?')[0]  )" :tooltip="item.title">
                     <Link :href="item.href">
                         <component :is="item.icon" />
+                        <div v-if ="item.svg" v-html="item.svg"> </div>
                         <span>{{ item.title }}</span>
                     </Link>
                 </SidebarMenuButton>

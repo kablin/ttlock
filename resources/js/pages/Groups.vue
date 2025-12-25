@@ -617,7 +617,7 @@ function onDragEnd() {
 
                         <!--div class="my-3 font-bold mx-auto text-lg">Замки</div-->
 
-                        <Input v-model="lock_search" placeholder="поиск..." class="mb-8 border-2"
+                        <Input v-model="lock_search" placeholder="поиск..." class="mb-8 search border-2"
                             @input="debouncedSearch" />
 
                         <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
@@ -707,7 +707,7 @@ function onDragEnd() {
 
                     </TabsContent>
                     <TabsContent value="rents" class="h-full justify-center flex-col  flex">
-                        <Input v-model="rent_search" placeholder="поиск..." class="mb-8 border-2"
+                        <Input v-model="rent_search" placeholder="поиск..." class="mb-8 search border-2"
                             @input="debouncedSearch" />
 
 
@@ -777,7 +777,7 @@ function onDragEnd() {
 
                 <div class="border-dashed border-2 px-4  h-full w-full flex flex-col border-gray-500">
                     <div class="my-5 mx-auto font-bold text-lg">Группы</div>
-                    <Input v-model="group_search" placeholder="поиск..." class="mb-8 border-2"
+                    <Input v-model="group_search" placeholder="поиск..." class="mb-8 search  border-2"
                         @input="debouncedSearch" />
 
 

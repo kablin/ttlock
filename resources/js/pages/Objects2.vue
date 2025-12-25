@@ -252,6 +252,7 @@ const attachLock = (rent, lock) => {
 
 const dattachLock = (rent, lock, rent2) => {
 
+   if (rent.id !=rent2.id)
     router.post(rent_dattach_lock2().url, { 'rent_search':  sync_search.value ?  lock_search.value : rent_search.value, 'lock_search': lock_search.value, 'lock_page': props.free_locks.current_page, 'rent_page': props.rents.current_page, 'rent_id': rent.id, 'lock_id': lock.id, 'drent_id': rent2.id, },
         {
             preserveScroll: true,
@@ -477,7 +478,7 @@ function onDragEnd() {
             <div
                 class="  md:col-span-2 min-h-[50px] border-dashed border-2 border-gray-500 flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col px-1 lg:px-4">
                 <div class="my-3 font-bold mx-auto text-lg">Замки</div>
-                <Input v-model="lock_search" placeholder="поиск..." class="mb-8 border-2" @input="debouncedSearch" />
+                <Input v-model="lock_search" placeholder="поиск..." class="mb-8 search border-2" @input="debouncedSearch" />
                 <div @dragover.prevent @drop="onFree()" :class="{ 'bg-green-200': isDrag == true, }"
                     class=" flex-1  min-h-[50px] items-center border-dashed  flex lg:min-w-[280px]  min-w-[240px] justify-center flex-col ">
 
@@ -568,7 +569,7 @@ function onDragEnd() {
                 <div class="flex-1 border-dashed border-2 px-4  w-full flex flex-col border-gray-500">
                     <div class="my-3 mx-auto font-bold text-lg">Объекты</div>
 
-                    <Input v-if="!sync_search" v-model="rent_search" placeholder="поиск..." class="mb-8 border-2"
+                    <Input v-if="!sync_search" v-model="rent_search" placeholder="поиск..." class="mb-8 search border-2"
                         @input="debouncedSearch" />
 
                     <div v-for="rent in rents.data" :key="rent.id">

@@ -166,6 +166,12 @@
     --sidebar: hsl(240 5.9% 10%);
 }
 
+.search
+{
+background: url(images/icons/search.svg) no-repeat scroll 7px 7px;
+padding-left:30px;
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;

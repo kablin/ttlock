@@ -12,36 +12,39 @@ import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Информация',
+        title: 'Дашборд',
         href: dashboard(),
-        icon: LayoutGrid,
+        svg: `<img width="25px" src="/images/icons/Document.png">`,
     },
+
+
+    {
+        title: 'Тариф и оплата',
+        href: tarifs(),
+         svg: `<img width="25px" src="/images/icons/hugeicons_payment-02.png">`,
+    },
+
+
+    {
+        title: 'Управление Пространствами',
+        href: groups(),
+        svg: `<img width="25px" src="/images/icons/Keyboard-Close.png">`,
+    },
+
+
+    {
+        title: 'Управление замками',
+        href: objects2(),
+        svg: `<img width="25px" src="/images/icons/Click.png">`,
+    },
+
 
     {
         title: 'Список замков',
         href: lockList(),
-        icon: LayoutGrid,
+        svg: `<img width="25px" src="/images/icons/Unlock.png">`,
     },
 
-
-    {
-        title: 'Мои группы',
-        href: groups(),
-        icon: LayoutGrid,
-    },
-
-
-    {
-        title: 'Мои объекты',
-        href: objects2(),
-        icon: LayoutGrid,
-    },
-
-    {
-        title: 'Тарифы',
-        href: tarifs(),
-        icon: LayoutGrid,
-    },
 
     {
         title: 'Логи',
