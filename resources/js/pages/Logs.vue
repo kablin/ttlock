@@ -6,7 +6,7 @@ import { usePage } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 
-import { CheckIcon,  } from 'lucide-vue-next'
+import { CheckIcon, } from 'lucide-vue-next'
 
 import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
@@ -111,7 +111,14 @@ const goToLogPage = async (page) => {
                                 <TableCell>{{ log.record_type_from_lock }}</TableCell>
                                 <TableCell>{{ log.record_type }}</TableCell>
                                 <TableCell>
-                                    <CheckIcon v-if="log.success" />
+                                    <template v-if="log.success">
+                                        <svg width="19" height="14" viewBox="0 0 19 14" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M5.94631 13.786C5.59988 13.7858 5.26421 13.6607 4.99631 13.4319L0.516307 9.60895C-0.0962757 9.05461 -0.174597 8.09333 0.33954 7.43939C0.853678 6.78544 1.77384 6.67595 2.41631 7.19228L5.88631 10.1506L15.8863 0.556867C16.2622 0.091317 16.8633 -0.104683 17.4269 0.0545234C17.9905 0.213729 18.4142 0.699197 18.5128 1.29877C18.6114 1.89834 18.3669 2.50301 17.8863 2.84853L6.96631 13.3694C6.69 13.6391 6.32496 13.7882 5.94631 13.786Z"
+                                                fill="#129F0D" />
+                                        </svg>
+                                    </template>
                                 </TableCell>
                                 <TableCell>{{ log.username }}</TableCell>
                                 <TableCell>{{ log.keyboard_pwd }} </TableCell>
