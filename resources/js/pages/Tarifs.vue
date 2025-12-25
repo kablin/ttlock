@@ -49,7 +49,9 @@ const breadcrumbs = [
 const successSchow = ref(false)
 const successText = ref('')
 
-const selectedTarif = ref(1)
+const selectedTarif = ref()
+const paying = ref(false)
+
 
 
 const props = defineProps({
@@ -67,8 +69,10 @@ const props = defineProps({
 
 
 const tarifPay = () => {
+    paying.value = true
     axios.post(webhook_pay().url, { tarif_id: selectedTarif.value }).then((response) => {
         let data = response.data
+        paying.value = false
         if (data.status) {
             window.location.href = data.url
         }
@@ -78,7 +82,7 @@ const tarifPay = () => {
 
         })
         .finally(() => {
-
+            paying.value = false
         });
 
     /* successSchow.value = true
@@ -141,8 +145,9 @@ const tarifPay = () => {
 
 
                     <CardAction class="flex mx-auto w-full">
-                        <Button v-if="phone" @click="tarifPay" variant="design" class="w-full">Оплатить</Button>
-                        <p v-else>  Необходимо указать номер телефона в настройках</p>
+                        <Button v-if="phone && selectedTarif" :disabled="paying" @click="tarifPay" variant="design"
+                            class="w-full">Оплатить</Button>
+                        <p v-if="!phone"> Необходимо указать номер телефона в настройках</p>
 
                     </CardAction>
                 </CardContent>
