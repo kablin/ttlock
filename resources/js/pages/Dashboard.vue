@@ -614,7 +614,7 @@ const goToLogPage = async (page) => {
             <div v-if="selectedLock">
 
 
-                <div class="xl:flex mt-5 gap-4 overflow-auto">
+                <div class="xl:flex mt-5 gap-6 overflow-auto">
 
                     <div class="" v-if="keyList && keyList.data?.length">
                         <div class=" font-bold  text-lg">Текущие ключи</div>
@@ -640,7 +640,7 @@ const goToLogPage = async (page) => {
                             </TooltipProvider>
                         </div>
 
-                        <Table class="mt-2">
+                        <Table class="mt-2 backdrop-blur-2xl bg-gray-100 p-3 rounded-[20px]">
 
                             <TableHeader>
                                 <TableRow>
@@ -664,8 +664,8 @@ const goToLogPage = async (page) => {
                                     </TableCell>
                                     <TableCell>{{ key.code_name }}</TableCell>
                                     <TableCell>{{ key.pin_code }}</TableCell>
-                                    <TableCell>{{ key.start }}</TableCell>
-                                    <TableCell>{{ key.end }}</TableCell>
+                                    <TableCell>{{ key.start ? (key.start.slice(0,-3)) : '' }}</TableCell>
+                                    <TableCell>{{ key.end  ? (key.end.slice(0,-3)) : ''}}</TableCell>
                                     <TableCell>
                                         <template v-if="key.is_load">
                                             <svg width="19" height="14" viewBox="0 0 19 14" fill="none"
@@ -721,7 +721,7 @@ const goToLogPage = async (page) => {
 
                         <div class=" font-bold mb-12 text-lg">Лог событий</div>
 
-                        <Table class="mt-2 ">
+                        <Table class="mt-2  bg-gray-100 p-3 rounded-[20px]">
 
                             <TableHeader>
                                 <TableRow>
@@ -743,7 +743,7 @@ const goToLogPage = async (page) => {
                                     <TableCell class="font-medium">
                                         {{ log.id }}
                                     </TableCell>
-                                    <TableCell>{{ log.record_type_from_lock }}</TableCell>
+                                    <TableCell class="whitespace-normal max-w-[250px]">{{ log.record_type_from_lock }}</TableCell>
                                     <TableCell>{{ log.record_type }}</TableCell>
                                     <TableCell>
                                         <template v-if="log.success">
@@ -757,7 +757,7 @@ const goToLogPage = async (page) => {
                                     </TableCell>
                                     <TableCell>{{ log.username }}</TableCell>
                                     <TableCell>{{ log.keyboard_pwd }} </TableCell>
-                                    <TableCell>{{ log.created_at }} </TableCell>
+                                    <TableCell>{{ new Date(log.created_at).toLocaleString('ru-RU')      }}   </TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
