@@ -75,6 +75,10 @@ class GetCodesListJob implements ShouldQueue
                             'pin_code' => $key['keyboardPwd'],
                             'start' => $key['startDate'] ? Carbon::createFromTimestamp(round($key['startDate']/1000))->toDateTimeString() : null,
                             'end' => $key['endDate'] ? Carbon::createFromTimestamp(round($key['endDate']/1000))->toDateTimeString() : null,
+
+                            'start_local' => $key['startDate'] ? Carbon::createFromTimestamp(round($key['startDate']/1000))->addHours(3)->toDateTimeString() : null,
+                            'end_local' => $key['endDate'] ? Carbon::createFromTimestamp(round($key['endDate']/1000))->addHours(3)->toDateTimeString() : null,
+
                             'code_name' => $key['keyboardPwdName']
                         ]
                     );
