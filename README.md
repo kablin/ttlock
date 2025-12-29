@@ -88,7 +88,7 @@
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br /> 'tag" : {},</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",<br /> "method" : "open_lock",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестный замок"</span><br />}</p>
 <p>&nbsp;</p>
 <p><strong>api/v1/add_code_to_lock</strong></p>
-<p><strong>**</strong> Добавить код в замок. В случае неудачи запускается заново через 20 минут в течение 5 раз.&nbsp; ВРЕМЯ <strong>UTC</strong><br />{<br />"begin":"2025-08-28 15:43",<br />"end":"2025-08-28 15:43",<br />"code": "1234",<br />"code_name": "Персонал",<br />"lock_id" :"1234566",<br />"tag":{}<br />}</p>
+<p><strong>**</strong> Добавить код в замок. В случае неудачи запускается заново через 20 минут в течение 5 раз.&nbsp; ВРЕМЯ <strong>UTC</strong><br />{<br />"begin":"2025-08-28 15:43",<br />"end":"2025-08-28 15:43",<br />"code": "1234",<br />"code_name": "Персонал",<br />"lock_id" :"1234566",<br />"tag":{}<br />,<br />"utc":"-3"<br />}</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><span style="text-decoration: underline;">Ответ</span>:</p>

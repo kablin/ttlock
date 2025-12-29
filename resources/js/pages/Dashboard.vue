@@ -383,6 +383,7 @@ const createKeyfn = async () => {
         const response = await axios.post(addCodeToLock().url, {
             'lock_id': selectedLock.value.lock_id,
             'code': null,
+            'utc': '-3',
             'code_name': addkeyType.value,
             'begin': (addkeyDateBegin.value && addkeyTimeBegin.value) ? addkeyDateBegin.value + ' ' + addkeyTimeBegin.value : null,
             'end': (addkeyDateEnd.value && addkeyTimeEnd.value) ? addkeyDateEnd.value + ' ' + addkeyTimeEnd.value : null,
@@ -664,8 +665,8 @@ const goToLogPage = async (page) => {
                                     </TableCell>
                                     <TableCell>{{ key.code_name }}</TableCell>
                                     <TableCell>{{ key.pin_code }}</TableCell>
-                                    <TableCell>{{ key.start ? (key.start.slice(0,-3)) : '' }}</TableCell>
-                                    <TableCell>{{ key.end  ? (key.end.slice(0,-3)) : ''}}</TableCell>
+                                    <TableCell>{{ key.start_local ? (key.start_local.slice(0,-3)) : '' }}</TableCell>
+                                    <TableCell>{{ key.end_local  ? (key.end_local.slice(0,-3)) : ''}}</TableCell>
                                     <TableCell>
                                         <template v-if="key.is_load">
                                             <svg width="19" height="14" viewBox="0 0 19 14" fill="none"

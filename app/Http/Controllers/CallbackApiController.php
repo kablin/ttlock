@@ -126,6 +126,7 @@ class CallbackApiController extends Controller
                 'code' => 'nullable|integer',
                 'code_name' => 'nullable|string',
                 'tag' => 'nullable',
+                'utc' => 'nullable|integer',
                 'lock_id' => 'required|integer',
 
             ], [
@@ -144,10 +145,10 @@ class CallbackApiController extends Controller
                 ], 200);
             }
 
-            $validated = $validator->safe()->only(['code', 'lock_id', 'begin', 'end', 'code_name', 'tag']);
+            $validated = $validator->safe()->only(['code', 'lock_id', 'begin', 'end', 'code_name', 'tag','utc']);
             if (!$validated['code']) $validated['code'] =  random_int(1000, 9999);
 
-            return (new JobsService(auth()->user()->id))->addKeyToLock($validated['lock_id'], $validated['code'], $validated['code_name'] ??  'Ключ от Renty api', $validated['begin'] ?? null, $validated['end'] ?? null, $validated['tag'] ?? '');
+            return (new JobsService(auth()->user()->id))->addKeyToLock($validated['lock_id'], $validated['code'], $validated['code_name'] ??  'Ключ от Renty api', $validated['begin'] ?? null, $validated['end'] ?? null, $validated['tag'] ?? '',$validated['utc'] ?? 0);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }

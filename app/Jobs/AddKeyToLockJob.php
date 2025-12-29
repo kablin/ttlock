@@ -6,6 +6,7 @@ namespace App\Jobs;
 
 
 use Illuminate\Bus\Queueable;
+use DateTime;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -28,7 +29,7 @@ class AddKeyToLockJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code, private string $code_name, private $begin = null, private $end = null) {}
+    public function __construct(private int $counter, private int $job_id, private int $lock_id, private int $code, private string $code_name, private $begin = null, private $end = null, private $utc = null) {}
 
     /**
      * Execute the job.
@@ -107,19 +108,26 @@ class AddKeyToLockJob implements ShouldQueue
             }
 
 
-
-
             $servise =  new TTLockService($job->user);
+            $_begin = $this->begin;
+            $_end = $this->end;
+            if ($this->utc) {
+                $_begin = (new DateTime($this->begin))->modify($this->utc . ' hours')->format('Y-m-d H:i');
+                $_end = (new DateTime($this->end))->modify($this->utc . ' hours')->format('Y-m-d H:i');
+            }
 
-            $key = $servise->newKey($this->code, $lock, $this->code_name, $this->begin, $this->end);
+          
+            $key = $servise->newKey($this->code, $lock, $this->code_name, $_begin,  $_end);
 
             if ($key['status']) {
                 LockPinCode::create([
                     'pin_code' => $this->code,
                     'pin_code_id' => $key['data']['keyboardPwdId'],
                     'lock_id' => $lock->id,
-                    'start' =>  $this->begin,
-                    'end' => $this->end,
+                    'start' =>  $_begin,
+                    'end' =>  $_end,
+                    'start_local' =>$this->begin,
+                    'end_local' =>$this->end,
                     'code_name' => $this->code_name,
                     'is_load' => true,
                 ]);
@@ -139,7 +147,7 @@ class AddKeyToLockJob implements ShouldQueue
             } else if ($key['error_code'] != -3007) {
                 $data['status'] = false;
                 $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Следеющая попытка загрузки ключа чере 20 минут';
-                AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id, $this->code, $this->code_name, $this->begin, $this->end)->onQueue('default')
+                AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id, $this->code, $this->code_name, $this->begin, $this->end, $this->utc)->onQueue('default')
                     ->chain([
                         new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                     ])
