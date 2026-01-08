@@ -539,7 +539,7 @@ const goToLogPage = async (page) => {
 
                 <div v-if="selectedRent.locks.length" class="mt-5 font-bold text-center"> Замки</div>
 
-                <Table v-if="selectedRent.locks.length" class="mt-2 bg-gray-200">
+                <Table v-if="selectedRent.locks.length" class="mt-2">
 
                     <TableHeader>
                         <TableRow>
@@ -556,7 +556,7 @@ const goToLogPage = async (page) => {
                     </TableHeader>
                     <TableBody>
                         <TableRow
-                            :class="{ 'border-2  font-bold  bg-green-200 hover:bg-green-200': lock.id == selectedLock.id }"
+                            :class="{ 'border-2  font-bold  bg-[#e7e7e7] hover:bg-[#e7e7e7]': lock.id == selectedLock.id }"
                             v-for="lock in selectedRent.locks" @click="selectLock(lock)" :key="lock.id">
                             <TableCell class="font-medium">
                                 {{ lock.lock_id }}
@@ -641,7 +641,7 @@ const goToLogPage = async (page) => {
                             </TooltipProvider>
                         </div>
 
-                        <Table class="mt-2 backdrop-blur-2xl bg-gray-100 p-3 rounded-[20px]">
+                        <Table class="mt-2 backdrop-blur-2xl p-3 ">
 
                             <TableHeader>
                                 <TableRow>
@@ -722,7 +722,7 @@ const goToLogPage = async (page) => {
 
                         <div class=" font-bold mb-12 text-lg">Лог событий</div>
 
-                        <Table class="mt-2  bg-gray-100 p-3 rounded-[20px]">
+                        <Table class="mt-2  p-3 ">
 
                             <TableHeader>
                                 <TableRow>
