@@ -103,7 +103,7 @@ class SettingsController extends Controller
                     'status' => true,
                     'error' => 0,
                     'message' => 'User created successfully',
-                    'msg' => 'Учетная запись ttlock сорхранена',
+                    'msg' => 'Учетная запись ttlock сохранена',
                 ], 200);
             } else
 

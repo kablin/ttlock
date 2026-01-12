@@ -24,7 +24,7 @@ class AuthController extends Controller
                 'is_ttlock_result' => false,
                 'api_method' => 'CreateUser',
                 'ip' => json_encode( $request->ip()),
-                'params' => json_encode($request->email),
+                'params' => json_encode($request->all()),
             ]);
 
 
