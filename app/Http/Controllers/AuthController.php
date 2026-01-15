@@ -63,7 +63,13 @@ class AuthController extends Controller
           
 
             if (!$user->wasRecentlyCreated) {
-                if (!Auth::attempt($validated))  return response()->json(['status' => false,  'msg' => 'Неверный пароль'], 200);
+                if (!Auth::attempt($validated))  
+                {
+                    // обновляем пароль пользователю                    
+                    //return response()->json(['status' => false,  'msg' => 'Неверный пароль'], 200);
+                    $user->password = Hash::make($validated['password']);
+                    $user->save();
+                }
             }
 
 
