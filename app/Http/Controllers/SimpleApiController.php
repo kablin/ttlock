@@ -98,7 +98,7 @@ class SimpleApiController extends Controller
             if (Auth::attempt($validated)) {
                 $token = auth()->user()->createToken('ttlock');
                 return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id], 200);
-            } else   return response()->json(['status' => false,  'msg' => 'Неизвестная ошибка'], 200);
+            } else   return response()->json(['status' => false,  'msg' => 'Пользователь не найден'], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
         }

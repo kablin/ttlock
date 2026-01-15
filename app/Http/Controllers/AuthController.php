@@ -23,7 +23,7 @@ class AuthController extends Controller
             LockApiLog::create([
                 'is_ttlock_result' => false,
                 'api_method' => 'CreateUser',
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 
@@ -61,6 +61,12 @@ class AuthController extends Controller
             $credentials['email'] = $validated['email'];
             $credentials['password'] = $validated['password'];
 
+          
+
+            if (!$user->wasRecentlyCreated) {
+                if (!Auth::attempt($validated))  return response()->json(['status' => false,  'msg' => 'Неверный пароль'], 200);
+            }
+
 
             $credential = LocksCredential::updateOrCreate(['user_id' => $user->id], ['login' => $validated['email'], 'password' => $validated['password']]);
             if (updateRefreshToken($credential)) {
@@ -73,6 +79,7 @@ class AuthController extends Controller
                     $code_packet->end = $code_packet->created_at->addYear();
                     $code_packet->save();
                 }
+
                 return response()->json([
                     'status' => true,
                     'error' => 0,
