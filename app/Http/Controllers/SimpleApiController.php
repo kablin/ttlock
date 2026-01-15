@@ -27,7 +27,7 @@ class SimpleApiController extends Controller
                 'is_ttlock_result' => false,
                 'api_method' => 'setCallback',
                 'user_id' => $request->user()->id,
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 
@@ -59,6 +59,58 @@ class SimpleApiController extends Controller
 
 
 
+    public function updateTtlockCredential(Request $request)
+    {
+        try {
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'updateTtlockCredential',
+                'user_id' => $request->user()->id,
+                'ip' => json_encode($request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
+
+            $validated = $request->validate([
+                'email' => 'required|string|email|max:255',
+                'password' => 'required|string',
+            ]);
+
+
+            if (!testCredential($validated['email'], $validated['password'])) {
+
+                return response()->json([
+                    'status' => false,
+                    'msg' => 'Не удалось залогиниться в облако TTLock',
+                ], 200);
+            }
+
+
+            $credential = LocksCredential::updateOrCreate(['user_id' => auth()->user()->id], ['login' => $validated['email'], 'password' => $validated['password']]);
+            if (updateRefreshToken($credential)) {
+
+                return response()->json([
+                    'status' => true,
+                    'msg' => 'Пароль к облаку Ttlock изменен',
+                ], 200);
+            } else
+
+                return response()->json([
+                    'status' => false,
+                    'msg' => 'Не получилось запистать данные для авторизации в TTLOCK',
+                ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
+
+
+
+
+
+
+
     public function getToken(Request $request)
     {
         try {
@@ -66,7 +118,7 @@ class SimpleApiController extends Controller
             LockApiLog::create([
                 'is_ttlock_result' => false,
                 'api_method' => 'getToken',
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 
@@ -116,7 +168,7 @@ class SimpleApiController extends Controller
                 'is_ttlock_result' => false,
                 'api_method' => 'getLockEvents',
                 'user_id' => auth()->user()->id,
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 
@@ -161,7 +213,7 @@ class SimpleApiController extends Controller
                 'is_ttlock_result' => false,
                 'api_method' => 'getLockEvents2',
                 'user_id' => auth()->user()->id,
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 
@@ -205,7 +257,7 @@ class SimpleApiController extends Controller
                 'is_ttlock_result' => false,
                 'api_method' => 'getEventsByCode',
                 'user_id' => auth()->user()->id,
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 
@@ -246,7 +298,7 @@ class SimpleApiController extends Controller
                 'is_ttlock_result' => false,
                 'api_method' => 'addCodePacket',
                 'user_id' => auth()->user()->id,
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 
@@ -290,7 +342,7 @@ class SimpleApiController extends Controller
                 'is_ttlock_result' => false,
                 'api_method' => 'setCodePacket',
                 'user_id' => auth()->user()->id,
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 
@@ -328,7 +380,7 @@ class SimpleApiController extends Controller
                 'is_ttlock_result' => false,
                 'api_method' => 'getCodesCount',
                 'user_id' => auth()->user()->id,
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'params' => json_encode($request->all()),
             ]);
 

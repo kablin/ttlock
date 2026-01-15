@@ -37,9 +37,14 @@ Route::middleware(['throttle:500,1'])->group(function () {
 
 Route::middleware(['throttle:500,1'])->group(function () {
 
-    /*Route::post('/v1/create_credential', function (Request $request) {
+   /* Route::post('/v1/create_credential', function (Request $request) {
         return (new JobsService(auth()->user()->id))->createCredential($request->user, $request->password, json_decode($request->getContent())->tag ?? '');
-    })->middleware('auth:sanctum');*/
+    })->middleware('auth:sanctum');
+
+*/
+    Route::post('/v1/update_ttlock_credential',  [SimpleApiController::class, 'updateTtlockCredential'])->middleware('auth:sanctum');
+
+
 
     Route::post('/v1/get_lock_list', [CallbackApiController::class, 'getLockList'])->middleware('auth:sanctum');
 

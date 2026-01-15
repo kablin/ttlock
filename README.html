@@ -12,6 +12,24 @@
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "2",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не получилось запистать данные для авторизации в TTLOCK"</span><br />}</p>
 <p>&nbsp;</p>
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> 'error" : "3",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестная ошибка"</span><br />}</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<hr />
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>api/v1/update_ttlock_credential</strong></p>
+<p>Обновить логин пароль для TTlock</p>
+<p>{<br />"email" : "xxxx@rambler.ru",<br />"password" : "************",<br />}</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Пароль к облаку Ttlock изменен"</span><br />}</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не удалось залогиниться&nbsp; в облако Ttlock"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Не получилось запистать данные для авторизации в Ttlock"</span><br />}</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестная ошибка"</span><br />}</p>
 <hr />
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/get_token</strong></p>
@@ -274,18 +292,4 @@
 <p>2. Получить Bearer токен авторизации, который используется во всех остальных запросах - api/v1/get_token</p>
 <p>3. Установить адрес обратного вызова, на который будет приходить ответ от API при работе с замками - api/v1/set_callback</p>
 <p>4. Выполнять остальные запросы к апи</p>
-
-
-
- apt-get update
- apt-get install php8.2
-
-apt-get install php8.2-mbstring
-
-
-php artisan fortify:install
-
-
-docker exec -it  centrifugo  centrifugo genconfig
-
- docker logs -f centrifugo
+<p>apt-get update apt-get install php8.2 apt-get install php8.2-mbstring php artisan fortify:install docker exec -it centrifugo centrifugo genconfig docker logs -f centrifugo</p>
