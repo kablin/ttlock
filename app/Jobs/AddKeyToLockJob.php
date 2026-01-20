@@ -141,7 +141,7 @@ class AddKeyToLockJob implements ShouldQueue
             if ($key['status']) {
                 $data['status'] = true;
                 $data['msg'] = "Ключ успешно загружен";
-            } else if ($this->counter >= 5) {
+            } else if ($this->counter >= 20) {
                 $data['status'] = false;
                 $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Количество попыток исчерпано.';
             } else if ($key['error_code'] != -3007) {
@@ -151,7 +151,7 @@ class AddKeyToLockJob implements ShouldQueue
                     ->chain([
                         new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                     ])
-                    ->delay(now()->addMinutes(20));
+                    ->delay(now()->addMinutes(3));
             } else {
                 $data['status'] = false;
                 $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'];
