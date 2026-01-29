@@ -143,10 +143,10 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['msg'] = "Ключ успешно загружен";
             } else if ($this->counter >= 20) {
                 $data['status'] = false;
-                $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Количество попыток исчерпано.';
+                $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Количество попыток исчерпано. Проверьте подключение замка к сети';
             } else if ($key['error_code'] != -3007) {
                 $data['status'] = false;
-                $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Следеющая попытка загрузки ключа чере 20 минут';
+                $data['msg'] = "Ошибка загрузки ключа. Замок недоступен" . $key['msg'] . ' Следующая попытка загрузки ключа через 3 минуты';
                 AddKeyToLockJob::dispatch(++$this->counter, $this->job_id, $this->lock_id, $this->code, $this->code_name, $this->begin, $this->end, $this->utc)->onQueue('default')
                     ->chain([
                         new SetStatusJob($this->job_id,  $this->lock_id ? true : false)

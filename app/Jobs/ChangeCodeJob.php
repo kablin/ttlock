@@ -122,12 +122,12 @@ class ChangeCodeJob implements ShouldQueue
             else if ($this->counter>=5)
             {
                 $data['status'] = false;
-                $data['msg'] = "Ошибка обновления ключа. ".$key['msg'].' Количество попыток исчерпано.';
+                $data['msg'] = "Ошибка обновления ключа. ".$key['msg'].' Количество попыток исчерпано. Проверьте подключение замка к сети';
             }
             else
             {
                  $data['status'] = false;
-                $data['msg'] = "Ошибка обновления ключа. ".$key['msg'].' Следеющая попытка загрузки ключа чере 20 минут';
+                $data['msg'] = "Ошибка обновления ключа. ".$key['msg'].' Следующая попытка обновления ключа через 3 минуты';
                 ChangeCodeJob::dispatch(++$this->counter, $this->job_id, $this->lock_id,$this->code_id, $this->begin, $this->end)->onQueue('default')
                 ->chain([
                     new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
