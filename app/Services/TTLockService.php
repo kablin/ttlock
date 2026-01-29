@@ -167,6 +167,21 @@ class TTLockService
 	}
 
 
+	public function getLockOpenState(Lock $lock)
+	{
+		$data = $this->request('/v3/lock/queryOpenState', [
+			'lockId' => $lock->lock_id,
+		]);
+
+		$lock->api_logs()->create([
+			'api_method' => '/v3/lock/queryOpenState',
+			'params' => json_encode($data),
+			'user_id' => $this->user?->id,
+		]);
+		return   $data;
+	}
+
+
 	public function getKeyList(Lock $lock, $pageNo, $pagSize)
 	{
 		$data = $this->request('/v3/lock/listKeyboardPwd', [

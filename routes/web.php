@@ -139,13 +139,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-
 /*
+
 Route::get('/test', function ()
 {
             $servise =  new \App\Services\TTLockService(App\Models\User::find(6));
            // return  $servise->getLockDetails(\App\Models\Lock::find(5));
-            return  $servise->getLockElectricQuantity(\App\Models\Lock::find(5));
+           // return  $servise->getLockElectricQuantity(\App\Models\Lock::find(5));
+            return  $servise->getLockOpenState(\App\Models\Lock::find(5));
+            
 }
 );*/
 

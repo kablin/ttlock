@@ -117,7 +117,7 @@ class AddKeyToLockJob implements ShouldQueue
             }
 
           
-            $key = $servise->newKey($this->code, $lock, $this->code_name, $_begin,  $_end);
+            $key = $servise->newKey($this->code, $lock, $job->user->source.'-'.$job->user->name.'-'. $this->code_name, $_begin,  $_end);
 
             if ($key['status']) {
                 LockPinCode::create([
@@ -128,7 +128,7 @@ class AddKeyToLockJob implements ShouldQueue
                     'end' =>  $_end,
                     'start_local' =>$this->begin,
                     'end_local' =>$this->end,
-                    'code_name' => $this->code_name,
+                    'code_name' =>$job->user->source.'-'.$job->user->name.'-'. $this->code_name,
                     'is_load' => true,
                 ]);
 
