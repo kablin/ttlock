@@ -137,5 +137,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
+
+
+
+/*
+Route::get('/test', function ()
+{
+            $servise =  new \App\Services\TTLockService(App\Models\User::find(6));
+           // return  $servise->getLockDetails(\App\Models\Lock::find(5));
+            return  $servise->getLockElectricQuantity(\App\Models\Lock::find(5));
+}
+);*/
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

@@ -152,6 +152,20 @@ class TTLockService
 	}
 
 
+	public function getLockElectricQuantity(Lock $lock)
+	{
+		$data = $this->request('/v3/lock/queryElectricQuantity', [
+			'lockId' => $lock->lock_id,
+		]);
+
+		$lock->api_logs()->create([
+			'api_method' => '/v3/lock/queryElectricQuantity',
+			'params' => json_encode($data),
+			'user_id' => $this->user?->id,
+		]);
+		return   $data;
+	}
+
 
 	public function getKeyList(Lock $lock, $pageNo, $pagSize)
 	{
