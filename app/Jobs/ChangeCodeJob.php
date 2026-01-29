@@ -119,7 +119,7 @@ class ChangeCodeJob implements ShouldQueue
                 $data['status'] = true;
                 $data['msg'] = "Ключ успешно обновлен";
             }
-            else if ($this->counter>=5)
+            else if ($this->counter>=1500)
             {
                 $data['status'] = false;
                 $data['msg'] = "Ошибка обновления ключа. ".$key['msg'].' Количество попыток исчерпано. Проверьте подключение замка к сети';
@@ -132,7 +132,7 @@ class ChangeCodeJob implements ShouldQueue
                 ->chain([
                     new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                 ])
-                ->delay(now()->addMinutes(20));
+                ->delay(now()->addMinutes(3));
             }
 
             info('Update key result', $key);
