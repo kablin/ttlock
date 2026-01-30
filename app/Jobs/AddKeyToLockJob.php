@@ -140,7 +140,7 @@ class AddKeyToLockJob implements ShouldQueue
             $data['data'] =  $key;
             if ($key['status']) {
                 $data['status'] = true;
-                $data['msg'] = "Ключ успешно загружен";
+                $data['msg'] = "Ключ в замок ". $lock->lock_alias." успешно загружен :". $this->code."#";
             } else if ($this->counter >= 1500) {
                 $data['status'] = false;
                 $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Количество попыток исчерпано. Проверьте подключение замка к сети';
