@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Illuminate\Support\Arr;
 use App\Models\LockApiLog;
+use Illuminate\Support\Str;
 
 
 class SettingsController extends Controller
@@ -22,7 +23,8 @@ class SettingsController extends Controller
     {
         $credential = auth()->user()->credential;
         return Inertia::render('Settings', [
-            'credential' => $credential
+            'credential' => $credential,
+            'user' => auth()->user()
         ]);
     }
 
@@ -35,7 +37,7 @@ class SettingsController extends Controller
         LockApiLog::create([
             'is_ttlock_result' => false,
             'user_id' => auth()->user()->id,
-            'ip' => json_encode( $request->ip()),
+            'ip' => json_encode($request->ip()),
             'api_method' => 'refreshToken',
             'params' => json_encode($request->all()),
 
@@ -44,6 +46,27 @@ class SettingsController extends Controller
 
         $token = auth()->user()->createToken('ttlock');
         return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id], 200);
+    }
+
+
+
+    public function refreshKey(Request $request)
+    {
+
+        LockApiLog::create([
+            'is_ttlock_result' => false,
+            'user_id' => auth()->user()->id,
+            'ip' => json_encode($request->ip()),
+            'api_method' => 'refreshKey',
+            'params' => json_encode($request->all()),
+
+        ]);
+
+        $user = User::find(auth()->user()->id);
+        $user['realty_key'] = Str::random(32);
+        $user->save();
+       
+        return response()->json(['realty_key' => $user['realty_key'], 'status' => true, 'user_id' => auth()->user()->id], 200);
     }
 
 
@@ -59,7 +82,7 @@ class SettingsController extends Controller
             LockApiLog::create([
                 'is_ttlock_result' => false,
                 'user_id' => auth()->user()->id,
-                'ip' => json_encode( $request->ip()),
+                'ip' => json_encode($request->ip()),
                 'api_method' => 'saveCredential',
                 'params' => json_encode($request->email),
 

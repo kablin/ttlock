@@ -109,7 +109,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::get('/credential', [\App\Http\Controllers\SettingsController::class, 'show'])->name('settings');
   Route::post('/refresh_token', [\App\Http\Controllers\SettingsController::class, 'refreshToken'])->name('refreshToken');
   Route::post('/save_credential', [\App\Http\Controllers\SettingsController::class, 'saveCredential'])->name('saveCredential');
-
+  Route::post('/refresh_realty_key', [\App\Http\Controllers\SettingsController::class, 'refreshKey'])->name('refreshKey');
 
 
   //tarifs

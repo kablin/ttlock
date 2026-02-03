@@ -5,8 +5,8 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ref } from 'vue'
-import { settings, refreshToken, saveCredential } from '@/routes';
+import { ref , onMounted} from 'vue'
+import { settings, refreshToken, saveCredential, refreshKey } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
@@ -22,10 +22,14 @@ const props = defineProps({
     credential: {
         type: Object
     },
+     user: {
+        type: Object
+    },
 });
 
 
 const loading = ref(false)
+const realty_key = ref()
 const showPassword = ref(false)
 
 const loadingTtlock = ref(false)
@@ -64,6 +68,25 @@ const handleSubmit = async () => {
 }
 
 
+const refreshkey = async () => {
+    loading.value = true
+    try {
+        // Axios POST request
+        const response = await axios.post(refreshKey().url, {
+        }, {
+            headers: {
+                //      'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json',
+            }
+        })
+        realty_key.value = response.data.realty_key
+    } catch (error: any) {
+        console.error('Error:', error)
+    } finally {
+        loading.value = false
+    }
+}
+
 
 const saveTtlockCredential = async () => {
     loadingTtlock.value = true
@@ -88,6 +111,32 @@ const saveTtlockCredential = async () => {
 }
 
 
+onMounted(() => {
+  realty_key.value = props.user.realty_key
+})
+
+
+
+const copied = ref(false) // Состояние копирования
+
+
+
+const copyToClipboard = async () => {
+    if (!realty_key.value) return
+    
+    try {
+        await navigator.clipboard.writeText(realty_key.value)
+        copied.value = true
+        
+        setTimeout(() => {
+            copied.value = false
+        }, 2000)
+    } catch (error) {
+        console.error('Ошибка копирования:', error)
+        alert('Не удалось скопировать ключ')
+    }
+}
+
 
 
 </script>
@@ -103,15 +152,14 @@ const saveTtlockCredential = async () => {
                     class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  items-center justify-center gap-4">
                     <div class="grid gap-3 mx-3 w-full">
                         <Label class="w-full min-w-[160px]">Учетная запись ttlock</Label>
-                        <Input v-model="credential_login" class="w-full " type="email"
-                            placeholder="name@example.ru" />
+                        <Input v-model="credential_login" class="w-full " type="email" placeholder="name@example.ru" />
                     </div>
                     <div class="grid w-full gap-3 mx-3 ">
 
                         <Label class="w-full min-w-[140px]">Пароль</Label>
                         <div class="flex">
-                            <Input :type="showPassword ? 'text' : 'password'" class="" 
-                                placeholder="пароль" v-model="credential_password" />
+                            <Input :type="showPassword ? 'text' : 'password'" class="" placeholder="пароль"
+                                v-model="credential_password" />
                             <Button @click="togglePassword" variant="design">
                                 <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -119,14 +167,15 @@ const saveTtlockCredential = async () => {
                                         stroke-linecap="round" stroke-linejoin="round" />
                                     <path d="M1 12C1 12 5 20 12 20C19 20 23 12 23 12" stroke="#ffffff" stroke-width="2"
                                         stroke-linecap="round" stroke-linejoin="round" />
-                                    <circle cx="12" cy="12" r="3" stroke="#ffffff" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
+                                    <circle cx="12" cy="12" r="3" stroke="#ffffff" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </Button>
                         </div>
                     </div>
                     <div>
-                        <Button variant="design" class="my-4" @click="saveTtlockCredential" :disabled="loadingTtlock">Сохранить</Button>
+                        <Button variant="design" class="my-4" @click="saveTtlockCredential"
+                            :disabled="loadingTtlock">Сохранить</Button>
                     </div>
                     <div>
                         <p class="break-all " :class="error ? 'text-red-500' : 'text-green-700'">{{ msg }}</p>
@@ -136,7 +185,10 @@ const saveTtlockCredential = async () => {
             </div>
             <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div
-                    class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col items-center justify-center gap-4">
+                    class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  gap-4">
+                    <div>
+                        <Label> Токен доступа к API</Label>
+                    </div>
                     <div>
                         <Label>Внимание! Токен будет показан только один раз</Label>
                     </div>
@@ -148,6 +200,46 @@ const saveTtlockCredential = async () => {
                     </div>
                 </div>
             </div>
+
+            <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div
+            class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  gap-4">
+            <div>
+                <Label> Ключ доступа к Realty Calendar</Label>
+            </div>
+            
+            <!-- Поле с ключом и кнопкой копирования -->
+            <div class="flex items-center gap-2">
+                <div class="flex-1 p-2 bg-muted rounded-md font-mono text-sm break-all">
+                    {{ realty_key }}
+                </div>
+                <Button 
+                    variant="design" 
+                    @click="copyToClipboard"
+                    :disabled="!realty_key || copied"
+                    class="whitespace-nowrap"
+                >
+                    <template v-if="!copied">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Скопировать
+                    </template>
+                    <template v-else>
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Скопировано!
+                    </template>
+                </Button>
+            </div>
+            
+            <div>
+                <Button variant="design" @click="refreshkey" :disabled="loading">Обновить ключ</Button>
+            </div>
+        </div>
+    </div>
+
         </SettingsLayout>
     </AppLayout>
 </template>

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 use App\Models\LockApiLog;
 
 
@@ -53,6 +54,8 @@ class AuthController extends Controller
                 'name' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'source' => json_decode($request->getContent())->source ?? 'bitrix',
+                'realty_key' =>  Str::random(32),
+
             ]);
 
 
@@ -60,11 +63,10 @@ class AuthController extends Controller
             $credentials['email'] = $validated['email'];
             $credentials['password'] = $validated['password'];
 
-          
+
 
             if (!$user->wasRecentlyCreated) {
-                if (!Auth::attempt($validated))  
-                {
+                if (!Auth::attempt($validated)) {
                     // обновляем пароль пользователю                    
                     //return response()->json(['status' => false,  'msg' => 'Неверный пароль'], 200);
                     $user->password = Hash::make($validated['password']);
