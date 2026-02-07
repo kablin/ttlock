@@ -28,7 +28,12 @@ class SettingsController extends Controller
         ]);
     }
 
-
+    public function realty(Request $request)
+    {
+         return Inertia::render('Realty', [
+              'user' => auth()->user()
+        ]);
+    }
 
 
     public function refreshToken(Request $request)

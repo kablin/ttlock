@@ -107,6 +107,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
   //settings
   Route::get('/credential', [\App\Http\Controllers\SettingsController::class, 'show'])->name('settings');
+  Route::get('/realty', [\App\Http\Controllers\SettingsController::class, 'realty'])->name('realty');
   Route::post('/refresh_token', [\App\Http\Controllers\SettingsController::class, 'refreshToken'])->name('refreshToken');
   Route::post('/save_credential', [\App\Http\Controllers\SettingsController::class, 'saveCredential'])->name('saveCredential');
   Route::post('/refresh_realty_key', [\App\Http\Controllers\SettingsController::class, 'refreshKey'])->name('refreshKey');
@@ -118,9 +119,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
   //youkassa
-   Route::post('/yookassa', [\App\Http\Controllers\YouKassaController::class,'webhook'])->name('webhook.yookassa');
-   Route::post('/pay', [\App\Http\Controllers\YouKassaController::class,'pay'])->name('webhook_pay');
- 
+  Route::post('/yookassa', [\App\Http\Controllers\YouKassaController::class, 'webhook'])->name('webhook.yookassa');
+  Route::post('/pay', [\App\Http\Controllers\YouKassaController::class, 'pay'])->name('webhook_pay');
+
 
   //  api
 

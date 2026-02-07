@@ -6,7 +6,7 @@ import { toUrl, urlIsActive } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editPassword } from '@/routes/password';
 import { edit as editProfile } from '@/routes/profile';
-import { settings } from '@/routes';
+import { settings,realty } from '@/routes';
 import { show } from '@/routes/two-factor';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
@@ -21,13 +21,17 @@ const sidebarNavItems: NavItem[] = [
         href: settings(),
     },
     {
+        title: 'Ключ Realty Calendar',
+        href: realty(),
+    },
+    {
         title: 'Пароль',
         href: editPassword(),
     },
-  /*  {
-        title: 'Two-Factor Auth',
-        href: show(),
-    },*/
+    /*  {
+          title: 'Two-Factor Auth',
+          href: show(),
+      },*/
     /*{
         title: 'Внешний вид',
         href: editAppearance(),
@@ -44,13 +48,8 @@ const currentPath = typeof window !== undefined ? window.location.pathname : '';
         <div class="flex flex-col lg:flex-row lg:space-x-12">
             <aside class="w-full max-w-xl lg:w-48">
                 <nav class="flex flex-col space-y-1 space-x-0">
-                    <Button
-                        v-for="item in sidebarNavItems"
-                        :key="toUrl(item.href)"
-                        variant="ghost"
-                        :class="['w-full justify-start', { 'bg-muted': urlIsActive(item.href, currentPath) }]"
-                        as-child
-                    >
+                    <Button v-for="item in sidebarNavItems" :key="toUrl(item.href)" variant="ghost"
+                        :class="['w-full justify-start', { 'bg-muted': urlIsActive(item.href, currentPath) }]" as-child>
                         <Link :href="item.href">
                             {{ item.title }}
                         </Link>
