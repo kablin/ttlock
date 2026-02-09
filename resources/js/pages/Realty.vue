@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ref, onMounted } from 'vue'
-import { settings,  refreshKey } from '@/routes';
+import { settings, refreshToken } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
@@ -31,24 +31,27 @@ const realty_key = ref()
 
 
 
-const refreshkey = async () => {
+const handleSubmit = async () => {
     loading.value = true
     try {
         // Axios POST request
-        const response = await axios.post(refreshKey().url, {
+        const response = await axios.post(refreshToken().url, {
         }, {
             headers: {
                 //      'X-CSRF-TOKEN': csrfToken,
                 'Content-Type': 'application/json',
             }
         })
-        realty_key.value = response.data.realty_key
+        realty_key.value = response.data.token
     } catch (error: any) {
         console.error('Error:', error)
     } finally {
         loading.value = false
     }
 }
+
+
+
 
 
 
@@ -80,7 +83,6 @@ const copyToClipboard = async () => {
 }
 
 
-
 </script>
 
 <template>
@@ -94,14 +96,16 @@ const copyToClipboard = async () => {
                 <div
                     class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  gap-4">
                     <div>
-                        <Label> Ключ доступа к Realty Calendar</Label>
+                        <Label> Токен доступа к API</Label>
                     </div>
 
-                    <!-- Поле с ключом и кнопкой копирования -->
-                    <div class="flex items-center gap-2">
-                        <div class="flex-1 p-2 bg-muted rounded-md font-mono text-sm break-all">
-                            {{ realty_key }}
-                        </div>
+                    <div>
+                        <Button variant="design" @click="handleSubmit" :disabled="loading">Обновить токен</Button>
+                    </div>
+                    <div>
+                        <p class="break-all">{{ realty_key }}</p>
+                    </div>
+                    <div>
                         <Button variant="design" @click="copyToClipboard" :disabled="!realty_key || copied"
                             class="whitespace-nowrap">
                             <template v-if="!copied">
@@ -119,10 +123,6 @@ const copyToClipboard = async () => {
                                 Скопировано!
                             </template>
                         </Button>
-                    </div>
-
-                    <div>
-                        <Button variant="design" @click="refreshkey" :disabled="loading">Обновить ключ</Button>
                     </div>
                 </div>
             </div>

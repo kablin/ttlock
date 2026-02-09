@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ref, onMounted } from 'vue'
-import { settings, refreshToken, saveCredential, refreshKey } from '@/routes';
+import { settings,  saveCredential } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
@@ -28,7 +28,7 @@ const props = defineProps({
 });
 
 
-const loading = ref(false)
+
 
 const showPassword = ref(false)
 
@@ -37,7 +37,7 @@ const loadingTtlock = ref(false)
 const credential_login = ref(props.credential?.login ?? "")
 const credential_password = ref(props.credential?.password ?? "")
 
-const token = ref()
+
 const msg = ref()
 const error = ref(false)
 
@@ -48,24 +48,6 @@ const togglePassword = () => {
 
 //const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
 
-const handleSubmit = async () => {
-    loading.value = true
-    try {
-        // Axios POST request
-        const response = await axios.post(refreshToken().url, {
-        }, {
-            headers: {
-                //      'X-CSRF-TOKEN': csrfToken,
-                'Content-Type': 'application/json',
-            }
-        })
-        token.value = response.data.token
-    } catch (error: any) {
-        console.error('Error:', error)
-    } finally {
-        loading.value = false
-    }
-}
 
 
 const saveTtlockCredential = async () => {
@@ -138,23 +120,7 @@ const saveTtlockCredential = async () => {
                 </div>
 
             </div>
-            <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div
-                    class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  gap-4">
-                    <div>
-                        <Label> Токен доступа к API</Label>
-                    </div>
-                    <div>
-                        <Label>Внимание! Токен будет показан только один раз</Label>
-                    </div>
-                    <div>
-                        <Button variant="design" @click="handleSubmit" :disabled="loading">Обновить токен</Button>
-                    </div>
-                    <div>
-                        <p class="break-all">{{ token }}</p>
-                    </div>
-                </div>
-            </div>
+
 
 
 

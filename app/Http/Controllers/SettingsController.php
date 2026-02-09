@@ -30,8 +30,8 @@ class SettingsController extends Controller
 
     public function realty(Request $request)
     {
-         return Inertia::render('Realty', [
-              'user' => auth()->user()
+        return Inertia::render('Realty', [
+            'user' => auth()->user()
         ]);
     }
 
@@ -50,6 +50,9 @@ class SettingsController extends Controller
 
 
         $token = auth()->user()->createToken('ttlock');
+        $user = User::find(auth()->user()->id);
+        $user['realty_key'] = $token->plainTextToken;
+        $user->save();
         return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id], 200);
     }
 
@@ -70,7 +73,7 @@ class SettingsController extends Controller
         $user = User::find(auth()->user()->id);
         $user['realty_key'] = Str::random(32);
         $user->save();
-       
+
         return response()->json(['realty_key' => $user['realty_key'], 'status' => true, 'user_id' => auth()->user()->id], 200);
     }
 
