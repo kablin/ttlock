@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TTLockWebHook;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -151,6 +152,8 @@ Route::get('/test', function ()
             
 }
 );*/
+
+Route::post('callback/ttlock/{code}', TTLockWebHook::class)->name('webhook.ttlock-code');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
