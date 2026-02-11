@@ -7,7 +7,7 @@ use App\Http\Controllers\SimpleApiController;
 use App\Http\Controllers\CallbackApiController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\TTLockWebHook;
 /*
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -21,6 +21,7 @@ Route::get('/lock_create', function (Request $request) {
 */
 
 
+Route::post('callback/ttlock/{code}', TTLockWebHook::class)->name('webhook.ttlock-code');
 
 
 Route::middleware(['throttle:500,1'])->group(function () {
