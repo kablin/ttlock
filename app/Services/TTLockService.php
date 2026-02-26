@@ -308,7 +308,7 @@ class TTLockService
 		if (is_null($begin)) {
 			$begin = Carbon::now()->unix();
 		} else {
-			$begin = Carbon::parse($begin)->unix();
+			$begin = Carbon::parse($begin)->subMinutes(15)->unix();
 		}
 
 
@@ -394,13 +394,13 @@ class TTLockService
 		if (is_null($begin)) {
 			$begin = Carbon::now()->unix();
 		} else {
-			$begin = Carbon::parse($begin)->setTimezone('Europe/Moscow')->unix();
+			$begin = Carbon::parse($begin)->subMinutes(15)->unix();
 		}
 
 		if (is_null($end)) {
 			$end = Carbon::today()->endOfDay()->unix();
 		} else {
-			$end = Carbon::parse($end)->setTimezone('Europe/Moscow')->unix();
+			$end = Carbon::parse($end)->unix();
 		}
 
 		$request = $this->request('/v3/keyboardPwd/change', [
