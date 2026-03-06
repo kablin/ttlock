@@ -60,6 +60,7 @@ class AuthController extends Controller
 
 
 
+
             $credentials['email'] = $validated['email'];
             $credentials['password'] = $validated['password'];
 
@@ -72,6 +73,13 @@ class AuthController extends Controller
                     $user->password = Hash::make($validated['password']);
                     $user->save();
                 }
+            }
+
+
+            if (!$user->realty_key) {
+                $token = auth()->user()->createToken('ttlock');
+                $user->realty_key = $token->plainTextToken;
+                $user->save();
             }
 
 
@@ -90,6 +98,7 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => true,
                     'error' => 0,
+                    'key' => $user->realty_key,
                     'message' => 'User created successfully',
                     'msg' => 'Пользователь успешно создан',
                 ], 200);
