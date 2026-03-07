@@ -47,6 +47,55 @@ class WizardController extends Controller
     return Inertia::render('Wizard', $params);
   }
 
+  public function index2(Request $request)
+  {
+    $rent_page = $request->input('rent_page', 1);
+    $lock_page = $request->input('lock_page', 1);
+
+
+    $rents = auth()->user()->rents()->with('locks')->orderBy('id');
+    if ($request->has('rent_search')) {
+      $rents = $rents->where('name', 'ilike', '%' . $request->rent_search . '%');
+    }
+    $rents = $rents->paginate(6, ['*'], 'rent_page', $rent_page);
+
+
+
+
+
+    $free_locks = auth()->user()->locks()->orderBy('id');
+    if ($request->has('lock_search')) {
+      $free_locks = $free_locks->where('lock_alias', 'ilike', '%' . $request->lock_search . '%');
+    }
+
+    $free_locks = $free_locks->paginate(20, ['*'], 'lock_page', $lock_page);
+
+
+    $params = ['rents' => $rents, 'free_locks' => $free_locks, 'success' => session('success')];
+    if ($request->has('rent_search'))  $params['rent_search'] = $request->rent_search;
+    if ($request->has('lock_search'))  $params['lock_search'] = $request->lock_search;
+
+    return Inertia::render('Wizard2', $params);
+  }
+
+
+  public function step2(Request $request)
+  {
+    return Inertia::render('Step2');
+  }
+
+  public function step3(Request $request)
+  {
+    return Inertia::render('Step3');
+  }
+  public function step4(Request $request)
+  {
+    return Inertia::render('Step4');
+  }
+  public function step5(Request $request)
+  {
+    return Inertia::render('Step5');
+  }
 
 
 

@@ -27,6 +27,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('wizard/page', [\App\Http\Controllers\WizardController::class, 'page'])->name('wizard_page');
 
 
+
+
+  Route::get('/setup/wizard/step1', [\App\Http\Controllers\WizardController::class, 'index2'])->name('wizard2');
+  Route::get('/setup/wizard/step2', [\App\Http\Controllers\WizardController::class, 'step2'])->name('wizard_step2');
+  Route::get('/setup/wizard/step3', [\App\Http\Controllers\WizardController::class, 'step3'])->name('wizard_step3');
+
+  Route::get('/setup/wizard/step4', [\App\Http\Controllers\WizardController::class, 'step4'])->name('wizard_step4');
+
+  Route::get('/setup/wizard/step5', [\App\Http\Controllers\WizardController::class, 'step5'])->name('wizard_step5');
+
   /*
     Route::get('rents_objects', function () {
         return Inertia::render('RentsObjects');
