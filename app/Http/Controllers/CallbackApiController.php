@@ -106,6 +106,107 @@ class CallbackApiController extends Controller
 
 
 
+public function createBooking(Request $request)
+    {
+        try {
+            //2025-08-28 15:43
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'createBooking',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
+            $validator = Validator::make($request->all(), [
+            //    'begin' => 'date_format:Y-m-d H:i',
+              //  'end' => 'date_format:Y-m-d H:i',
+              //  'code' => 'nullable|integer',
+              //  'code_name' => 'nullable|string',
+                'tag' => 'nullable',
+               // 'utc' => 'nullable|integer',
+                //'lock_id' => 'required|integer',
+
+            ], [
+              //  'begin.date_format' => 'Не верный формат даты -  "2025-07-23 18:07".',
+              //  'end.date_format' => 'Не верный формат даты -  "2025-07-23 18:07". ',
+               // 'lock_id.integer' => 'lock_id не число.',
+               // 'code.integer' => 'code не число.',
+               // 'lock_id.required' => 'Не указан lock_id.',
+               // 'code.required' => 'Не указан code.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only([ 'tag',]);
+            if (!$validated['code']) $validated['code'] =  random_int(1000, 9999);
+
+            return (new JobsService(auth()->user()->id))->createBooking(/*$validated['lock_id'], $validated['code'], $validated['code_name'] ??  'Ключ от Renty api', $validated['begin'] ?? null, $validated['end'] ?? null, ,$validated['utc'] ?? 0*/  $validated['tag'] ?? '');
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
+
+
+
+
+public function changeBooking(Request $request)
+    {
+        try {
+            //2025-08-28 15:43
+
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'changeBooking',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode( $request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
+            $validator = Validator::make($request->all(), [
+            //    'begin' => 'date_format:Y-m-d H:i',
+              //  'end' => 'date_format:Y-m-d H:i',
+              //  'code' => 'nullable|integer',
+              //  'code_name' => 'nullable|string',
+                'tag' => 'nullable',
+               // 'utc' => 'nullable|integer',
+                //'lock_id' => 'required|integer',
+
+            ], [
+              //  'begin.date_format' => 'Не верный формат даты -  "2025-07-23 18:07".',
+              //  'end.date_format' => 'Не верный формат даты -  "2025-07-23 18:07". ',
+               // 'lock_id.integer' => 'lock_id не число.',
+               // 'code.integer' => 'code не число.',
+               // 'lock_id.required' => 'Не указан lock_id.',
+               // 'code.required' => 'Не указан code.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only([ 'tag',]);
+            if (!$validated['code']) $validated['code'] =  random_int(1000, 9999);
+
+            return (new JobsService(auth()->user()->id))->changeBooking(/*$validated['lock_id'], $validated['code'], $validated['code_name'] ??  'Ключ от Renty api', $validated['begin'] ?? null, $validated['end'] ?? null, ,$validated['utc'] ?? 0*/  $validated['tag'] ?? '');
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
+
+    
+
     public function addCodeToLock(Request $request)
     {
         try {

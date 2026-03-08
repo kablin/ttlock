@@ -106,7 +106,49 @@ class SimpleApiController extends Controller
     }
 
 
+    public function testToken(Request $request)
+    {
+        try {
 
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'testToken',
+                'ip' => json_encode($request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
+
+            $validator = Validator::make($request->all(), [
+                'token' => 'required|string',
+
+
+            ], [
+                'token.required' => 'Не указан token.',
+                'token.string' => 'token не строка.',
+            ]);
+
+
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only(['token']);
+
+            $user = User::where('realty_key', $validated['token'])->first();
+
+            if (!$user) {
+                return response()->json(['status' => false,  'msg' => 'Ключ не найден'], 200);
+            } else
+                return response()->json(['status' => true,  'msg' => 'Ключ найден'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
 
 
 

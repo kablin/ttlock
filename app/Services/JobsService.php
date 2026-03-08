@@ -108,9 +108,36 @@ class JobsService
         $uuid = $this->startLockJob('addKeyToLock', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
-        AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end,$utc)->onQueue('default')->chain([
+        AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end, $utc)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
+
+        return response()->json(['job_id' => $uuid->job_id], 200);
+    }
+
+
+
+    public function createBooking(/*$lock_id, $code, $code_name, $begin, $end, $tag, $utc*/$tag)
+    {
+        $uuid = $this->startLockJob('addKeyToLock', $tag);
+        //$lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
+
+        /* AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end, $utc)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());*/
+
+        return response()->json(['job_id' => $uuid->job_id], 200);
+    }
+
+
+    public function changeBooking(/*$lock_id, $code, $code_name, $begin, $end, $tag, $utc*/$tag)
+    {
+        $uuid = $this->startLockJob('addKeyToLock', $tag);
+        //$lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
+
+        /* AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end, $utc)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());*/
 
         return response()->json(['job_id' => $uuid->job_id], 200);
     }
@@ -129,7 +156,7 @@ class JobsService
     }
 
 
-    
+
 
     public function changeCode($lock_id, $code_id, $begin, $end, $tag)
     {
