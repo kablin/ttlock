@@ -43,6 +43,21 @@
 <p>&nbsp;</p>
 <p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "msg" : "Неизвестная ошибка"</span><br />}</p>
 <p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<hr />
+<p>&nbsp;</p>
+<p><strong>&nbsp;api/v1/test_token</strong></p>
+<p>Проверка наличия ключа в системе<br /><br /></p>
+<p>{<br /><br />"token":"123456"</p>
+<p>}<br /><br /></p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "true",</span><br />'msg' =&gt; 'Ключ найден'<br /><br />}</p>
+<p><span style="text-decoration: underline;">Ошибки</span>:</p>
+<p>&nbsp;</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"status'": "false",</span><br />'msg' =&gt; 'Ключ не найден'<br />}</p>
+<p>&nbsp;</p>
 <hr />
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/set_callback</strong></p>
@@ -59,6 +74,14 @@
 <p>&nbsp;</p>
 <h3>Запросы к апи которые возвращают job_id с уникальным номером запроса. После выполнения запроса к облаку TTLOCK вызвается коллбэк пользователя куда передается job_id и результат запроса. Во всех этих запросах есть необязательное поле tag, куда можно записать произвольный json, и это поле будет возвращено с результатом</h3>
 <p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>&nbsp;api/v1/create_booking</strong></p>
+<p><strong>*</strong> Создать бронирование<br /><br /></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>&nbsp;api/v1/change_booking</strong></p>
+<p><strong>* Изменить бронирование</strong> <br /><br /></p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
