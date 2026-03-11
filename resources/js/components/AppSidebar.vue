@@ -1,106 +1,151 @@
-<script setup lang="ts">
-import NavFooter from '@/components/NavFooter.vue';
-import NavMain from '@/components/NavMain.vue';
-import NavUser from '@/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { router, Link } from '@inertiajs/vue3'
+import draggable from 'vuedraggable'
+import { 
+  Home, Building, KeyRound, Lock, ShoppingCart, 
+  CreditCard, Link2, BookOpen, Settings, GripVertical, X 
+} from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
 import { dashboard, lockList, groups, wizard_step1, lockevents, objects2, tarifs } from '@/routes';
-import { edit as editProfile } from '@/routes/profile';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
-import AppLogo from './AppLogo.vue';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Дашборд',
-        href: dashboard(),
-        svg: `<img width="25px" src="/images/icons/Document.png">`,
-    },
+const props = defineProps({
 
+  mobileOpen: {
+    type: Boolean,
+    default: false
+  }
+})
 
-    {
-        title: 'Тариф и оплата',
-        href: tarifs(),
-         svg: `<img width="25px" src="/images/icons/hugeicons_payment-02.png">`,
-    },
+const emit = defineEmits(['update:mobileOpen'])
 
+// Иконки маппинг
+const icons = {
+  Home, Building, KeyRound, Lock, ShoppingCart,
+  CreditCard, Link2, BookOpen, Settings
+}
 
-    {
-        title: 'Управление Пространствами',
-        href: groups(),
-        svg: `<img width="25px" src="/images/icons/Keyboard-Close.png">`,
-    },
+// Дефолтная навигация
+const defaultNavigation = [
+  { id: 'dashboard', name: 'Обзор', href: 'Dashboard', icon: 'Home' },
+  { id: 'properties', name: 'Объекты и доступы', href: 'PropertiesAndAccess', icon: 'Building' },
+  { id: 'locks', name: 'Управление замками', href: 'Locks', icon: 'Lock' },
+  { id: 'shop', name: 'Магазин оборудования', href: 'Properties', icon: 'ShoppingCart' },
+  { id: 'billing', name: 'Тариф и оплата', href: 'AccessGrants', icon: 'CreditCard' },
+  { id: 'mapping', name: 'Привязка замков', href: 'LockMapping', icon: 'Link2' },
+  { id: 'eventlog', name: 'Журнал событий', href: 'EventLog', icon: 'BookOpen' },
+  { id: 'settings', name: 'Мастер настройки', href: wizard_step1().url, icon: 'Settings' },
+]
 
+// Состояние
+const navigation = ref([...defaultNavigation])
 
-    {
-        title: 'Управление замками',
-        href: objects2(),
-        svg: `<img width="25px" src="/images/icons/Click.png">`,
-    },
+// Загрузка порядка из localStorage
+onMounted(() => {
+  const saved = localStorage.getItem('menuOrder')
+  if (saved) {
+    try {
+      const savedOrder = JSON.parse(saved)
+      if (Array.isArray(savedOrder) && savedOrder.length > 0) {
+        const restored = savedOrder
+          .map(id => defaultNavigation.find(item => item.id === id))
+          .filter(Boolean)
+        const missing = defaultNavigation.filter(item => !savedOrder.includes(item.id))
+        if (restored.length > 0) {
+          navigation.value = [...restored, ...missing]
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore menu order', e)
+    }
+  }
+})
 
+// Drag & Drop: сохранение порядка
+const onDragEnd = () => {
+  localStorage.setItem('menuOrder', JSON.stringify(navigation.value.map(item => item.id)))
+}
 
-    {
-        title: 'Список замков',
-        href: lockList(),
-        svg: `<img width="25px" src="/images/icons/Unlock.png">`,
-    },
+// Навигация
+const navigate = (href) => {
+ router.visit(href)
+  emit('update:mobileOpen', false)
+}
 
-
-    {
-        title: 'Логи',
-        href: lockevents(),
-        icon: LayoutGrid,
-    },
-
-    {
-        title: 'Настройки',
-        href: editProfile(),
-        icon: LayoutGrid,
-    },
-
-    {
-        title: 'Мастер',
-        href: wizard_step1(),
-        icon: LayoutGrid,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    /*  {
-          title: 'Github Repo',
-          href: 'https://github.com/laravel/vue-starter-kit',
-          icon: Folder,
-      },
-      {
-          title: 'Documentation',
-          href: 'https://laravel.com/docs/starter-kits#vue',
-          icon: BookOpen,
-      },*/
-];
+// Закрыть сайдбар на мобильном
+const closeMobile = () => {
+  emit('update:mobileOpen', false)
+}
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="sidebar">
-        <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
-                        <AppLogo />
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-        </SidebarHeader>
+  <aside 
+    :class="cn(
+      'fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-slate-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0',
+      mobileOpen ? 'translate-x-0' : '-translate-x-full'
+    )"
+  >
+    <div class="flex flex-col h-full">
+ 
+      <!-- Logo + Close button (mobile) -->
+      <div class="h-16 flex items-center justify-between px-4 border-b border-slate-100">
+        <Link :href="dashboard()" class="flex items-center">
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69628f4d0d107902144d2a82/353a167e4__1.png" 
+            alt="RENTYSOFT" 
+            class="h-9"
+          />
+        </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="lg:hidden"
+          @click="closeMobile"
+        >
+          <X class="w-5 h-5" />
+        </Button>
+      </div>
 
-        <SidebarContent>
-            <NavMain :items="mainNavItems" />
-        </SidebarContent>
+      <!-- Navigation with Drag & Drop -->
+      <draggable
+        v-model="navigation"
+        item-key="id"
+        handle=".drag-handle"
+        class="flex-1 py-4 px-3 overflow-y-auto"
+        @end="onDragEnd"
+      >
+        <template #item="{ element: item, index }">
+          <div class="mb-1">
+            <div
+              @click="navigate(item.href)"
+              :class="cn(
+                'flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer',
+                1 === item.href 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              )"
+            >
+              <!-- Drag handle -->
+              <div
+                class="drag-handle cursor-grab active:cursor-grabbing"
+                :class="1 === item.href ? 'text-white/70' : 'text-slate-400'"
+                @click.stop
+              >
+                <GripVertical class="w-4 h-4" />
+              </div>
+              
+              <!-- Icon -->
+              <component :is="icons[item.icon]" class="w-5 h-5" />
+              
+              <!-- Label -->
+              <span class="flex-1">{{ item.name }}</span>
+            </div>
+          </div>
+        </template>
+      </draggable>
 
-        <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
-            <NavUser />
-        </SidebarFooter>
-    </Sidebar>
-    <slot />
+    </div>
+  </aside>
 </template>
