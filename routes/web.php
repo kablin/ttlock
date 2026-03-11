@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-  Route::get('/setup/wizard/step1', [\App\Http\Controllers\WizardController::class, 'index2'])->name('wizard2');
+  Route::get('/setup/wizard/step1', [\App\Http\Controllers\WizardController::class, 'index2'])->name('wizard_step1');
   Route::get('/setup/wizard/step2', [\App\Http\Controllers\WizardController::class, 'step2'])->name('wizard_step2');
   Route::get('/setup/wizard/step3', [\App\Http\Controllers\WizardController::class, 'step3'])->name('wizard_step3');
 

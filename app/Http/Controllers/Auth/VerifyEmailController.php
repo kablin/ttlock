@@ -18,6 +18,6 @@ class VerifyEmailController extends Controller
             return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
         }
         $request->fulfill();
-        return redirect()->intended(route('wizard', absolute: false).'?verified=1');
+        return redirect()->intended(route('wizard_step1', absolute: false).'?verified=1');
     }
 }
