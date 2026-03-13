@@ -27,15 +27,16 @@ const icons = {
   CreditCard, Link2, BookOpen, Settings
 }
 
+//  { id: 'eventlog', name: 'Журнал событий', href: 'EventLog', icon: 'BookOpen' },
+//    { id: 'shop', name: 'Магазин оборудования', href: 'Properties', icon: 'ShoppingCart' },
+//  { id: 'properties', name: 'Объекты и доступы', href: 'PropertiesAndAccess', icon: 'Building' },
+//
 // Дефолтная навигация
 const defaultNavigation = [
-  { id: 'dashboard', name: 'Обзор', href: 'Dashboard', icon: 'Home' },
-  { id: 'properties', name: 'Объекты и доступы', href: 'PropertiesAndAccess', icon: 'Building' },
-  { id: 'locks', name: 'Управление замками', href: 'Locks', icon: 'Lock' },
-  { id: 'shop', name: 'Магазин оборудования', href: 'Properties', icon: 'ShoppingCart' },
-  { id: 'billing', name: 'Тариф и оплата', href: 'AccessGrants', icon: 'CreditCard' },
-  { id: 'mapping', name: 'Привязка замков', href: 'LockMapping', icon: 'Link2' },
-  { id: 'eventlog', name: 'Журнал событий', href: 'EventLog', icon: 'BookOpen' },
+  { id: 'dashboard', name: 'Обзор', href: dashboard().url, icon: 'Home' },
+  { id: 'locks', name: 'Управление замками', href: lockList().url, icon: 'Lock' },
+  { id: 'billing', name: 'Тариф и оплата', href: tarifs().url, icon: 'CreditCard' },
+  { id: 'mapping', name: 'Привязка замков', href: objects2().url, icon: 'Link2' },
   { id: 'settings', name: 'Мастер настройки', href: wizard_step1().url, icon: 'Settings' },
 ]
 

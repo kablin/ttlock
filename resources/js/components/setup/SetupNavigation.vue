@@ -56,8 +56,9 @@ const handleBack = () => {
 }
 
 const handleNext = () => {
-  props.onNext()
+  //props.onNext()
   emit('next')
+
 }
 
 const handleSkip = () => {

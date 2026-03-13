@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use denis660\Centrifugo\Centrifugo;
-
+use App\Services\TTLockService;
+use App\Models\Lock;
 
 
 class LockController extends Controller
@@ -34,5 +35,47 @@ class LockController extends Controller
     {
         $locks = auth()->user()->locks;
         return response()->json($locks);
+    }
+
+
+    public function getLockList(Request $request)
+    {
+        $servise =  new TTLockService(auth()->user());
+        $locks_data = $servise->getLockList();
+
+        $mylocks = [];
+        if ($locks_data['status'] == true) {
+            foreach ($locks_data['data']['list'] as $data) {
+                $lock = [];
+                $lock['user_id'] =  auth()->user()->id;
+                $lock['lock_id'] = $data['lockId'];
+                $lock['lock_name'] = $data['lockName'];
+                $lock['lock_alias'] = $data['lockAlias'];
+                $lock['status'] = true;
+                $lock['electric_quantity'] = $data['electricQuantity'];
+                $lock['no_key_pwd'] = $data['noKeyPwd'];
+
+                $model = Lock::query()->updateOrCreate(['lock_id' => $data['lockId']], $lock);
+
+                $mylocks[] =  $model->id;
+
+                $model->saveOptionValueByName('error', null);
+                $model->saveOptionValueByName('electricQuantity', $data['electricQuantity'] ?? 0);
+                $model->saveOptionValueByName('lockAlias', $data['lockAlias']);
+                $model->saveOptionValueByName('noKeyPwd', $data['noKeyPwd']);
+                $model->saveOptionValueByName('timezoneRawOffset', $data['timezoneRawOffset']);
+            }
+            Lock::where('user_id', auth()->user()->id)->whereNotIn('id', $mylocks)->delete();
+
+
+            return response()->json([
+                'status' => true,
+                'msg' => 'Успешно. Замков получено:'+ count($locks_data['data']['list'] )
+            ], 200);
+        } else
+            return response()->json([
+                'status' => false,
+                'msg' => $locks_data['msg']
+            ], 200);
     }
 }

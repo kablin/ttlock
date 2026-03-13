@@ -111,6 +111,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::get('/lockList', [\App\Http\Controllers\LockController::class, 'lockList'])->name('lockList');
   Route::post('/lockList_refresh', [\App\Http\Controllers\LockController::class, 'lockList_refresh'])->name('lockList_refresh');
 
+ Route::post('/getLockList', [\App\Http\Controllers\LockController::class, 'getLockList'])->name('wizard_lock_list');
 
 
 

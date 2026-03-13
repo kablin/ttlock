@@ -4,7 +4,7 @@ import { router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue';
 // import { route } from 'ziggy-js' // Раскомментируйте, если у вас настроен Ziggy
 import { cn } from '@/lib/utils'
-
+import { Head } from '@inertiajs/vue3';
 import SetupSteps from '@/components/setup/SetupSteps.vue'
 import SetupNavigation from '@/components/setup/SetupNavigation.vue'
 
