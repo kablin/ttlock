@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { Eye, EyeOff, ExternalLink, Check, X, Loader2, Link as LinkIcon } from 'lucide-vue-next'
+import { Eye, EyeOff, ExternalLink, Check, X, Loader2, Link as LinkIcon, Copy } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
@@ -12,7 +12,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { usePage } from '@inertiajs/vue3';
 
 const page = usePage();
-
+const copied = ref(false)
 // Состояния
 const token = ref(page.props.auth.user.realty_key)
 const showToken = ref(false)
@@ -23,6 +23,34 @@ const foundObjects = ref(0)
 // Получаем параметр integration из URL
 const urlParams = new URLSearchParams(window.location.search)
 const integration = urlParams.get('integration') || 'realtycalendar'
+
+
+// Копирование в буфер
+const copyToClipboard = async () => {
+  if (!token.value) return
+  
+  try {
+    await navigator.clipboard.writeText(token.value)
+    copied.value = true
+    
+    // Сброс через 2 секунды
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('Не удалось скопировать:', err)
+    // Fallback для старых браузеров
+    const textarea = document.createElement('textarea')
+    textarea.value = token.value
+    document.body.appendChild(textarea)
+    textarea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textarea)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  }
+}
+
 
 // Методы
 const handleConnect = async () => {
@@ -128,18 +156,55 @@ const dismissNotification = () => {
                 </a>
               </Button>
 
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-slate-700">Токен</label>
-                <div class="relative">
-                  <Input v-model="token" :type="showToken ? 'text' : 'password'" readonly
-                    placeholder="Вставьте токен из RealtyCalendar" class="pr-10 bg-slate-50" :disabled="isConnecting" />
-                  <button type="button" @click="showToken = !showToken"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                    <EyeOff v-if="showToken" class="w-5 h-5" />
-                    <Eye v-else class="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
+<div class="space-y-2">
+  <label class="text-sm font-medium text-slate-700">Токен</label>
+  <div class="relative">
+    <Input 
+      v-model="token" 
+      :type="showToken ? 'text' : 'password'" 
+      placeholder="Вставьте токен из RealtyCalendar" 
+      class="pr-20 bg-slate-50" 
+      :disabled="isConnecting" 
+    />
+    
+    <!-- Кнопки действий (справа внутри input) -->
+    <div class="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+      
+      <!-- 🔘 Копировать -->
+      <button
+        type="button"
+        @click="copyToClipboard"
+        :disabled="!token"
+        class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        title="Скопировать токен"
+      >
+        <Copy v-if="!copied" class="w-4 h-4" />
+        <Check v-else class="w-4 h-4 text-green-600" />
+      </button>
+      
+      <!-- 👁️ Показать/скрыть -->
+      <button
+        type="button"
+        @click="showToken = !showToken"
+        class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+        :title="showToken ? 'Скрыть токен' : 'Показать токен'"
+      >
+        <EyeOff v-if="showToken" class="w-4 h-4" />
+        <Eye v-else class="w-4 h-4" />
+      </button>
+      
+    </div>
+  </div>
+  
+  <!-- Подсказка после копирования -->
+  <p v-if="copied" class="text-xs text-green-600 flex items-center gap-1">
+    <Check class="w-3 h-3" />
+    Токен скопирован в буфер обмена
+  </p>
+</div>
+
+
+
             </div>
           </div>
 

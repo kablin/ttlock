@@ -84,7 +84,7 @@ const saveTtlockCredential = async () => {
         <Head title="Список замков" />
 
         <SettingsLayout>
-            <div class="flex   flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div class="flex-1 px-6 py-8 w-full">
                 <div
                     class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  items-center justify-center gap-4">
                     <div class="grid gap-3 mx-3 w-full">

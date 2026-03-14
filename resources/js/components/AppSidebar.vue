@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-import { dashboard, lockList, groups, wizard_step1, lockevents, objects2, tarifs } from '@/routes';
+import { dashboard, lockList, groups, wizard_step1, lockevents, mapping, tarifs } from '@/routes';
 
 const props = defineProps({
 
@@ -36,7 +36,7 @@ const defaultNavigation = [
   { id: 'dashboard', name: 'Обзор', href: dashboard().url, icon: 'Home' },
   { id: 'locks', name: 'Управление замками', href: lockList().url, icon: 'Lock' },
   { id: 'billing', name: 'Тариф и оплата', href: tarifs().url, icon: 'CreditCard' },
-  { id: 'mapping', name: 'Привязка замков', href: objects2().url, icon: 'Link2' },
+  { id: 'mapping', name: 'Привязка замков', href: mapping().url, icon: 'Link2' },
   { id: 'settings', name: 'Мастер настройки', href: wizard_step1().url, icon: 'Settings' },
 ]
 

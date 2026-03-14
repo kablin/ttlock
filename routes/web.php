@@ -43,6 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
+  //mapping
+  Route::get('/mapping', [\App\Http\Controllers\LockController::class, 'mapping'])->name('mapping');
+
   /*
     Route::get('rents_objects', function () {
         return Inertia::render('RentsObjects');

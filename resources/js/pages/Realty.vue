@@ -92,16 +92,16 @@ const copyToClipboard = async () => {
 
         <SettingsLayout>
 
-            <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div class="flex-1 px-6 py-8  w-full">
                 <div
                     class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  gap-4">
                     <div>
                         <Label> Токен доступа к API</Label>
                     </div>
 
-                    <div>
+                    <!--div>
                         <Button variant="design" @click="handleSubmit" :disabled="loading">Обновить токен</Button>
-                    </div>
+                    </div-->
                     <div>
                         <p class="break-all">{{ realty_key }}</p>
                     </div>

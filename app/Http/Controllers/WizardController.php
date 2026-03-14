@@ -75,8 +75,10 @@ class WizardController extends Controller
         ], 200);
       }
 
-      $rent = Rent::find($validated['rent_id']);
-      $rent->locks()->syncWithoutDetaching([$validated['lock_id']]);
+      $lock = Lock::find($validated['lock_id']);
+      $lock->rent_id = $validated['rent_id'];
+      $lock->save();
+
       return response()->json(['status' => true], 200);
     } catch (\Exception $e) {
       return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
@@ -110,9 +112,9 @@ class WizardController extends Controller
           'msg' => Arr::toCssClasses($validator->errors()->all())
         ], 200);
       }
-      $rent = Rent::find($validated['rent_id']);
       $lock = Lock::find($validated['lock_id']);
-      $rent->locks()->detach($lock);
+      $lock->rent_id = null;
+      $lock->save();
       return response()->json(['status' => true], 200);
     } catch (\Exception $e) {
       return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);

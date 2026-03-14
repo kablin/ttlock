@@ -38,6 +38,13 @@ class LockController extends Controller
     }
 
 
+    public function mapping(Request $request)
+    {
+        $locks = auth()->user()->locks()->get();
+        $rents = auth()->user()->rents()->get();
+        return Inertia::render('Mapping', ['all_locks' => $locks, 'rents' => $rents]);
+    }
+
     public function getLockList(Request $request)
     {
         $servise =  new TTLockService(auth()->user());
@@ -70,7 +77,7 @@ class LockController extends Controller
 
             return response()->json([
                 'status' => true,
-                'msg' => 'Успешно. Замков получено: '. count($locks_data['data']['list'] )
+                'msg' => 'Успешно. Замков получено: ' . count($locks_data['data']['list'])
             ], 200);
         } else
             return response()->json([
