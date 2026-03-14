@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\Rent;
 use App\Models\Lock;
+use App\Services\XmlParserService;
 use Illuminate\Support\Facades\Validator;
 use App\Models\LockApiLog;
 use Illuminate\Support\Arr;
@@ -14,6 +15,10 @@ use Illuminate\Support\Arr;
 
 class WizardController extends Controller
 {
+
+
+  public function __construct(protected XmlParserService $object_service) {}
+
 
 
   public function step1(Request $request)
@@ -44,9 +49,15 @@ class WizardController extends Controller
 
 
 
+  public function sync_rents(Request $request)
+  {
+    try {
 
-
-
+      return response()->json( $this->object_service->fetch(), 200);
+    } catch (\Exception $e) {
+      return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+    }
+  }
 
 
   public function map(Request $request)

@@ -23,14 +23,16 @@ use Illuminate\Support\Facades\Log;
 class XmlParserService
 {
 
-    public function fetch(string $url)
+    const URL =  'https://realtycalendar.ru/v2/integrations/rentysoft/xml_feed?token=';
+
+    public function fetch()
     {
         try {
-            $response = Http::get($url);
+            $response = Http::get($this::URL . auth()->user()->realty_key);
 
             if (!$response->successful()) {
-               // throw new \Exception("Failed to fetch XML from {$url}, status: " . $response->status());
-               return false;
+                // throw new \Exception("Failed to fetch XML from {$url}, status: " . $response->status());
+                return ['status' => false, 'count' => 0];
             }
 
             $xmlString = $response->body();
@@ -38,6 +40,7 @@ class XmlParserService
             return $this->parse($xmlString);
         } catch (\Exception $e) {
             Log::error('Error fetching or processing XML: ' . $e->getMessage());
+            return ['status' => false, 'count' => 0];
         }
     }
 
@@ -48,7 +51,7 @@ class XmlParserService
 
         if ($xml === false) {
             $errors = libxml_get_errors();
-            return false;
+            return ['status' => false, 'count' => 0];
             //throw new \Exception('Invalid XML format: ' . collect($errors)->pluck('message')->join(', '));
         }
 
@@ -60,9 +63,9 @@ class XmlParserService
 
             $location = trim(
                 (string)$offer->location->country . ' ' .
-                (string)$offer->location->region . ' ' .
-                (string)$offer->location->locality_name . ' ' .
-                (string)$offer->location->address
+                    (string)$offer->location->region . ' ' .
+                    (string)$offer->location->locality_name . ' ' .
+                    (string)$offer->location->address
             );
 
             $timezone = (int)$offer->location->timezone;
@@ -71,11 +74,12 @@ class XmlParserService
                 ['internal_id' => $internalId],
                 [
                     'location' => $location,
-                    'timezone' => $timezone
+                    'timezone' => $timezone,
+                    'name' => (string)$offer->title
                 ]
             );
         }
 
-        return true;
+        return ['status' => true, 'count' => count($offers)];
     }
 }

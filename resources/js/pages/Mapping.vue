@@ -9,7 +9,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { RefreshCw } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { wizard_lock_list } from '@/routes';
+import { wizard_lock_list, wizard_sync_rents } from '@/routes';
 
 const isSyncing = ref(false)
 const props = defineProps({
@@ -27,7 +27,9 @@ const props = defineProps({
 const handleSync = async () => {
   isSyncing.value = true
   let response = await axios.post(wizard_lock_list().url, {})
-
+  if (response.data.status) {
+    response = await axios.post(wizard_sync_rents().url, {})
+  }
   if (response.data.status) {
     window.location.reload()
   }

@@ -74,7 +74,6 @@ class LockController extends Controller
             }
             Lock::where('user_id', auth()->user()->id)->whereNotIn('id', $mylocks)->delete();
 
-
             return response()->json([
                 'status' => true,
                 'msg' => 'Успешно. Замков получено: ' . count($locks_data['data']['list'])

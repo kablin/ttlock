@@ -10,6 +10,10 @@ import SetupSteps from '@/components/setup/SetupSteps.vue'
 import SetupNavigation from '@/components/setup/SetupNavigation.vue'
 import AppLayout from '@/layouts/AppLayout.vue';
 import { usePage } from '@inertiajs/vue3';
+import { wizard_sync_rents } from '@/routes';
+import axios from 'axios';
+
+
 
 const page = usePage();
 const copied = ref(false)
@@ -28,11 +32,11 @@ const integration = urlParams.get('integration') || 'realtycalendar'
 // Копирование в буфер
 const copyToClipboard = async () => {
   if (!token.value) return
-  
+
   try {
     await navigator.clipboard.writeText(token.value)
     copied.value = true
-    
+
     // Сброс через 2 секунды
     setTimeout(() => {
       copied.value = false
@@ -59,11 +63,16 @@ const handleConnect = async () => {
   isConnecting.value = true
   connectionStatus.value = null
 
-  // Имитация запроса (замените на реальный API-вызов)
-  await new Promise(resolve => setTimeout(resolve, 2000))
+  let response = await axios.post(wizard_sync_rents().url, {})
 
-  connectionStatus.value = 'success'
-  foundObjects.value = 25
+  let isSuccess = response.data.status
+  if (isSuccess) {
+    connectionStatus.value = 'success'
+    foundObjects.value = response.data.count
+
+  }
+
+
   isConnecting.value = false
 }
 
@@ -115,7 +124,7 @@ const dismissNotification = () => {
               <div class="space-y-1">
                 <h3 class="font-semibold text-slate-900">Подключите систему управления недвижимостью</h3>
                 <p class="text-sm text-slate-600 leading-relaxed">
-                  Перейдите в RealtyCalendar, скопируйте токен и вставьте его в поле ниже.
+                  Cкопируйте токен, перейдите в RealtyCalendar, и вставьте его.
                   Все ваши объекты подгрузятся в интерфейс, чтобы в дальнейшем связать их с замками.
                 </p>
               </div>
@@ -156,52 +165,40 @@ const dismissNotification = () => {
                 </a>
               </Button>
 
-<div class="space-y-2">
-  <label class="text-sm font-medium text-slate-700">Токен</label>
-  <div class="relative">
-    <Input 
-      v-model="token" 
-      :type="showToken ? 'text' : 'password'" 
-      placeholder="Вставьте токен из RealtyCalendar" 
-      class="pr-20 bg-slate-50" 
-      :disabled="isConnecting" 
-    />
-    
-    <!-- Кнопки действий (справа внутри input) -->
-    <div class="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
-      
-      <!-- 🔘 Копировать -->
-      <button
-        type="button"
-        @click="copyToClipboard"
-        :disabled="!token"
-        class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        title="Скопировать токен"
-      >
-        <Copy v-if="!copied" class="w-4 h-4" />
-        <Check v-else class="w-4 h-4 text-green-600" />
-      </button>
-      
-      <!-- 👁️ Показать/скрыть -->
-      <button
-        type="button"
-        @click="showToken = !showToken"
-        class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
-        :title="showToken ? 'Скрыть токен' : 'Показать токен'"
-      >
-        <EyeOff v-if="showToken" class="w-4 h-4" />
-        <Eye v-else class="w-4 h-4" />
-      </button>
-      
-    </div>
-  </div>
-  
-  <!-- Подсказка после копирования -->
-  <p v-if="copied" class="text-xs text-green-600 flex items-center gap-1">
-    <Check class="w-3 h-3" />
-    Токен скопирован в буфер обмена
-  </p>
-</div>
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-slate-700">Токен</label>
+                <div class="relative">
+                  <Input v-model="token" :type="showToken ? 'text' : 'password'"
+                    placeholder="Вставьте токен из RealtyCalendar" class="pr-20 bg-slate-50" :disabled="isConnecting" />
+
+                  <!-- Кнопки действий (справа внутри input) -->
+                  <div class="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+
+                    <!-- 🔘 Копировать -->
+                    <button type="button" @click="copyToClipboard" :disabled="!token"
+                      class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      title="Скопировать токен">
+                      <Copy v-if="!copied" class="w-4 h-4" />
+                      <Check v-else class="w-4 h-4 text-green-600" />
+                    </button>
+
+                    <!-- 👁️ Показать/скрыть -->
+                    <button type="button" @click="showToken = !showToken"
+                      class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+                      :title="showToken ? 'Скрыть токен' : 'Показать токен'">
+                      <EyeOff v-if="showToken" class="w-4 h-4" />
+                      <Eye v-else class="w-4 h-4" />
+                    </button>
+
+                  </div>
+                </div>
+
+                <!-- Подсказка после копирования -->
+                <p v-if="copied" class="text-xs text-green-600 flex items-center gap-1">
+                  <Check class="w-3 h-3" />
+                  Токен скопирован в буфер обмена
+                </p>
+              </div>
 
 
 

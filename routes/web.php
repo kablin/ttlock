@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
   Route::post('wizard/map', [\App\Http\Controllers\WizardController::class, 'map'])->name('wizard_map');
   Route::post('wizard/unmap', [\App\Http\Controllers\WizardController::class, 'unmap'])->name('wizard_unmap');
-
+ Route::post('wizard/sync_rents', [\App\Http\Controllers\WizardController::class, 'sync_rents'])->name('wizard_sync_rents');
 
 
   //mapping
