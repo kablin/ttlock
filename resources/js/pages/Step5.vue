@@ -11,25 +11,21 @@ import { Head } from '@inertiajs/vue3';
 import SetupSteps from '@/components/setup/SetupSteps.vue'
 import SetupNavigation from '@/components/setup/SetupNavigation.vue'
 import AppLayout from '@/layouts/AppLayout.vue';
-// Демо-данные (замените на реальные API-вызовы)
-const demoProperties = [
-  { id: '1', name: 'Студия на Невском', address: 'Невский пр. 25, кв. 12' },
-  { id: '2', name: 'Апартаменты Центр', address: 'ул. Рубинштейна 10' },
-  { id: '3', name: 'Квартира у метро', address: 'Лиговский пр. 45, кв. 8' },
-  { id: '4', name: 'Студия Петроградка', address: 'Каменноостровский 32' },
-  { id: '5', name: 'Лофт на Васильевском', address: '7-я линия В.О., д. 18' },
-]
+import { wizard_map, wizard_unmap } from '@/routes';
+import axios from 'axios';
 
-const demoLocks = [
-  { id: 'l1', name: 'Входная дверь', model: 'TTLock Pro' },
-  { id: 'l2', name: 'Замок #2', model: 'TTLock S31' },
-  { id: 'l3', name: 'Парадная', model: 'TTLock Pro' },
-  { id: 'l4', name: 'Замок #4', model: 'TTLock S31' },
-  { id: 'l5', name: 'Офис главный', model: 'TTLock Pro' },
-  { id: 'l6', name: 'Замок #6', model: 'TTLock S31' },
-  { id: 'l7', name: 'Калитка', model: 'TTLock Outdoor' },
-  { id: 'l8', name: 'Замок #8', model: 'TTLock S31' },
-]
+
+const props = defineProps({
+  all_locks: {
+    type: Object,
+    default: true
+  },
+  rents: {
+    type: Object,
+    default: true
+  },
+})
+
 
 // Состояния
 const properties = ref([])
@@ -46,25 +42,27 @@ const draggedLock = ref(null)
 // Загрузка данных
 const loadData = async () => {
   try {
-    // Замените на реальные API-вызовы:
-    // properties.value = await base44.entities.Property.list()
-    // locks.value = await base44.entities.Lock.list()
+    properties.value = props.rents
+    locks.value = props.all_locks
 
-    // Демо-данные:
-    properties.value = demoProperties
-    locks.value = demoLocks
+    locks.value.forEach(lock => {
+      if (lock.rent_id) assignLock(lock.id, lock.rent_id)
+    })
+
   } catch (error) {
     console.error('Ошибка загрузки данных:', error)
   }
 }
 
+
+/*
 // Синхронизация (перезагрузка данных)
 const handleSync = async () => {
   isSyncing.value = true
   await loadData()
   isSyncing.value = false
 }
-
+*/
 // Сохранение маппинга
 const handleComplete = async () => {
   isSaving.value = true
@@ -97,7 +95,7 @@ const handleBack = () => {
 const filteredProperties = computed(() => {
   return properties.value.filter(p =>
     p.name?.toLowerCase().includes(propertySearch.value.toLowerCase()) ||
-    p.address?.toLowerCase().includes(propertySearch.value.toLowerCase())
+    p.location?.toLowerCase().includes(propertySearch.value.toLowerCase())
   )
 })
 
@@ -107,8 +105,8 @@ const assignedLockIds = computed(() => {
 
 const filteredLocks = computed(() => {
   return locks.value.filter(l => {
-    const matchesSearch = l.name?.toLowerCase().includes(lockSearch.value.toLowerCase()) ||
-      l.model?.toLowerCase().includes(lockSearch.value.toLowerCase())
+    const matchesSearch = l.lock_name?.toLowerCase().includes(lockSearch.value.toLowerCase()) ||
+      l.lock_alias?.toLowerCase().includes(lockSearch.value.toLowerCase())
     const matchesFilter = !showUnassignedOnly.value || !assignedLockIds.value.includes(l.id)
     return matchesSearch && matchesFilter
   })
@@ -137,10 +135,16 @@ const assignLock = (lockId, propertyId) => {
   mappings.value = newMappings
 }
 
-const unassignLock = (lockId, propertyId) => {
-  const newMappings = { ...mappings.value }
-  newMappings[propertyId] = newMappings[propertyId].filter(id => id !== lockId)
-  mappings.value = newMappings
+const unassignLock = async (lockId, propertyId) => {
+  let response = await axios.post(wizard_unmap().url, {
+    "lock_id": lockId,
+    'rent_id': propertyId
+  })
+  if (response.data.status) {
+    const newMappings = { ...mappings.value }
+    newMappings[propertyId] = newMappings[propertyId].filter(id => id !== lockId)
+    mappings.value = newMappings
+  }
 }
 
 // Drag & Drop
@@ -154,10 +158,18 @@ const handleDragOver = (e) => {
   e.dataTransfer.dropEffect = 'move'
 }
 
-const handleDrop = (e, propertyId) => {
+const handleDrop = async (e, propertyId) => {
   e.preventDefault()
   if (draggedLock.value) {
-    assignLock(draggedLock.value.id, propertyId)
+    let id = draggedLock.value.id;
+    let response = await axios.post(wizard_map().url, {
+      "lock_id": id,
+      'rent_id': propertyId
+    })
+    let isSuccess = response.data.status
+    if (isSuccess) {
+      assignLock(id, propertyId)
+    }
     draggedLock.value = null
   }
 }
@@ -184,12 +196,12 @@ onMounted(() => {
 
         <SetupSteps :current-step="5" />
 
-        <div class="mt-8 flex justify-end mb-6">
+        <!--div class="mt-8 flex justify-end mb-6">
           <Button @click="handleSync" :disabled="isSyncing" variant="outline" class="gap-2">
             <RefreshCw :class="cn('w-4 h-4', isSyncing && 'animate-spin')" />
             Синхронизация
           </Button>
-        </div>
+        </div-->
 
         <!-- Info Banner -->
         <div
@@ -250,12 +262,11 @@ onMounted(() => {
                 <div class="flex items-start justify-between gap-3 mb-2">
                   <div class="flex-1 min-w-0">
                     <h4 class="font-semibold text-slate-900 text-base">{{ property.name }}</h4>
-                    <p class="text-sm text-slate-500">{{ property.address }}</p>
+                    <p class="text-sm text-slate-500">{{ property.location }}</p>
                   </div>
                   <Badge v-if="getLocksForProperty(property.id).length > 0" variant="secondary"
                     class="bg-green-100 text-green-700 flex-shrink-0">
-                    {{ getLocksForProperty(property.id).length }} замок{{ getLocksForProperty(property.id).length > 1 ?
-                    'а' : '' }}
+                    замков:{{ getLocksForProperty(property.id).length }}
                   </Badge>
                 </div>
 
@@ -264,7 +275,7 @@ onMounted(() => {
                   <div v-for="lockId in getLocksForProperty(property.id)" :key="lockId"
                     class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm">
                     <Lock class="w-3 h-3 text-indigo-500" />
-                    <span class="text-slate-700">{{locks.find(l => l.id === lockId)?.name}}</span>
+                    <span class="text-slate-700">{{locks.find(l => l.id === lockId)?.lock_alias}}</span>
                     <button @click.stop="unassignLock(lockId, property.id)"
                       class="ml-1 p-0.5 hover:bg-slate-100 rounded">
                       <X class="w-3 h-3 text-slate-400 hover:text-slate-600" />
@@ -299,7 +310,7 @@ onMounted(() => {
                 <Input v-model="lockSearch" placeholder="Поиск..." class="pl-8 bg-white h-8 text-sm" />
               </div>
               <label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer">
-                <Checkbox v-model:checked="showUnassignedOnly" class="h-3.5 w-3.5" />
+                <Checkbox v-model="showUnassignedOnly" class="h-3.5 w-3.5" />
                 Только непривязанные
               </label>
             </div>
@@ -324,7 +335,7 @@ onMounted(() => {
                   'text-sm truncate flex-1',
                   assignedLockIds.includes(lock.id) ? 'text-green-700' : 'text-slate-700'
                 )">
-                  {{ lock.name }}
+                  {{ lock.lock_alias }}
                 </span>
 
                 <Check v-if="assignedLockIds.includes(lock.id)" class="w-3.5 h-3.5 text-green-500 flex-shrink-0" />

@@ -9,73 +9,16 @@ use App\Models\Rent;
 use App\Models\Lock;
 use Illuminate\Support\Facades\Validator;
 use App\Models\LockApiLog;
+use Illuminate\Support\Arr;
 
 
 class WizardController extends Controller
 {
 
 
-
-  public function index(Request $request)
+  public function step1(Request $request)
   {
-    $rent_page = $request->input('rent_page', 1);
-    $lock_page = $request->input('lock_page', 1);
-
-
-    $rents = auth()->user()->rents()->with('locks')->orderBy('id');
-    if ($request->has('rent_search')) {
-      $rents = $rents->where('name', 'ilike', '%' . $request->rent_search . '%');
-    }
-    $rents = $rents->paginate(6, ['*'], 'rent_page', $rent_page);
-
-
-
-
-
-    $free_locks = auth()->user()->locks()->orderBy('id');
-    if ($request->has('lock_search')) {
-      $free_locks = $free_locks->where('lock_alias', 'ilike', '%' . $request->lock_search . '%');
-    }
-
-    $free_locks = $free_locks->paginate(20, ['*'], 'lock_page', $lock_page);
-
-
-    $params = ['rents' => $rents, 'free_locks' => $free_locks, 'success' => session('success')];
-    if ($request->has('rent_search'))  $params['rent_search'] = $request->rent_search;
-    if ($request->has('lock_search'))  $params['lock_search'] = $request->lock_search;
-
-    return Inertia::render('Wizard', $params);
-  }
-
-  public function index2(Request $request)
-  {
-    $rent_page = $request->input('rent_page', 1);
-    $lock_page = $request->input('lock_page', 1);
-
-
-    $rents = auth()->user()->rents()->with('locks')->orderBy('id');
-    if ($request->has('rent_search')) {
-      $rents = $rents->where('name', 'ilike', '%' . $request->rent_search . '%');
-    }
-    $rents = $rents->paginate(6, ['*'], 'rent_page', $rent_page);
-
-
-
-
-
-    $free_locks = auth()->user()->locks()->orderBy('id');
-    if ($request->has('lock_search')) {
-      $free_locks = $free_locks->where('lock_alias', 'ilike', '%' . $request->lock_search . '%');
-    }
-
-    $free_locks = $free_locks->paginate(20, ['*'], 'lock_page', $lock_page);
-
-
-    $params = ['rents' => $rents, 'free_locks' => $free_locks, 'success' => session('success')];
-    if ($request->has('rent_search'))  $params['rent_search'] = $request->rent_search;
-    if ($request->has('lock_search'))  $params['lock_search'] = $request->lock_search;
-
-    return Inertia::render('Wizard2', $params);
+    return Inertia::render('Step1');
   }
 
 
@@ -94,8 +37,130 @@ class WizardController extends Controller
   }
   public function step5(Request $request)
   {
-    return Inertia::render('Step5');
+    $locks = auth()->user()->locks()->get();
+    $rents = auth()->user()->rents()->get();
+    return Inertia::render('Step5', ['all_locks' => $locks, 'rents' => $rents]);
   }
+
+
+
+
+
+
+
+
+  public function map(Request $request)
+  {
+    try {
+      LockApiLog::create([
+        'is_ttlock_result' => false,
+        'api_method' => 'attachLockToRentWizard',
+        'user_id' => auth()->user()->id,
+        'ip' => json_encode($request->ip()),
+        'params' => json_encode($request->all()),
+      ]);
+
+      $validator = Validator::make($request->all(), [
+        'rent_id' => 'required|exists:rents,id',
+        'lock_id' => 'required|exists:locks,id',
+
+      ]);
+
+      $validated = $validator->safe()->only(['rent_id', 'lock_id',]);
+
+      if ($validator->fails()) {
+        return response()->json([
+          'status' => false,
+          'msg' => Arr::toCssClasses($validator->errors()->all())
+        ], 200);
+      }
+
+      $rent = Rent::find($validated['rent_id']);
+      $rent->locks()->syncWithoutDetaching([$validated['lock_id']]);
+      return response()->json(['status' => true], 200);
+    } catch (\Exception $e) {
+      return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+    }
+  }
+
+
+
+  public function unmap(Request $request)
+  {
+    try {
+      LockApiLog::create([
+        'is_ttlock_result' => false,
+        'api_method' => 'detachLockToRentWizard',
+        'user_id' => auth()->user()->id,
+        'ip' => json_encode($request->ip()),
+        'params' => json_encode($request->all()),
+      ]);
+
+      $validator = Validator::make($request->all(), [
+        'lock_id' => 'required|exists:locks,id',
+        'rent_id' => 'required|exists:rents,id',
+
+      ]);
+
+      $validated = $validator->safe()->only(['lock_id', 'rent_id']);
+
+      if ($validator->fails()) {
+        return response()->json([
+          'status' => false,
+          'msg' => Arr::toCssClasses($validator->errors()->all())
+        ], 200);
+      }
+      $rent = Rent::find($validated['rent_id']);
+      $lock = Lock::find($validated['lock_id']);
+      $rent->locks()->detach($lock);
+      return response()->json(['status' => true], 200);
+    } catch (\Exception $e) {
+      return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  /////////////////////////////////////////
+
+  public function index(Request $request)
+  {
+    $rent_page = $request->input('rent_page', 1);
+    $lock_page = $request->input('lock_page', 1);
+
+
+    $rents = auth()->user()->rents()->with('locks')->orderBy('id');
+    if ($request->has('rent_search')) {
+      $rents = $rents->where('name', 'ilike', '%' . $request->rent_search . '%');
+    }
+    $rents = $rents->paginate(6, ['*'], 'rent_page', $rent_page);
+
+    $free_locks = auth()->user()->locks()->orderBy('id');
+    if ($request->has('lock_search')) {
+      $free_locks = $free_locks->where('lock_alias', 'ilike', '%' . $request->lock_search . '%');
+    }
+
+    $free_locks = $free_locks->paginate(20, ['*'], 'lock_page', $lock_page);
+
+
+    $params = ['rents' => $rents, 'free_locks' => $free_locks, 'success' => session('success')];
+    if ($request->has('rent_search'))  $params['rent_search'] = $request->rent_search;
+    if ($request->has('lock_search'))  $params['lock_search'] = $request->lock_search;
+
+    return Inertia::render('Wizard', $params);
+  }
+
+
+
 
 
 

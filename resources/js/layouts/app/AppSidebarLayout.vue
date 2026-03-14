@@ -57,8 +57,8 @@ withDefaults(defineProps(), {
 });
 
 
-const wizardPages = ['/setup/wizard/step1', '/setup/wizard/step2', '/setup/wizard/step3', '/setup/wizard/step4', '/setup/wizard/step5']
-const isWizardPage = wizardPages.includes(page.url)
+const wizardPages = ['Step1', 'Step2', 'Step3', 'Step4', 'Step5']
+const isWizardPage = wizardPages.includes(page.component)
 
 
 // Поддержка: типы диалога
@@ -83,7 +83,6 @@ const navigate = (href) => {
     <AppShell variant="sidebar">
         <AppSidebar v-if="!isWizardPage" v-model:mobile-open="sidebarMobileOpen" />
         <AppContent variant="sidebar" class="" :class="!isWizardPage ? 'lg:ml-64' : ''">
-
 
             <header class="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200">
                 <div class="h-full px-4 sm:px-6 flex items-center justify-between">

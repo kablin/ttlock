@@ -70,7 +70,7 @@ class LockController extends Controller
 
             return response()->json([
                 'status' => true,
-                'msg' => 'Успешно. Замков получено:'+ count($locks_data['data']['list'] )
+                'msg' => 'Успешно. Замков получено: '. count($locks_data['data']['list'] )
             ], 200);
         } else
             return response()->json([

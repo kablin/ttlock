@@ -8,7 +8,7 @@ import { Head } from '@inertiajs/vue3';
 import SetupSteps from '@/components/setup/SetupSteps.vue'
 import SetupNavigation from '@/components/setup/SetupNavigation.vue'
 import AppLayout from '@/layouts/AppLayout.vue';
-import {  saveCredential } from '@/routes';
+import { saveCredential, wizard_lock_list } from '@/routes';
 import axios from 'axios';
 // Состояния
 const email = ref('')
@@ -16,9 +16,9 @@ const password = ref('')
 const showPassword = ref(false)
 const isConnecting = ref(false)
 const notifications = ref([])
-const msg = ref()
+
 // Вычисляемое свойство
-const hasSuccess = computed(() => notifications.value.some(n => n.type === 'success'))
+const hasSuccess = ref(false)
 
 // Методы
 const handleConnect = async () => {
@@ -27,16 +27,12 @@ const handleConnect = async () => {
   isConnecting.value = true
 
 
-  const response = await axios.post(saveCredential().url, {
+  let response = await axios.post(saveCredential().url, {
     "email": email.value,
     'password': password.value
   })
 
-
-  msg.value = response.data.msg
-
-
-  const isSuccess = response.data.status
+  let isSuccess = response.data.status
 
   if (isSuccess) {
     notifications.value.push({
@@ -44,11 +40,33 @@ const handleConnect = async () => {
       type: 'success',
       message: 'Успешно. Синхронизируем замки. Это может занять несколько минут'
     })
+
+
+    response = await axios.post(wizard_lock_list().url, { })
+
+
+    isSuccess = response.data.status
+
+    if (isSuccess) {
+      notifications.value.push({
+        id: Date.now(),
+        type: 'success',
+        message: response.data.msg
+      })
+      hasSuccess.value = true
+    } else {
+      notifications.value.push({
+        id: Date.now(),
+        type: 'error',
+        message: response.data.msg
+      })
+    }
+
   } else {
     notifications.value.push({
       id: Date.now(),
       type: 'error',
-      message: msg.value
+      message: response.data.msg
     })
   }
 

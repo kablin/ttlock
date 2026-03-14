@@ -15,27 +15,33 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-
   Route::get('/dashboard', [\App\Http\Controllers\DashboarController::class, 'index'])->name('dashboard');
 
-  Route::get('/wizard', [\App\Http\Controllers\WizardController::class, 'index'])->name('wizard');
 
+  // wizard old
+
+  Route::get('/wizard', [\App\Http\Controllers\WizardController::class, 'index'])->name('wizard');
   Route::post('wizard/attach_lock', [\App\Http\Controllers\WizardController::class, 'attach_lock'])->name('wizard_attach_lock');
   Route::post('wizard/detach_lock', [\App\Http\Controllers\WizardController::class, 'detach_lock'])->name('wizard_detach_lock');
   Route::post('wizard/dattach_lock', [\App\Http\Controllers\WizardController::class, 'dattach_lock'])->name('wizard_dattach_lock');
-
   Route::post('wizard/page', [\App\Http\Controllers\WizardController::class, 'page'])->name('wizard_page');
 
 
 
+  //wizard new
 
-  Route::get('/setup/wizard/step1', [\App\Http\Controllers\WizardController::class, 'index2'])->name('wizard_step1');
+
+  Route::post('/getLockList', [\App\Http\Controllers\LockController::class, 'getLockList'])->name('wizard_lock_list');
+  Route::get('/setup/wizard/step1', [\App\Http\Controllers\WizardController::class, 'step1'])->name('wizard_step1');
   Route::get('/setup/wizard/step2', [\App\Http\Controllers\WizardController::class, 'step2'])->name('wizard_step2');
   Route::get('/setup/wizard/step3', [\App\Http\Controllers\WizardController::class, 'step3'])->name('wizard_step3');
-
   Route::get('/setup/wizard/step4', [\App\Http\Controllers\WizardController::class, 'step4'])->name('wizard_step4');
-
   Route::get('/setup/wizard/step5', [\App\Http\Controllers\WizardController::class, 'step5'])->name('wizard_step5');
+
+  Route::post('wizard/map', [\App\Http\Controllers\WizardController::class, 'map'])->name('wizard_map');
+  Route::post('wizard/unmap', [\App\Http\Controllers\WizardController::class, 'unmap'])->name('wizard_unmap');
+
+
 
   /*
     Route::get('rents_objects', function () {
@@ -110,9 +116,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
   //lock_list
   Route::get('/lockList', [\App\Http\Controllers\LockController::class, 'lockList'])->name('lockList');
   Route::post('/lockList_refresh', [\App\Http\Controllers\LockController::class, 'lockList_refresh'])->name('lockList_refresh');
-
- Route::post('/getLockList', [\App\Http\Controllers\LockController::class, 'getLockList'])->name('wizard_lock_list');
-
 
 
 
