@@ -23,13 +23,17 @@ use App\Jobs\SetPassageModeOnJob;
 use App\Jobs\RefreshLockTokenJob;
 use App\Jobs\AddKeyToLockJob;
 use App\Jobs\DeleteKeyJob;
+use App\Models\Rent;
 use App\Jobs\OpenLockJob;
 use App\Models\LockEvent;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Log;
+use Throwable;
+
 
 class JobsService
 {
@@ -37,9 +41,9 @@ class JobsService
 
 
 
-    private function startLockJob(string $task,  $tag = null)
+    private function startLockJob(string $task,  $tag = null, $parent = null)
     {
-        return LockJob::create(['user_id' => $this->user_id, 'task' => $task, 'tag' => $tag ? json_encode($tag) : ""]);
+        return LockJob::create(['user_id' => $this->user_id, 'parent_job' => $parent, 'task' => $task, 'tag' => $tag ? json_encode($tag) : ""]);
     }
 
 
@@ -69,8 +73,6 @@ class JobsService
     public function createLock($tag)
     {
         $uuid = $this->startLockJob('createLock', $tag);
-        info($uuid->job_id);
-
         CreateLockJob::dispatch()->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
         ]);
@@ -82,8 +84,6 @@ class JobsService
     public function getLockList($tag)
     {
         $uuid = $this->startLockJob('getLockList', $tag);
-        info($uuid->job_id);
-
         GetLockListJob::dispatch($uuid->id)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
@@ -108,7 +108,7 @@ class JobsService
         $uuid = $this->startLockJob('addKeyToLock', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
-        AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end, $utc)->onQueue('default')->chain([
+        AddKeyToLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end, $utc)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
@@ -117,16 +117,120 @@ class JobsService
 
 
 
-    public function createBooking(/*$lock_id, $code, $code_name, $begin, $end, $tag, $utc*/$tag)
+    public function createBooking($params)
     {
-        $uuid = $this->startLockJob('addKeyToLock', $tag);
+
+        $jobs = [];
+        $uuids = [];
+        $token = 'token';
+        $global_uuid  = $this->startLockJob('createBooking', $params['tag'] ?? null);
+
+        $rent = Rent::where('internal_id', $params['realty_id'])->first();
+
+        if (!$rent) {
+            $data['status'] = false;
+            $data['msg'] = "Объект не найден";
+            return response()->json($data, 200);
+        }
+
+        $locks = auth()->user()->locks()->where('rent_id',  $rent->id)->get();
+
+        if (!$locks->count()) {
+            $data['status'] = false;
+            $data['msg'] = "К объекту не привязан ни один замок";
+            return response()->json($data, 200);
+
+            //Http::withToken($token)->withBody(json_encode($data), 'application/json')->post($job->user->callback);
+        }
+
+
+        foreach ($locks as $lock) {
+            $uuid  = $this->startLockJob('addKeyToLock', $params['tag'] ?? null, $global_uuid->id);
+            $uuids[] = $uuid->id;
+
+  
+            $jobs[] = (new AddKeyToLockJob(
+                $uuid->id,
+                $lock->id,
+                $params['code'],
+                $params['code_name'] ?? '',
+                $params['begin_date'] . ' ' . $params['arrival_time'],
+                $params['end_date'] . ' ' . $params['departure_time'],
+                $params['utc'] ?? null,
+                $params['realty_id']
+            ))->delay($this->getDelay());
+        }
+
+
+        $batch = Bus::batch($jobs)
+            ->withOption('uuids', $uuids)
+            ->withOption('rent_id', $params['rent_id'])
+            ->withOption('code', $params['code'])
+            ->withOption('global_uuid', $global_uuid) // <--- Сохраняем список в опциях батча
+            ->then(function (Batch $batch) {
+                // Сработает, если ВСЕ задачи успешны
+                // Достаем массив из опций
+                $uuids = $batch->options['uuids'] ?? [];
+                $global_uuid = $batch->options['global_uuid'] ?? [];
+                $rent_id = $batch->options['rent_id'] ?? '';
+                $code = $batch->options['code'] ?? '';
+
+                $data['job'] = $global_uuid['job_id'];
+                $data['status'] = true;
+                $data['msd'] = 'Ключ загружен во все замки';
+                $data['code'] = $code;
+                $data['rent_id'] = $rent_id;
+                $data['method'] = 'createBooking';
+
+
+
+                foreach ($uuids as $uuid) {
+                    SetStatusJob::dispatch($uuid['id'], true)->onQueue('default');
+                }
+
+                Http::withToken('token')->withBody(json_encode($data), 'application/json')->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
+            })
+            ->catch(function (Batch $batch, Throwable $e) {
+                // Сработает, если ХОТЯ БЫ ОДНА задача упала окончательно
+                $uuids = $batch->options['uuids'] ?? [];
+                $global_uuid = $batch->options['global_uuid'] ?? [];
+                $rent_id = $batch->options['rent_id'] ?? '';
+                $code = $batch->options['code'] ?? '';
+
+                $data['job'] = $global_uuid->job_id;
+                $data['status'] = true;
+                $data['msd'] = 'Ключ загружен во все замки';
+                $data['code'] = $code;
+                $data['rent_id'] = $rent_id;
+                $data['method'] = 'createBooking';
+
+
+                foreach ($uuids as $uuid) {
+                    // Отправляем статус false для всех или можно логировать ошибку
+                    SetStatusJob::dispatch($uuid, false)->onQueue('default');
+                }
+
+                Http::withToken('token')->withBody(json_encode($data), 'application/json')->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
+            })
+            ->finally(function (Batch $batch) {
+                // Выполняется всегда (опционально)
+            })
+            ->onQueue('default')
+
+            ->dispatch();
+
+
+
+
+
+        // $uuid = $this->startLockJob('createBooking', $params['tag'] ?? null);
         //$lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
         /* AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end, $utc)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());*/
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $global_uuid->job_id], 200);
     }
 
 

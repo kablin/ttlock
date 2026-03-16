@@ -76,7 +76,13 @@
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p><strong>&nbsp;api/v1/create_booking</strong></p>
-<p><strong>*</strong> Создать бронирование<br /><br /></p>
+<p><strong>*</strong> Создать бронирование</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"begin_date'": "2026-05-15",<br />"end_date'": "2026-05-18",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "arrival_time" : "18:22" },</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "deparure_time" : "15:00",</span></p>
+<p><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "rent_id" : "3454325",<br /> 'realty_id" : ""156464,</span></p>
+<p>}</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Ответ</span>:</p>
+<p>{<br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"job'": "xxxxxxx",<br />"status'": "true",</span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;">"rent_id":"456465" </span><br /><span class="selectable-text copyable-text xkrh14z" style="white-space: pre-wrap;"> "method" : "createBooking",<br /> 'code" :"1234",<br /> "msg" : "Ключ успешно загружен" </span><br /><br />}</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
