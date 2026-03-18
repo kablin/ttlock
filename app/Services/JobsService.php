@@ -129,7 +129,7 @@ class JobsService
 
         if (!$rent) {
             $data['status'] = false;
-            $data['msg'] = "Объект не найден";
+            $data['error'] = "Объект не найден";
             return response()->json($data, 200);
         }
 
@@ -137,7 +137,7 @@ class JobsService
 
         if (!$locks->count()) {
             $data['status'] = false;
-            $data['msg'] = "К объекту не привязан ни один замок";
+            $data['error'] = "К объекту не привязан ни один замок";
             return response()->json($data, 200);
 
             //Http::withToken($token)->withBody(json_encode($data), 'application/json')->post($job->user->callback);
@@ -148,7 +148,7 @@ class JobsService
             $uuid  = $this->startLockJob('addKeyToLock', $params['tag'] ?? null, $global_uuid->id);
             $uuids[] = $uuid->id;
 
-  
+
             $jobs[] = (new AddKeyToLockJob(
                 $uuid->id,
                 $lock->id,
@@ -157,7 +157,7 @@ class JobsService
                 $params['begin_date'] . ' ' . $params['arrival_time'],
                 $params['end_date'] . ' ' . $params['departure_time'],
                 $params['utc'] ?? null,
-                $params['realty_id']
+                $params['rent_id']
             ))->delay($this->getDelay());
         }
 
@@ -177,7 +177,7 @@ class JobsService
 
                 $data['job'] = $global_uuid['job_id'];
                 $data['status'] = true;
-                $data['msd'] = 'Ключ загружен во все замки';
+                $data['message'] = 'Ключ записан';
                 $data['code'] = $code;
                 $data['rent_id'] = $rent_id;
                 $data['method'] = 'createBooking';
@@ -187,7 +187,7 @@ class JobsService
                 foreach ($uuids as $uuid) {
                     SetStatusJob::dispatch($uuid['id'], true)->onQueue('default');
                 }
-
+                info('Batch success', $data);
                 Http::withToken('token')->withBody(json_encode($data), 'application/json')->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
             })
             ->catch(function (Batch $batch, Throwable $e) {
@@ -198,8 +198,8 @@ class JobsService
                 $code = $batch->options['code'] ?? '';
 
                 $data['job'] = $global_uuid->job_id;
-                $data['status'] = true;
-                $data['msd'] = 'Ключ загружен во все замки';
+                $data['status'] = false;
+                $data['error'] = 'Не удалось записать ключ';
                 $data['code'] = $code;
                 $data['rent_id'] = $rent_id;
                 $data['method'] = 'createBooking';
@@ -209,7 +209,7 @@ class JobsService
                     // Отправляем статус false для всех или можно логировать ошибку
                     SetStatusJob::dispatch($uuid, false)->onQueue('default');
                 }
-
+                info('Batch fail', $data);
                 Http::withToken('token')->withBody(json_encode($data), 'application/json')->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
             })
             ->finally(function (Batch $batch) {
@@ -230,7 +230,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());*/
 
-        return response()->json(['job_id' => $global_uuid->job_id], 200);
+        return response()->json(['job_id' => $global_uuid->job_id, 'locks_count'=>count($locks)], 200);
     }
 
 

@@ -30,11 +30,11 @@ class AddKeyToLockJob implements ShouldQueue
     public $backoff = 180;    // Задержка 3 минуты между попытками
     public $timeout = 120;
 
-
+  protected $dontReport = [\RuntimeException::class, \Exception::class];
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $job_id, private int $lock_id, private int $code, private string $code_name, private $begin = null, private $end = null, private $utc = null, private $realty_id = null) {}
+    public function __construct(private int $job_id, private int $lock_id, private int $code, private string $code_name, private $begin = null, private $end = null, private $utc = null, private $rent_id = null) {}
 
     /**
      * Execute the job.
@@ -54,6 +54,23 @@ class AddKeyToLockJob implements ShouldQueue
         $centrifugo->publish('api:add_code_to_lock-' . $job->user->id, ['msg' => $data['msg'], 'method' => $data['method'], 'job' =>  $data['job'], 'status' => $data['status']]);
     }
 
+
+    private function sendToRC($data): void
+    {
+        if ($this->batchId) {
+            $job = LockJob::find($this->job_id);
+            if ($data['status'] == false)   $data['error'] = $data['msg'];
+            else $data['message'] = $data['msg'];
+
+            if ($parent_job = LockJob::find($job->parent_job)) {
+                $data['job'] = $parent_job->job_id;
+            }
+            $data['rent_id'] = $this->rent_id;
+            info('Batch send', $data);
+            Http::withToken('token')->withBody(json_encode($data), 'application/json')->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
+        }
+    }
+
     public function handle(): void
     {
 
@@ -71,10 +88,9 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['status'] = false;
 
                 $this->callback($data);
-
+                $this->sendToRC($data);
                 return;
             }
-
 
 
             if (!$job->user->code_packet()->exists()) {
@@ -82,6 +98,7 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['codes_error'] = true;
                 $data['msg'] = "Нет оплаченного пакета кодов";
                 $this->callback($data);
+                $this->sendToRC($data);
                 return;
             }
 
@@ -91,6 +108,7 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['codes_error'] = true;
                 $data['msg'] = "Окончилась дата действия пакета кодов";
                 $this->callback($data);
+                $this->sendToRC($data);
                 return;
             }
             if ($job->user->code_packet->count < 1 &&  $job->user->code_packet->count != -100) {
@@ -98,6 +116,7 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['codes_error'] = true;
                 $data['msg'] = "Закончился пакет кодов";
                 $this->callback($data);
+                $this->sendToRC($data);
                 return;
             }
 
@@ -123,7 +142,7 @@ class AddKeyToLockJob implements ShouldQueue
                     'start_local' => $this->begin,
                     'end_local' => $this->end,
                     'code_name' => $this->code_name,
-                    'realty_id' => $this->realty_id,
+                    'rent_id' => $this->rent_id,
                     'is_load' => true,
                 ]);
 
@@ -138,9 +157,14 @@ class AddKeyToLockJob implements ShouldQueue
                 $data['msg'] = "Ключ в замок " . $lock->lock_alias . " успешно загружен :" . $this->code . "#";
             } else if ($key['error_code'] != -3007) {
                 $data['status'] = false;
-                $data['msg'] = "Ошибка загрузки ключа. Замок недоступен" . $key['msg'] . ' Следующая попытка загрузки ключа через 3 минуты';
+                $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'] . ' Следующая попытка загрузки ключа через 3 минуты';
 
                 $this->callback($data);
+
+                if ($this->attempts() === 1) {
+
+                    $this->sendToRC($data);
+                }
                 throw new \Exception("Lock {$this->lock_id} not ready. Attempt {$this->attempts()}");
 
 
@@ -149,9 +173,13 @@ class AddKeyToLockJob implements ShouldQueue
                         new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                     ])
                     ->delay(now()->addMinutes(3));*/
-            } else {
+            } else {  // код уже существует
                 $data['status'] = false;
                 $data['msg'] = "Ошибка загрузки ключа. " . $key['msg'];
+                $this->sendToRC($data);
+                $this->fail(new \RuntimeException(
+                    "Code {$this->code} already exists in lock {$this->lock_id}"
+                ));
             }
 
             info('Load key result', $key);

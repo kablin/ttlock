@@ -32,7 +32,7 @@ Route::middleware(['throttle:50,1'])->group(function () {
 
     Route::post('/v1/get_token', [SimpleApiController::class, 'getToken']);
 
-    Route::post('/v1/test_token', [SimpleApiController::class, 'testToken']);
+    Route::post('/validate_token ', [SimpleApiController::class, 'testToken']);
 });
 
 
@@ -75,7 +75,7 @@ Route::middleware(['throttle:50,1'])->group(function () {
         Route::post('/v1/get_events_by_code', [SimpleApiController::class, 'getEventsByCode'])->middleware('auth:sanctum');
 
 
-         Route::post('/v1/create_booking', [CallbackApiController::class, 'createBooking'])->middleware('auth:sanctum');
+         Route::post('/lock_codes', [CallbackApiController::class, 'createBooking'])->middleware('auth:sanctum');
 
 
           Route::post('/v1/change_booking', [CallbackApiController::class, 'changeBooking'])->middleware('auth:sanctum');

@@ -145,7 +145,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
-                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                    'error' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
 
@@ -154,7 +154,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->createBooking($validated);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка'], 200);
         }
     }
 

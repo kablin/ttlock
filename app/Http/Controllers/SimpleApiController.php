@@ -123,10 +123,10 @@ class SimpleApiController extends Controller
                 'token' => 'required|string',
 
 
-            ], [
+            ]/*, [
                 'token.required' => 'Не указан token.',
                 'token.string' => 'token не строка.',
-            ]);
+            ]*/);
 
 
 
@@ -142,11 +142,11 @@ class SimpleApiController extends Controller
             $user = User::where('realty_key', $validated['token'])->first();
 
             if (!$user) {
-                return response()->json(['status' => false,  'msg' => 'Ключ не найден'], 200);
+                return response()->json(['valid' => false,  'status' => false, 'msg' => 'Ключ не найден'], 200);
             } else
-                return response()->json(['status' => true,  'msg' => 'Ключ найден'], 200);
+                return response()->json(['valid' => true, 'status' => true, 'error' => 'Неправильный ключ'], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'valid' => false,  'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
