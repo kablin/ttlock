@@ -26,6 +26,7 @@ use App\Jobs\DeleteKeyJob;
 use App\Models\Rent;
 use App\Jobs\OpenLockJob;
 use App\Models\LockEvent;
+use App\Models\LockPinCode;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -203,6 +204,16 @@ class JobsService
         if (Cache::get("batch_needs_restart:{$operationId}", false)) {
 
             $collisionCount = (int) Cache::get("collision_count:{$options['global_uuid']['job_id']}", 0);
+            foreach ($options['locks'] as $lock) {
+                // удаляем коды со старым ключем, который смог записаться
+                $pin_to_delete =  LockPinCode::where(['lock_id' => $lock->id, 'rent_id' => $options['params']['rent_id'], 'pin_code' => $options['params']['code'], 'is_confirm' => false])->get();
+
+                foreach ($pin_to_delete as $pin) {
+                    // удаляем коды со старым ключем, который смог записаться
+                    $this->deleteKey($lock->id, $pin->pin_code_id, '');
+                }
+            }
+
 
             // Превышен лимит попыток?
             if ($collisionCount >= $maxAttempts) {
@@ -213,6 +224,7 @@ class JobsService
 
             // Получаем новый код и запускаем СЛЕДУЮЩИЙ батч
             $newCode = Cache::get("final_code:{$operationId}");
+    
 
             info("Restarting batch with new code", [
                 'operation_id' => $operationId,
@@ -220,6 +232,7 @@ class JobsService
                 'new_code' => $newCode,
             ]);
 
+            $options['params']['code'] = $newCode;
             // Рекурсивный запуск следующего батча
             $this->dispatchBatch($options['params'], $newCode, $options['global_uuid'],  $options['locks'], $attempt + 1);
 
@@ -228,6 +241,12 @@ class JobsService
         }
 
         // === Все замки успешно записаны ===
+
+        foreach ($options['locks'] as $lock) {
+            LockPinCode::where(['lock_id' => $lock->id, 'rent_id' => $options['params']['rent_id'], 'pin_code' => $options['params']['code']])->update(['is_confirm' => true]);
+        }
+
+
         $this->sendSuccessResponse($options);
         $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
     }
