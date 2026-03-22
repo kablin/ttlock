@@ -116,13 +116,13 @@ class JobsService
     }
 
 
-
+    //******************************************************************************************************** */
     public function createBooking($params)
     {
 
-        $jobs = [];
+        /* $jobs = [];
         $uuids = [];
-        $token = 'token';
+        $token = 'token';*/
         $global_uuid  = $this->startLockJob('createBooking', $params['tag'] ?? null);
 
         $rent = Rent::where('internal_id', $params['realty_id'])->first();
@@ -144,95 +144,179 @@ class JobsService
         }
 
 
+        // Запускаем первый батч (попытка #0)
+        $this->dispatchBatch($params, $params['code'], $global_uuid, $locks, 0);
+
+
+        return response()->json(['job_id' => $global_uuid->job_id, 'locks_count' => count($locks)], 200);
+    }
+
+
+
+
+    private function dispatchBatch(array $options, $code, $global_uuid, $locks, int $attempt = 0): void
+    {
+        $jobs = [];
+        $uuids = [];
+
         foreach ($locks as $lock) {
             $uuid  = $this->startLockJob('addKeyToLock', $params['tag'] ?? null, $global_uuid->id);
             $uuids[] = $uuid->id;
-
+            $lock_ids[] = $lock->id;
 
             $jobs[] = (new AddKeyToLockJob(
                 $uuid->id,
                 $lock->id,
-                $params['code'],
-                $params['code_name'] ?? '',
-                $params['begin_date'] . ' ' . $params['arrival_time'],
-                $params['end_date'] . ' ' . $params['departure_time'],
-                $params['utc'] ?? null,
-                $params['rent_id']
+                $code,
+                $options['code_name'] ?? '',
+                $options['begin_date'] . ' ' . $options['arrival_time'],
+                $options['end_date'] . ' ' . $options['departure_time'],
+                $options['utc'] ?? null,
+                $options['rent_id']
             ))->delay($this->getDelay());
         }
 
 
         $batch = Bus::batch($jobs)
             ->withOption('uuids', $uuids)
-            ->withOption('rent_id', $params['rent_id'])
-            ->withOption('code', $params['code'])
-            ->withOption('global_uuid', $global_uuid) // <--- Сохраняем список в опциях батча
-            ->then(function (Batch $batch) {
-                // Сработает, если ВСЕ задачи успешны
-                // Достаем массив из опций
-                $uuids = $batch->options['uuids'] ?? [];
-                $global_uuid = $batch->options['global_uuid'] ?? [];
-                $rent_id = $batch->options['rent_id'] ?? '';
-                $code = $batch->options['code'] ?? '';
-
-                $data['job'] = $global_uuid['job_id'];
-                $data['status'] = true;
-                $data['message'] = 'Ключ записан';
-                $data['code'] = $code;
-                $data['rent_id'] = $rent_id;
-                $data['method'] = 'createBooking';
-
-
-
-                foreach ($uuids as $uuid) {
-                    SetStatusJob::dispatch($uuid['id'], true)->onQueue('default');
-                }
-                info('Batch success', $data);
-                Http::withToken('token')->withBody(json_encode($data), 'application/json')->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
-            })
-            ->catch(function (Batch $batch, Throwable $e) {
-                // Сработает, если ХОТЯ БЫ ОДНА задача упала окончательно
-                $uuids = $batch->options['uuids'] ?? [];
-                $global_uuid = $batch->options['global_uuid'] ?? [];
-                $rent_id = $batch->options['rent_id'] ?? '';
-                $code = $batch->options['code'] ?? '';
-
-                $data['job'] = $global_uuid->job_id;
-                $data['status'] = false;
-                $data['error'] = 'Не удалось записать ключ';
-                $data['code'] = $code;
-                $data['rent_id'] = $rent_id;
-                $data['method'] = 'createBooking';
-
-
-                foreach ($uuids as $uuid) {
-                    // Отправляем статус false для всех или можно логировать ошибку
-                    SetStatusJob::dispatch($uuid, false)->onQueue('default');
-                }
-                info('Batch fail', $data);
-                Http::withToken('token')->withBody(json_encode($data), 'application/json')->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
-            })
-            ->finally(function (Batch $batch) {
-                // Выполняется всегда (опционально)
-            })
+            ->withOption('params', $options)
+            ->withOption('locks', $locks)
+            ->withOption('code', $code)
+            ->withOption('global_uuid', $global_uuid)
+            ->withOption('attempt', $attempt)   // <--- Номер попытки
+            ->then(fn(Batch $b) => $this->handleBatchThen($b))
+            ->catch(fn(Batch $b, Throwable $e) => $this->handleBatchCatch($b, $e))
             ->onQueue('default')
-
             ->dispatch();
-
-
-
-
-
-        // $uuid = $this->startLockJob('createBooking', $params['tag'] ?? null);
-        //$lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
-
-        /* AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end, $utc)->onQueue('default')->chain([
-            new SetStatusJob($uuid->id,  $lock ? true : false)
-        ])->delay($this->getDelay());*/
-
-        return response()->json(['job_id' => $global_uuid->job_id, 'locks_count'=>count($locks)], 200);
     }
 
+
+
+    private function handleBatchThen(Batch $batch): void
+    {
+        $options = $batch->options;
+        $operationId = $batch->id;
+        $attempt = (int) ($options['attempt'] ?? 0);
+        $maxAttempts = 3;
+
+        // Проверяем, была ли коллизия в этом батче
+        if (Cache::get("batch_needs_restart:{$operationId}", false)) {
+
+            $collisionCount = (int) Cache::get("collision_count:{$options['global_uuid']['job_id']}", 0);
+
+            // Превышен лимит попыток?
+            if ($collisionCount >= $maxAttempts) {
+                $this->sendFinalError($options, "Не удалось создать ключ после {$maxAttempts} попыток");
+                $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
+                return;
+            }
+
+            // Получаем новый код и запускаем СЛЕДУЮЩИЙ батч
+            $newCode = Cache::get("final_code:{$operationId}");
+
+            info("Restarting batch with new code", [
+                'operation_id' => $operationId,
+                'attempt' => $attempt + 1,
+                'new_code' => $newCode,
+            ]);
+
+            // Рекурсивный запуск следующего батча
+            $this->dispatchBatch($options['params'], $newCode, $options['global_uuid'],  $options['locks'], $attempt + 1);
+
+            $this->cleanupCache($operationId);
+            return;
+        }
+
+        // === Все замки успешно записаны ===
+        $this->sendSuccessResponse($options);
+        $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
+    }
+
+
+
+    private function handleBatchCatch(Batch $batch, Throwable $e): void
+    {
+        $options = $batch->options;
+        $operationId = $batch->id;;
+
+        // Если это коллизия — она уже обработана в then(), игнорируем
+        if ($e instanceof \RuntimeException && str_contains($e->getMessage(), 'already exists')) {
+            return;
+        }
+
+        // Настоящая ошибка (сеть, таймаут, исчерпаны $tries)
+        info("Batch failed", [
+            'operation_id' => $operationId,
+            'error' => $e->getMessage(),
+            'batch_id' => $batch->id,
+        ]);
+
+        $this->sendFinalError($options, "Не удалось загрузить ключ: {$e->getMessage()}");
+        $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
+    }
+
+
+
+    private function sendSuccessResponse(array $options): void
+    {
+        $data = [
+            'job' => $options['global_uuid']['job_id'],
+            'status' => true,
+            'message' => 'Ключ успешно записан',
+            'code' => $options['code'],
+            'rent_id' => $options['params']['rent_id'],
+            'method' => 'createBooking',
+        ];
+
+        $this->dispatchStatusJobs($options['uuids'] ?? [], true);
+        info('Batch success', $data);
+        $this->sendToApi($data);
+    }
+
+    private function sendFinalError(array $options, string $error): void
+    {
+
+        $data = [
+            'job' => $options['global_uuid']['job_id'],
+            'status' => false,
+            'error' => $error,
+            'code' => $options['code'],
+            'rent_id' => $options['params']['rent_id'],
+            'method' => 'createBooking',
+        ];
+
+        $this->dispatchStatusJobs($options['uuids'], false);
+        $this->sendToApi($data);
+    }
+
+
+
+    private function dispatchStatusJobs(array $uuids, bool $status): void
+    {
+        foreach ($uuids as $uuid) {
+            SetStatusJob::dispatch($uuid, false)->onQueue('default');
+        }
+    }
+
+
+    private function sendToApi(array $data): void
+    {
+        info('sendToApi send', $data);
+        // Http::withToken(config('services.rentysoft.token'))
+        Http::withToken('token')
+            ->withBody(json_encode($data), 'application/json')
+            ->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
+    }
+
+
+    private function cleanupCache(string $operationId, string $collisionId = ''): void
+    {
+        info('cleanupCache');
+        Cache::forget("final_code:{$operationId}");
+        Cache::forget("batch_needs_restart:{$operationId}");
+        if ($collisionId) Cache::forget("collision_count:{$collisionId}");
+        Cache::forget("regenerate_lock:{$operationId}");
+    }
 
     public function changeBooking(/*$lock_id, $code, $code_name, $begin, $end, $tag, $utc*/$tag)
     {
@@ -245,6 +329,11 @@ class JobsService
 
         return response()->json(['job_id' => $uuid->job_id], 200);
     }
+
+
+
+
+    //******************************************************************************************************** */
 
 
     public function getCodesList($lock_id, $page_number, $page_size, $tag)
