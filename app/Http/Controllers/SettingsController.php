@@ -149,4 +149,38 @@ class SettingsController extends Controller
             return  response()->json(['status' => false, 'error' => 3, 'msg' => 'Неизвестная ошибка', 'message' => 'Something wrong',], 200);
         }
     }
+
+
+
+    public function setDelay(Request $request)
+    {
+        try {
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode($request->ip()),
+                'api_method' => 'setDelay',
+                'params' => json_encode($request->all()),
+
+            ]);
+
+            $validator = Validator::make($request->all(), [
+                'time_delay' => 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only(['time_delay']);
+            auth()->user()->time_delay =  $validated['time_delay'];
+            auth()->user()->save();
+        } catch (\Exception $e) {
+
+            return  response()->json(['status' => false, 'error' => 3, 'msg' => 'Неизвестная ошибка', 'message' => 'Something wrong',], 200);
+        }
+    }
 }

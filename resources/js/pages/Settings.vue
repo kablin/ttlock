@@ -6,10 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ref, onMounted } from 'vue'
-import { settings,  saveCredential } from '@/routes';
+import { settings, saveCredential, setDelay } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+
+
+const page = usePage();
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,7 +33,7 @@ const props = defineProps({
 });
 
 
-
+const time_delay = ref(page.props.auth.user.time_delay)
 
 const showPassword = ref(false)
 
@@ -39,6 +44,7 @@ const credential_password = ref(props.credential?.password ?? "")
 
 
 const msg = ref()
+const msg2= ref()
 const error = ref(false)
 
 
@@ -72,6 +78,26 @@ const saveTtlockCredential = async () => {
     }
 }
 
+const saveTimeDelay = async () => {
+    loadingTtlock.value = true
+
+    try {
+        // Axios POST request
+        const response = await axios.post(setDelay().url, {
+            "time_delay": time_delay.value,
+        })
+
+        msg2.value = response.data.msg
+        error.value = !response.data.status
+
+
+
+    } catch (error: any) {
+        console.error('Error:', error)
+    } finally {
+        loadingTtlock.value = false
+    }
+}
 
 
 
@@ -111,7 +137,7 @@ const saveTtlockCredential = async () => {
                         </div>
                     </div>
                     <div>
-                        <Button variant="design" class="my-4" @click="saveTtlockCredential"
+                        <Button variant="design" class="my-2" @click="saveTtlockCredential"
                             :disabled="loadingTtlock">Сохранить</Button>
                     </div>
                     <div>
@@ -119,6 +145,21 @@ const saveTtlockCredential = async () => {
                     </div>
                 </div>
 
+                <div
+                    class="relative  p-4 flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex flex-col  items-center justify-center gap-4">
+                    <div class="grid gap-3 mx-3 w-full">
+                        <Label class="w-full min-w-[160px]">Активировать ключ за указанное число минут</Label>
+                        <Input v-model="time_delay" class="w-full " type="number" />
+                    </div>
+
+                    <div>
+                        <Button variant="design" class="my-2" @click="saveTimeDelay"
+                            :disabled="loadingTtlock">Сохранить</Button>
+                    </div>
+                    <div>
+                        <p class="break-all " :class="error ? 'text-red-500' : 'text-green-700'">{{ msg2 }}</p>
+                    </div>
+                </div>
             </div>
 
 

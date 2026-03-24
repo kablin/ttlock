@@ -308,7 +308,9 @@ class TTLockService
 		if (is_null($begin)) {
 			$begin = Carbon::now()->unix();
 		} else {
-			$begin = Carbon::parse($begin)->subMinutes(15)->unix();
+			if ($this->user?->time_delay)
+				$begin = Carbon::parse($begin)->subMinutes($this->user?->time_delay)->unix();
+			else $begin = Carbon::parse($begin)->unix();
 		}
 
 
@@ -394,7 +396,9 @@ class TTLockService
 		if (is_null($begin)) {
 			$begin = Carbon::now()->unix();
 		} else {
-			$begin = Carbon::parse($begin)->subMinutes(15)->unix();
+			if ($this->user?->time_delay)
+				$begin = Carbon::parse($begin)->subMinutes($this->user?->time_delay)->unix();
+			else $begin = Carbon::parse($begin)->unix();
 		}
 
 		if (is_null($end)) {

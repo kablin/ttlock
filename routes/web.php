@@ -128,6 +128,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('/refresh_token', [\App\Http\Controllers\SettingsController::class, 'refreshToken'])->name('refreshToken');
   Route::post('/save_credential', [\App\Http\Controllers\SettingsController::class, 'saveCredential'])->name('saveCredential');
   Route::post('/refresh_realty_key', [\App\Http\Controllers\SettingsController::class, 'refreshKey'])->name('refreshKey');
+  Route::post('/set_delay', [\App\Http\Controllers\SettingsController::class, 'setDelay'])->name('setDelay');
 
 
   //tarifs
@@ -147,6 +148,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('/v1/get_codes_list', [\App\Http\Controllers\CallbackApiController::class, 'getCodesList'])->name('getCodesList');
   Route::post('/v1/delete_code_from_lock', [\App\Http\Controllers\CallbackApiController::class, 'deleteCode'])->name('deleteKey');
   Route::post('/v1/add_code_to_lock', [\App\Http\Controllers\CallbackApiController::class, 'addCodeToLock'])->name('addCodeToLock');
+
+
+    Route::post('/lock_codes', [\App\Http\Controllers\CallbackApiController::class, 'createBooking'])->name('test');
+
 
 
 

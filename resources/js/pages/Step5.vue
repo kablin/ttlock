@@ -31,6 +31,9 @@ const handleBack = () => {
   router.visit('/setup/wizard/step4')
 }
 
+const handleSkip = () => {
+  router.visit('/dashboard')
+}
 
 </script>
 
@@ -51,7 +54,7 @@ const handleBack = () => {
 
       </div>
     </AppLayout>
-    <SetupNavigation @next="handleComplete" @back="handleBack" :show-back="true" :show-skip="false"
+    <SetupNavigation @next="handleComplete" @back="handleBack" :show-back="true"  @skip="handleSkip"
       next-label="Завершить настройку" :is-loading="isSaving" />
   </div>
 </template>
