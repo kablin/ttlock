@@ -1,6 +1,6 @@
 <script setup lang="js">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard, openLock, pincodes_list, getCodesList, deleteKey, addCodeToLock, pincodes_page, lockevents_lock_page } from '@/routes';
+import { test, dashboard, openLock, pincodes_list, getCodesList, deleteKey, addCodeToLock, pincodes_page, lockevents_lock_page } from '@/routes';
 import { Head } from '@inertiajs/vue3';
 import { ref, onMounted, computed } from 'vue'
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
@@ -318,20 +318,37 @@ const addKey = () => {
 
 
 const openLockfn = async (lock) => {
-    waitApiOpenLock.value = true
-    try {
-        const response = await axios.post(openLock().url, {
-            'lock_id': lock.lock_id
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-    } catch (error) {
-        console.error('Error:', error)
-    } finally {
-        // loading.value = false
-    }
+
+
+    const response = await axios.post(test().url, {
+        'realty_id': '67',
+        'rent_id': '100',
+        'begin_date': '2026-03-28',
+        'end_date': '2026-03-28',
+        'arrival_time': '13:00',
+        'departure_time': "18:15"
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+
+
+    /*
+        waitApiOpenLock.value = true
+        try {
+            const response = await axios.post(openLock().url, {
+                'lock_id': lock.lock_id
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+        } catch (error) {
+            console.error('Error:', error)
+        } finally {
+            // loading.value = false
+        }*/
 }
 
 
@@ -665,8 +682,8 @@ const goToLogPage = async (page) => {
                                     </TableCell>
                                     <TableCell>{{ key.code_name }}</TableCell>
                                     <TableCell>{{ key.pin_code }}</TableCell>
-                                    <TableCell>{{ key.start_local ? (key.start_local.slice(0,-3)) : '' }}</TableCell>
-                                    <TableCell>{{ key.end_local  ? (key.end_local.slice(0,-3)) : ''}}</TableCell>
+                                    <TableCell>{{ key.start_local ? (key.start_local.slice(0, -3)) : '' }}</TableCell>
+                                    <TableCell>{{ key.end_local ? (key.end_local.slice(0, -3)) : '' }}</TableCell>
                                     <TableCell>
                                         <template v-if="key.is_load">
                                             <svg width="19" height="14" viewBox="0 0 19 14" fill="none"
@@ -744,7 +761,8 @@ const goToLogPage = async (page) => {
                                     <TableCell class="font-medium">
                                         {{ log.id }}
                                     </TableCell>
-                                    <TableCell class="whitespace-normal max-w-[250px]">{{ log.record_type_from_lock }}</TableCell>
+                                    <TableCell class="whitespace-normal max-w-[250px]">{{ log.record_type_from_lock }}
+                                    </TableCell>
                                     <TableCell>{{ log.record_type }}</TableCell>
                                     <TableCell>
                                         <template v-if="log.success">
@@ -758,7 +776,7 @@ const goToLogPage = async (page) => {
                                     </TableCell>
                                     <TableCell>{{ log.username }}</TableCell>
                                     <TableCell>{{ log.keyboard_pwd }} </TableCell>
-                                    <TableCell>{{ new Date(log.created_at).toLocaleString('ru-RU')      }}   </TableCell>
+                                    <TableCell>{{ new Date(log.created_at).toLocaleString('ru-RU') }} </TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
