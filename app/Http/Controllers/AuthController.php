@@ -89,7 +89,7 @@ class AuthController extends Controller
                 if ($user->wasRecentlyCreated) {
                     $code_packet = CodePacket::firstOrCreate(['user_id' => $user->id]);
                     $code_packet->refresh();
-                    $code_packet->count = 30;
+                    $code_packet->count = 50;
 
                     $code_packet->end = $code_packet->created_at->addYear();
                     $code_packet->save();
