@@ -39,9 +39,10 @@ class CreateNewUser implements CreatesNewUsers
         ]);
 
         $token = auth()->user()->createToken('ttlock');
-        $user->realty_key = $token->plainTextToken;
-        $user->save();
 
+        $user->realty_key = $token->plainTextToken;
+
+        $user->save();
         return $user;
     }
 }

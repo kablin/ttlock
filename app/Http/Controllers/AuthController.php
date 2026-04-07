@@ -54,9 +54,13 @@ class AuthController extends Controller
                 'name' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'source' => json_decode($request->getContent())->source ?? 'bitrix',
-                'realty_key' =>  Str::random(32),
 
             ]);
+
+            $token =  $user->createToken('ttlock');
+
+            $user['realty_key'] = $token->plainTextToken;
+            $user->save();
 
 
 
@@ -89,7 +93,7 @@ class AuthController extends Controller
                 if ($user->wasRecentlyCreated) {
                     $code_packet = CodePacket::firstOrCreate(['user_id' => $user->id]);
                     $code_packet->refresh();
-                    $code_packet->count = 50;
+                    $code_packet->count = 100000;
 
                     $code_packet->end = $code_packet->created_at->addYear();
                     $code_packet->save();

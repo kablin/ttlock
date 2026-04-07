@@ -71,7 +71,10 @@ class SettingsController extends Controller
         ]);
 
         $user = User::find(auth()->user()->id);
-        $user['realty_key'] = Str::random(32);
+
+        $token = auth()->user()->createToken('ttlock');
+
+        $user['realty_key'] = $token->plainTextToken;
         $user->save();
 
         return response()->json(['realty_key' => $user['realty_key'], 'status' => true, 'user_id' => auth()->user()->id], 200);
