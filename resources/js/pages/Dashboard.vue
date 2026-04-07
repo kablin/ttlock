@@ -320,7 +320,7 @@ const addKey = () => {
 const openLockfn = async (lock) => {
 
 
-    const response = await axios.post(test().url, {
+   /* const response = await axios.post(test().url, {
         'realty_id': '67',
         'rent_id': '100',
         'begin_date': '2026-03-28',
@@ -331,10 +331,10 @@ const openLockfn = async (lock) => {
         headers: {
             'Content-Type': 'application/json',
         }
-    })
+    })*/
 
 
-    /*
+    
         waitApiOpenLock.value = true
         try {
             const response = await axios.post(openLock().url, {
@@ -348,7 +348,7 @@ const openLockfn = async (lock) => {
             console.error('Error:', error)
         } finally {
             // loading.value = false
-        }*/
+        }
 }
 
 
