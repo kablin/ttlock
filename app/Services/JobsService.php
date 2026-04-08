@@ -78,7 +78,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ]);
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
 
@@ -89,7 +89,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
 
@@ -113,7 +113,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
 
@@ -149,7 +149,7 @@ class JobsService
         $this->dispatchBatch($params, $params['code'], $global_uuid, $locks, 0);
 
 
-        return response()->json(['job_id' => $global_uuid->job_id, 'locks_count' => count($locks)], 200);
+        return response()->json(['job_id' => $global_uuid->job_id, 'status'=>true, 'locks_count' => count($locks)], 200);
     }
 
 
@@ -346,7 +346,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());*/
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
 
@@ -364,7 +364,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
 
@@ -379,7 +379,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
 
@@ -392,7 +392,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
 
@@ -404,7 +404,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
     public function deleteKey($lock_id, $pwdID, $tag)
@@ -415,7 +415,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
     public function createCredential($user, $password, $tag)
@@ -426,7 +426,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 
 
@@ -541,6 +541,6 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
     }
 }
