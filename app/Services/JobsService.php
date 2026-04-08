@@ -324,7 +324,7 @@ class JobsService
         // Http::withToken(config('services.rentysoft.token'))
         Http::withToken('token')
             ->withBody(json_encode($data), 'application/json')
-            ->post('https://realtycalendar.ru/v2/integrations/rentysoft/receive_lock_code');
+            ->post('https://test.realtycalendar.ru/v2/integrations/renty_soft/receive_lock_code');
     }
 
 
