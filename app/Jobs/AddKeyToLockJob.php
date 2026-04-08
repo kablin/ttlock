@@ -76,7 +76,7 @@ class AddKeyToLockJob implements ShouldQueue
             $this->data['rent_id'] = $this->rent_id;
             info('sendToRC send', $this->data);
 
-            Http::withToken('token')->withBody(json_encode($this->data), 'application/json')->post('https://test.realtycalendar.ru/v2/integrations/renty_soft/receive_lock_code');
+            Http::withToken($this->current_job->user->realty_key)->withBody(json_encode($this->data), 'application/json')->post('https://test.realtycalendar.ru/v2/integrations/renty_soft/receive_lock_code');
         }
     }
 

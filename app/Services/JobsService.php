@@ -322,7 +322,7 @@ class JobsService
     {
         info('sendToApi send', $data);
         // Http::withToken(config('services.rentysoft.token'))
-        Http::withToken('token')
+        Http::withToken(auth()->user()->realty_key)
             ->withBody(json_encode($data), 'application/json')
             ->post('https://test.realtycalendar.ru/v2/integrations/renty_soft/receive_lock_code');
     }
