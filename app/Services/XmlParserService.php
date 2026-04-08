@@ -23,20 +23,37 @@ use Illuminate\Support\Facades\Log;
 class XmlParserService
 {
 
-    const URL =  'https://realtycalendar.ru/v2/integrations/rentysoft/xml_feed?token=';
+    const URL =  'https://test.realtycalendar.ru/v2/integrations/rentysoft/xml_feed?token=';
 
     public function fetch()
     {
         try {
-            $response = Http::get($this::URL . auth()->user()->realty_key);
+              $response = Http::get($this::URL . auth()->user()->realty_key);
+            //$response = Http::get($this::URL . 'y4qVxZQNvQRw4KrEVZb3sxKZCnVtV0lA');
+
 
             if (!$response->successful()) {
                 // throw new \Exception("Failed to fetch XML from {$url}, status: " . $response->status());
-                return ['status' => false, 'count' => 0];
+                return ['status' => false, 'count' => 0, 'error' => 'Не удалось получить адрес списка'];
+            }
+
+            $xmlString = $response->body();
+            
+            if (!$xmlString) {
+                // throw new \Exception("Failed to fetch XML , status: " . $response->status());
+                return ['status' => false, 'count' => 0, 'error' => 'Не удалось получить адрес списка'];
+            }
+           
+            $response = Http::get($xmlString);
+
+            if (!$response->successful()) {
+                // throw new \Exception("Failed to fetch XML from {$url}, status: " . $response->status());
+                return ['status' => false, 'count' => 0, 'error' => 'Не удалось получить xml'];
             }
 
             $xmlString = $response->body();
 
+            
             return $this->parse($xmlString);
         } catch (\Exception $e) {
             Log::error('Error fetching or processing XML: ' . $e->getMessage());
@@ -52,11 +69,15 @@ class XmlParserService
         if ($xml === false) {
             $errors = libxml_get_errors();
             return ['status' => false, 'count' => 0];
-            //throw new \Exception('Invalid XML format: ' . collect($errors)->pluck('message')->join(', '));
+            throw new \Exception('Invalid XML format: ' . collect($errors)->pluck('message')->join(', '));
         }
 
+
         // Просто ищем все теги <offer>, без namespace
-        $offers = $xml->xpath('//offer');
+        $xml->registerXPathNamespace('y', 'http://webmaster.yandex.ru/schemas/feed/realty/2010-06');
+        // Теперь используем префикс в запросе
+        $offers = $xml->xpath('//y:offer');
+
 
         foreach ($offers as $offer) {
             $internalId = (string)$offer['internal-id'];
@@ -75,6 +96,7 @@ class XmlParserService
                 [
                     'location' => $location,
                     'timezone' => $timezone,
+                    'user_id' => auth()->user()->id,
                     'name' => (string)$offer->title
                 ]
             );
