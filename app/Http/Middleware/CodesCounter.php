@@ -19,13 +19,13 @@ class CodesCounter
 
 
         if (!auth()->user()->code_packet()->exists())
-        return response()->json(['codes_error'=> true,'status' => false, 'msg' => "Не осталось доступного пакета кодов"], 200);
+        return response()->json(['codes_error'=> true,'status' => false, 'error' => "Не осталось доступного пакета кодов", 'msg' => "Не осталось доступного пакета кодов"], 200);
 
         if (auth()->user()->code_packet->end < now() ) 
-        return response()->json(['codes_error'=> true,'status' => false, 'msg' => "Срок действия пакета кодов закончился"], 200);
+        return response()->json(['codes_error'=> true,'status' => false, 'error' => "Срок действия пакета кодов закончился",'msg' => "Срок действия пакета кодов закончился"], 200);
 
         if (auth()->user()->code_packet->count < 1 && auth()->user()->code_packet->count != -100)
-        return response()->json(['codes_error'=> true,'status' => false, 'msg' => "Не осталось доступного пакета кодов"], 200);
+        return response()->json(['codes_error'=> true,'status' => false, 'error' => "Срок действия пакета кодов закончился",'msg' => "Не осталось доступного пакета кодов"], 200);
 
 
         return $next($request);

@@ -47,7 +47,7 @@ class DeleteKeyJob implements ShouldQueue
                 $data['data'] = 'Lock not found';
                 $data['msg'] = 'Неизвестный замок';
                 $data['status'] = false;
-
+                $data['error'] =  $data['msg'];
                 Http::withBody(json_encode($data), 'application/json')
                     //                ->withOptions([
                     //                    'headers' => ''

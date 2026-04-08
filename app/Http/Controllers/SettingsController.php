@@ -115,6 +115,7 @@ class SettingsController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }

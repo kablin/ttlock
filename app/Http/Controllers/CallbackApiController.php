@@ -55,7 +55,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->getLockList(json_decode($request->getContent())->tag ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -90,7 +90,8 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
-                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                    'msg' => Arr::toCssClasses($validator->errors()->all()),
+                     'error' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
 
@@ -98,7 +99,7 @@ class CallbackApiController extends Controller
             $validated = $validator->safe()->only(['lock_id', 'page_number',   'tag']);
             return (new JobsService(auth()->user()->id))->getCodesList($validated['lock_id'], $validated['page_number'], 100, $validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -196,6 +197,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -205,7 +207,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->changeBooking(/*$validated['lock_id'], $validated['code'], $validated['code_name'] ??  'Ключ от Renty api', $validated['begin'] ?? null, $validated['end'] ?? null, ,$validated['utc'] ?? 0*/$validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -246,6 +248,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -255,7 +258,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->addKeyToLock($validated['lock_id'], $validated['code'], $validated['code_name'] ??  'Ключ от Renty api', $validated['begin'] ?? null, $validated['end'] ?? null, $validated['tag'] ?? '', $validated['utc'] ?? 0);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -294,6 +297,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -302,7 +306,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->changeCode($validated['lock_id'], $validated['code_id'],  $validated['begin'] ?? null, $validated['end'] ?? null, $validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -332,6 +336,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                     'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -340,7 +345,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->setPassageModeOn($validated['lock_id'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -370,6 +375,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -378,7 +384,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->setPassageModeOff($validated['lock_id'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка','msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -407,6 +413,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -415,7 +422,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->openLock($validated['lock_id'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false,  'error' => 'Неизвестная ошибка','msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -446,6 +453,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -454,7 +462,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->deleteKey($validated['lock_id'], $validated['code_id'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false,  'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 }

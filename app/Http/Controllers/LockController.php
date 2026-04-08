@@ -81,6 +81,7 @@ class LockController extends Controller
         } else
             return response()->json([
                 'status' => false,
+                'error' => $locks_data['msg'],
                 'msg' => $locks_data['msg']
             ], 200);
     }

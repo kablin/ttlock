@@ -55,7 +55,7 @@ class WizardController extends Controller
 
       return response()->json( $this->object_service->fetch(), 200);
     } catch (\Exception $e) {
-      return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+      return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
     }
   }
 
@@ -82,6 +82,7 @@ class WizardController extends Controller
       if ($validator->fails()) {
         return response()->json([
           'status' => false,
+          'error' => Arr::toCssClasses($validator->errors()->all()),
           'msg' => Arr::toCssClasses($validator->errors()->all())
         ], 200);
       }
@@ -92,7 +93,7 @@ class WizardController extends Controller
 
       return response()->json(['status' => true], 200);
     } catch (\Exception $e) {
-      return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+      return response()->json(['status' => false,'error' =>  'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
     }
   }
 
@@ -120,6 +121,7 @@ class WizardController extends Controller
       if ($validator->fails()) {
         return response()->json([
           'status' => false,
+          'error' => Arr::toCssClasses($validator->errors()->all()),
           'msg' => Arr::toCssClasses($validator->errors()->all())
         ], 200);
       }
@@ -128,7 +130,7 @@ class WizardController extends Controller
       $lock->save();
       return response()->json(['status' => true], 200);
     } catch (\Exception $e) {
-      return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+      return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
     }
   }
 
@@ -192,7 +194,7 @@ class WizardController extends Controller
     $validated = $validator->safe()->only(['rent_page', 'lock_page', 'lock_search', 'rent_search']);
 
     if ($validator->fails()) {
-      return response()->json(['status' => false], 400);
+      return response()->json(['status' => false, 'error' => 'Неизвестная ошибка'], 400);
     }
 
 
@@ -230,7 +232,7 @@ class WizardController extends Controller
     $validated = $validator->safe()->only(['rent_id', 'lock_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search']);
 
     if ($validator->fails()) {
-      return response()->json(['status' => false], 400);
+      return response()->json(['status' => false, 'error' => 'Неизвестная ошибка'], 400);
     }
 
 
@@ -276,7 +278,7 @@ class WizardController extends Controller
     $validated = $validator->safe()->only(['rent_id', 'lock_id', 'drent_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search']);
 
     if ($validator->fails()) {
-      return response()->json(['status' => false], 400);
+      return response()->json(['status' => false, 'error' => 'Неизвестная ошибка'], 400);
     }
 
 
@@ -321,7 +323,7 @@ class WizardController extends Controller
     $validated = $validator->safe()->only(['lock_id', 'rent_id', 'rent_page', 'lock_page', 'lock_search', 'rent_search']);
 
     if ($validator->fails()) {
-      return response()->json(['status' => false], 400);
+      return response()->json(['status' => false, 'error' => 'Неизвестная ошибка'], 400);
     }
 
     $rent = Rent::find($validated['rent_id']);

@@ -48,6 +48,7 @@ class GetCodesListJob implements ShouldQueue
 
                 $data['data'] = 'Lock not found';
                 $data['msg'] = 'Неизвестный замок';
+                $data['error'] =  $data['msg'];
                 $data['status'] = false;
 
                 Http::withBody(json_encode($data), 'application/json')

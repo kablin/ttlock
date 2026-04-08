@@ -43,6 +43,7 @@ class SimpleApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -53,7 +54,7 @@ class SimpleApiController extends Controller
             $request->user()->save();
             return response()->json(['status' => true], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false,  'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -82,6 +83,7 @@ class SimpleApiController extends Controller
 
                 return response()->json([
                     'status' => false,
+                    'error' => 'Не удалось залогиниться в облако TTLock',
                     'msg' => 'Не удалось залогиниться в облако TTLock',
                 ], 200);
             }
@@ -98,10 +100,11 @@ class SimpleApiController extends Controller
 
                 return response()->json([
                     'status' => false,
+                    'error' => 'Не получилось запистать данные для авторизации в TTLOCK',
                     'msg' => 'Не получилось запистать данные для авторизации в TTLOCK',
                 ], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -133,6 +136,7 @@ class SimpleApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -146,7 +150,7 @@ class SimpleApiController extends Controller
             } else
                 return response()->json(['valid' => true, 'status' => true, 'msg' => 'Ключ проверен'], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'valid' => false,  'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'valid' => false,  'error' => 'Неизвестная ошибка','msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -182,7 +186,8 @@ class SimpleApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
-                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                    'msg' => Arr::toCssClasses($validator->errors()->all()),
+                    'error' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
 
@@ -192,9 +197,9 @@ class SimpleApiController extends Controller
             if (Auth::attempt($validated)) {
                 $token = auth()->user()->createToken('ttlock');
                 return response()->json(['token' => $token->plainTextToken, 'status' => true, 'user_id' => auth()->user()->id], 200);
-            } else   return response()->json(['status' => false,  'msg' => 'Пользователь не найден'], 200);
+            } else   return response()->json(['status' => false,  'error' => 'Пользователь не найден',  'msg' => 'Пользователь не найден'], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -229,6 +234,7 @@ class SimpleApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -237,11 +243,11 @@ class SimpleApiController extends Controller
 
             $lock = auth()->user()->locks->where('lock_id', $validated['lock_id'])->first();
 
-            if (!$lock) return response()->json(['status' => false, 'msg' => "Неизвестный замок"], 200);
+            if (!$lock) return response()->json(['status' => false, 'error' => "Неизвестный замок",'msg' => "Неизвестный замок"], 200);
 
             return response()->json(JobsService::getLockEvents($validated['lock_id'],   $validated['lock_record_type'] ?? null, $validated['record_type'] ?? null, $validated['personal'] ?? false), 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -273,6 +279,7 @@ class SimpleApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -281,11 +288,11 @@ class SimpleApiController extends Controller
 
             $code = $validated['code'] ?? null;
 
-            if ($validated['type'] == 1 &&  !$code) return response()->json(['status' => false, 'msg' => "Не указан code"], 200);
+            if ($validated['type'] == 1 &&  !$code) return response()->json(['status' => false, 'error' => "Не указан code", 'msg' => "Не указан code"], 200);
 
             return response()->json(JobsService::getLockEvents2($validated['lock_ids'],   $validated['type'], $code), 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -315,6 +322,7 @@ class SimpleApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -323,11 +331,11 @@ class SimpleApiController extends Controller
 
             $lock = auth()->user()->locks->where('lock_id', $validated['lock_id'])->first();
 
-            if (!$lock) return response()->json(['status' => false, 'msg' => "Неизвестный замок"], 200);
+            if (!$lock) return response()->json(['status' => false, 'error' => "Неизвестный замок", 'msg' => "Неизвестный замок"], 200);
 
             return response()->json(JobsService::getCodeEvents($validated['lock_id'],   $validated['code']), 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -358,6 +366,7 @@ class SimpleApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -366,7 +375,7 @@ class SimpleApiController extends Controller
 
             return response()->json(JobsService::addCodesCount($validated['codes_count'],  $validated['expired_at']), 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -400,6 +409,7 @@ class SimpleApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -408,7 +418,7 @@ class SimpleApiController extends Controller
 
             return response()->json(JobsService::setCodesCount($validated['codes_count']), 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -429,7 +439,7 @@ class SimpleApiController extends Controller
 
             return response()->json(JobsService::getCodesCount(), 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 }
