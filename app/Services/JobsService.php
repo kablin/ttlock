@@ -259,7 +259,7 @@ class JobsService
         $operationId = $batch->id;;
 
         // Если это коллизия — она уже обработана в then(), игнорируем
-        if ($e instanceof \RuntimeException && str_contains($e->getMessage(), 'already exists')) {
+        if ($e instanceof \RuntimeException && str_contains($e->getMessage(), 'уже есть в замке')) {
             return;
         }
 

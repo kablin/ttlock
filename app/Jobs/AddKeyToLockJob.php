@@ -105,7 +105,7 @@ class AddKeyToLockJob implements ShouldQueue
             if (!$this->current_job->user->code_packet()->exists()) {
                 $this->data['status'] = false;
                 $this->data['codes_error'] = true;
-                $this->data['msg'] = "Нет оплаченного пакета кодов";
+                $this->data['msg'] = "Нет оплаченного пакета ключей";
                 $this->callback();
                 $this->sendToRC();
                 return;
@@ -115,7 +115,7 @@ class AddKeyToLockJob implements ShouldQueue
 
                 $this->data['status'] = false;
                 $this->data['codes_error'] = true;
-                $this->data['msg'] = "Окончилась дата действия пакета кодов";
+                $this->data['msg'] = "Окончилась дата действия пакета ключей";
                 $this->callback();
                 $this->sendToRC();
                 return;
@@ -123,7 +123,7 @@ class AddKeyToLockJob implements ShouldQueue
             if ($this->current_job->user->code_packet->count < 1 &&  $this->current_job->user->code_packet->count != -100) {
                 $this->data['status'] = false;
                 $this->data['codes_error'] = true;
-                $this->data['msg'] = "Закончился пакет кодов";
+                $this->data['msg'] = "Закончился пакет ключей";
                 $this->callback();
                 $this->sendToRC();
                 return;
@@ -141,7 +141,7 @@ class AddKeyToLockJob implements ShouldQueue
             // === ПРОВЕРКА: не изменился ли код в процессе? ===
             $this->batchId ?    $finalCode = Cache::get("final_code:{$this->batchId}", $this->code) : $finalCode = $this->code;
 
-
+            $this->data['code'] = $finalCode;
             $key = $service->newKey($finalCode, $lock, $this->code_name, $_begin, $_end);
 
 
@@ -149,7 +149,7 @@ class AddKeyToLockJob implements ShouldQueue
 
             if ($key['status']) {
                 LockPinCode::create([
-                    'pin_code' => $this->code,
+                    'pin_code' =>  $finalCode,
                     'pin_code_id' => $key['data']['keyboardPwdId'],
                     'lock_id' => $lock->id,
                     'start' =>  $_begin,
@@ -169,7 +169,7 @@ class AddKeyToLockJob implements ShouldQueue
             $this->data['data'] =  $key;
             if ($key['status']) {
                 $this->data['status'] = true;
-                $this->data['msg'] = "Ключ в замок " . $lock->lock_alias . " успешно загружен :" . $this->code . "#";
+                $this->data['msg'] = "Ключ в замок " . $lock->lock_alias . " успешно загружен :" . $finalCode . "#";
             } else if ($key['error_code'] != -3007) {
                 $this->data['status'] = false;
                 $this->data['msg'] = "Ошибка загрузки ключа в замок {$lock->lock_alias}. " . $key['msg'] . '. Следующая попытка загрузки ключа через 3 минуты';
@@ -200,14 +200,14 @@ class AddKeyToLockJob implements ShouldQueue
 
 
                 $this->fail(new \RuntimeException(
-                    "Ключ {$this->code} уже есть в замке {$this->lock_id}"
+                    "Ключ {$finalCode} уже есть в замке {$this->lock_id}"
                 ));
             }
 
             info('Load key result', $key);
 
 
-            if ($this->data['status']) $this->data['msg'] = "Код " . $this->code . ' загружен в замок ' . $lock->lock_alias;
+            if ($this->data['status']) $this->data['msg'] = "Код " . $finalCode . ' загружен в замок ' . $lock->lock_alias;
 
             $this->callback();
         }

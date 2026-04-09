@@ -74,7 +74,7 @@ class ChangeCodeJob implements ShouldQueue
             if (!$job->user->code_packet()->exists()) {
                 $data['status'] = false;
                 $data['codes_error'] = true;
-                $data['msg'] = "Нет оплаченного пакета кодов";
+                $data['msg'] = "Нет оплаченного пакета ключей";
 
                 Http::withBody(json_encode($data), 'application/json')
                     ->post($job->user->callback);
@@ -85,7 +85,7 @@ class ChangeCodeJob implements ShouldQueue
 
                 $data['status'] = false;
                 $data['codes_error'] = true;
-                $data['msg'] = "Окончилась дата действия пакета кодов";
+                $data['msg'] = "Окончилась дата действия пакета ключей";
 
                 Http::withBody(json_encode($data), 'application/json')
                     ->post($job->user->callback);
@@ -94,7 +94,7 @@ class ChangeCodeJob implements ShouldQueue
             if ($job->user->code_packet->count < 1 &&  $job->user->code_packet->count != -100) {
                 $data['status'] = false;
                 $data['codes_error'] = true;
-                $data['msg'] = "Закончился пакет кодов";
+                $data['msg'] = "Закончился пакет ключей";
 
                 Http::withBody(json_encode($data), 'application/json')
                     ->post($job->user->callback);
