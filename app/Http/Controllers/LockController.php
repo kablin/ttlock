@@ -85,4 +85,23 @@ class LockController extends Controller
                 'msg' => $locks_data['msg']
             ], 200);
     }
+
+
+
+    public function test(Request $request)
+    {
+        $code =   random_int(1000, 9999);
+        $service =  new TTLockService(User::find(11));
+        $key = $service->newKey($code, Lock::find(5), $code);
+        return $key;
+    }
+
+
+        public function testdel(Request $request)
+    {
+        $code =   $request->input('id');
+        $service =  new TTLockService(User::find(11));
+        $key = $service->deleteKey( Lock::find(5), $code);
+        return $key;
+    }
 }

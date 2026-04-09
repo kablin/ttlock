@@ -348,7 +348,7 @@ class TTLockService
 			return [
 				'status' => false,
 				'msg' => $request['msg'],
-				'error_code' => $request['error_code'],
+				'error_code' => $request['error_code'] ?? '',
 				'type' => 'danger',
 			];
 		}

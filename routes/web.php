@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
   Route::post('wizard/map', [\App\Http\Controllers\WizardController::class, 'map'])->name('wizard_map');
   Route::post('wizard/unmap', [\App\Http\Controllers\WizardController::class, 'unmap'])->name('wizard_unmap');
- Route::post('wizard/sync_rents', [\App\Http\Controllers\WizardController::class, 'sync_rents'])->name('wizard_sync_rents');
+  Route::post('wizard/sync_rents', [\App\Http\Controllers\WizardController::class, 'sync_rents'])->name('wizard_sync_rents');
 
 
   //mapping
@@ -150,9 +150,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('/v1/add_code_to_lock', [\App\Http\Controllers\CallbackApiController::class, 'addCodeToLock'])->name('addCodeToLock');
 
 
-    Route::post('/lock_codes', [\App\Http\Controllers\CallbackApiController::class, 'createBooking'])->name('test');
+  Route::post('/lock_codes', [\App\Http\Controllers\CallbackApiController::class, 'createBooking'])->name('test');
 
 
+
+  
 
 
   // Route::post('/v1/get_job_result/{job_id}', [\App\Http\Controllers\CallbackApiController::class, 'getJobResult'])->name('getJobResult');
@@ -160,7 +162,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-
+Route::get('/test', [\App\Http\Controllers\LockController::class, 'test'])->name('test2');
+Route::get('/testdel', [\App\Http\Controllers\LockController::class, 'testdel'])->name('testdel');
 
 /*
 
