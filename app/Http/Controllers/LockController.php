@@ -92,16 +92,27 @@ class LockController extends Controller
     {
         $code =   random_int(1000, 9999);
         $service =  new TTLockService(User::find(11));
-        $key = $service->newKey($code, Lock::find(5), $code);
+        $key = $service->newKey($code, Lock::find(1), $code);
+        $key['code'] =   $code;
         return $key;
     }
 
 
-        public function testdel(Request $request)
+    public function testdel(Request $request)
     {
         $code =   $request->input('id');
         $service =  new TTLockService(User::find(11));
-        $key = $service->deleteKey( Lock::find(5), $code);
+        $key = $service->deleteKey(Lock::find(1), $code);
+        return $key;
+    }
+
+
+     public function testlist(Request $request)
+    {
+        $p =   $request->input('p');
+        if (!$p) $p=1;
+        $service =  new TTLockService(User::find(11));
+        $key = $service->getKeyList(Lock::find(1),$p , 100);
         return $key;
     }
 }
