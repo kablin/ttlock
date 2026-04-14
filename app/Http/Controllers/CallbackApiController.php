@@ -198,7 +198,7 @@ class CallbackApiController extends Controller
                 $validated['code'] = $pin?->pin_code ?? random_int(1000, 9999);
             }
 
-            if ($validated['status'] = 'canceled')
+            if ($validated['status'] == 'canceled')
                 return (new JobsService(auth()->user()->id))->cancelBooking($validated);
 
             else return (new JobsService(auth()->user()->id))->changeBooking($validated);
