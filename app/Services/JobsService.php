@@ -78,7 +78,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ]);
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
 
@@ -89,7 +89,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
 
@@ -113,7 +113,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
 
@@ -146,16 +146,16 @@ class JobsService
 
 
         // Запускаем первый батч (попытка #0)
-        $this->dispatchBatch($params, $params['code'], $global_uuid, $locks, 0);
+        $this->dispatchBatch($params, $params['code'], $global_uuid, $locks,  auth()->user()->realty_key, 0);
 
 
-        return response()->json(['job_id' => $global_uuid->job_id, 'status'=>true, 'locks_count' => count($locks)], 200);
+        return response()->json(['job_id' => $global_uuid->job_id, 'status' => true, 'locks_count' => count($locks)], 200);
     }
 
 
 
 
-    private function dispatchBatch(array $options, $code, $global_uuid, $locks, int $attempt = 0): void
+    private function dispatchBatch(array $options, $code, $global_uuid, $locks, $token, int $attempt = 0): void
     {
         $jobs = [];
         $uuids = [];
@@ -181,6 +181,7 @@ class JobsService
         $batch = Bus::batch($jobs)
             ->withOption('uuids', $uuids)
             ->withOption('params', $options)
+            ->withOption('token', $token)
             ->withOption('locks', $locks)
             ->withOption('code', $code)
             ->withOption('global_uuid', $global_uuid)
@@ -224,7 +225,7 @@ class JobsService
 
             // Получаем новый код и запускаем СЛЕДУЮЩИЙ батч
             $newCode = Cache::get("final_code:{$operationId}");
-    
+
 
             info("Restarting batch with new code", [
                 'operation_id' => $operationId,
@@ -234,7 +235,7 @@ class JobsService
 
             $options['params']['code'] = $newCode;
             // Рекурсивный запуск следующего батча
-            $this->dispatchBatch($options['params'], $newCode, $options['global_uuid'],  $options['locks'], $attempt + 1);
+            $this->dispatchBatch($options['params'], $newCode, $options['global_uuid'],  $options['locks'],$options['token'], $attempt + 1);
 
             $this->cleanupCache($operationId);
             return;
@@ -289,7 +290,7 @@ class JobsService
 
         $this->dispatchStatusJobs($options['uuids'] ?? [], true);
         info('Batch success', $data);
-        $this->sendToApi($data);
+        $this->sendToApi($data,$options['token']);
     }
 
     private function sendFinalError(array $options, string $error): void
@@ -305,7 +306,7 @@ class JobsService
         ];
 
         $this->dispatchStatusJobs($options['uuids'], false);
-        $this->sendToApi($data);
+        $this->sendToApi($data,$options['token']);
     }
 
 
@@ -318,11 +319,11 @@ class JobsService
     }
 
 
-    private function sendToApi(array $data): void
+    private function sendToApi(array $data, $token): void
     {
         info('sendToApi send', $data);
         // Http::withToken(config('services.rentysoft.token'))
-        Http::withToken(auth()->user()->realty_key)
+        Http::withToken($token)
             ->withBody(json_encode($data), 'application/json')
             ->post('https://test.realtycalendar.ru/v2/integrations/renty_soft/receive_lock_code');
     }
@@ -346,7 +347,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());*/
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
 
@@ -364,7 +365,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
 
@@ -379,7 +380,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
 
@@ -392,7 +393,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
 
@@ -404,7 +405,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
     public function deleteKey($lock_id, $pwdID, $tag)
@@ -415,7 +416,7 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
     public function createCredential($user, $password, $tag)
@@ -426,7 +427,7 @@ class JobsService
             new SetStatusJob($uuid->id, true)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 
 
@@ -541,6 +542,6 @@ class JobsService
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
-        return response()->json(['job_id' => $uuid->job_id, 'status'=>true,], 200);
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
     }
 }
