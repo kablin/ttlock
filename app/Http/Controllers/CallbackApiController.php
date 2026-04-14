@@ -194,7 +194,7 @@ class CallbackApiController extends Controller
 
             $validated = $validator->safe()->only(['status', 'tag', 'utc', 'code_name', 'code', 'realty_id', 'rent_id', 'begin_date', 'end_date', 'arrival_time', 'departure_time']);
             if (!isset($validated['code'])) {
-                $pin = LockPinCode::where('rent_id', $validated['rent_id'])->fisrt();
+                $pin = LockPinCode::where('rent_id', $validated['rent_id'])->first();
                 $validated['code'] = $pin?->pin_code ?? random_int(1000, 9999);
             }
 
