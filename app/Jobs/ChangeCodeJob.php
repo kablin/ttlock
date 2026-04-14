@@ -17,6 +17,7 @@ use App\Models\Lock;
 use App\Models\LockPinCode;
 use App\Services\TTLockService;
 use Throwable;
+use DateTime;
 use Illuminate\Bus\Batchable;
 use denis660\Centrifugo\Centrifugo;
 
@@ -43,7 +44,7 @@ class ChangeCodeJob implements ShouldQueue
 
 
 
- private function callback(): void
+    private function callback(): void
     {
         if ($this->current_job->user->callback) {
             Http::withBody(json_encode($this->data), 'application/json')
@@ -150,23 +151,32 @@ class ChangeCodeJob implements ShouldQueue
 
             $servise =  new TTLockService($this->current_job->user);
 
-            $key = $servise->updateKey($this->code_id, $lock, $this->begin, $this->end);
+            $_begin = $this->begin;
+            $_end = $this->end;
+            if ($this->utc) {
+                $_begin = (new DateTime($this->begin))->modify($this->utc . ' hours')->format('Y-m-d H:i');
+                $_end = (new DateTime($this->end))->modify($this->utc . ' hours')->format('Y-m-d H:i');
+            }
+
+
+            $key = $servise->updateKey($this->code_id, $lock,  $_begin, $_end);
 
             if ($key['status']) {
-                $pincode->start = $this->begin;
-                $pincode->end = $this->end;
+                $pincode->start = $_begin;
+                $pincode->end = $_end;
+                $pincode->start_local = $this->begin;
+                $pincode->end_local = $this->end;
                 $pincode->save();
             }
             $this->data['data'] =  $key;
             if ($key['status']) {
                 $this->data['status'] = true;
                 $this->data['msg'] = "Ключ успешно обновлен";
-            } 
-           /* else if ($this->counter >= 1500) {
+            }
+            /* else if ($this->counter >= 1500) {
                 $this->data['status'] = false;
                 $this->data['msg'] = "Ошибка обновления ключа. " . $key['msg'] . ' Количество попыток исчерпано. Проверьте подключение замка к сети';
-            } */
-            else {
+            } */ else {
                 $this->data['status'] = false;
                 $this->data['msg'] = "Ошибка обновления ключа. " . $key['msg'] . ' Следующая попытка обновления ключа через 3 минуты';
 
@@ -176,10 +186,10 @@ class ChangeCodeJob implements ShouldQueue
 
                     $this->sendToRC();
                 }
-                throw new \Exception( $this->data['msg']);
+                throw new \Exception($this->data['msg']);
 
 
-               /* ChangeCodeJob::dispatch(++$this->counter, $this->job_id, $this->lock_id, $this->code_id, $this->begin, $this->end)->onQueue('default')
+                /* ChangeCodeJob::dispatch(++$this->counter, $this->job_id, $this->lock_id, $this->code_id, $this->begin, $this->end)->onQueue('default')
                     ->chain([
                         new SetStatusJob($this->job_id,  $this->lock_id ? true : false)
                     ])
@@ -188,12 +198,12 @@ class ChangeCodeJob implements ShouldQueue
 
             info('Update key result', $key);
 
-                $this->callback();
+            $this->callback();
         }
     }
 
 
-     public function failed(Throwable $e)
+    public function failed(Throwable $e)
     {
         if ($this->current_job) {
 
