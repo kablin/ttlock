@@ -314,7 +314,7 @@ class JobsService
     private function dispatchStatusJobs(array $uuids, bool $status): void
     {
         foreach ($uuids as $uuid) {
-            SetStatusJob::dispatch($uuid, false)->onQueue('default');
+            SetStatusJob::dispatch($uuid, $status)->onQueue('default');
         }
     }
 
