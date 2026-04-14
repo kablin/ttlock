@@ -26,6 +26,7 @@ class DashboarController extends Controller
             'api:get_codes_list-' . (string)Auth::id(),
             'api:delete_code_from_lock-' . (string)Auth::id(),
             'api:add_code_to_lock-' . (string)Auth::id(),
+            'api:change_code-' . (string)Auth::id(),
 
         ]);
 

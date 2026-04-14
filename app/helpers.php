@@ -77,10 +77,10 @@ if (!function_exists('get_msg_by_type')) {
 				return 'Замок успешно открыт';
 				break;
 			case 7:
-				return 'Неизветный код';
+				return 'Неизветный ключ';
 				break;
 			case 11:
-				return 'Код истек';
+				return 'Ключ истек';
 				break;
 			default:
 			    return 'Ошибка';

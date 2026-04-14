@@ -117,6 +117,29 @@ class JobsService
     }
 
 
+
+    public function cancelBooking($params)
+    {
+
+        $global_uuid  = $this->startLockJob('createBooking', $params['tag'] ?? null);
+
+        $pins = LockPinCode::where('rent_id', $params['rent_id'])->get();
+
+        if (!$pins) {
+            $data['status'] = false;
+            $data['error'] = "Ключи не найдены";
+            return response()->json($data, 200);
+        }
+
+
+        // Запускаем первый батч (попытка #0)
+        $this->dispatchDelBatch($params, $pins, $global_uuid,  auth()->user()->realty_key, 0);
+
+
+        return response()->json(['job_id' => $global_uuid->job_id, 'status' => true, 'pin_count' => count($pins)], 200);
+    }
+
+
     //******************************************************************************************************** */
     public function createBooking($params)
     {
@@ -154,6 +177,31 @@ class JobsService
 
 
 
+    public function changeBooking($params)
+    {
+
+        $global_uuid  = $this->startLockJob('changeBooking', $params['tag'] ?? null);
+
+        $pins = LockPinCode::where('rent_id', $params['rent_id'])->get();
+
+        if (!$pins) {
+            $data['status'] = false;
+            $data['error'] = "Ключи не найдены";
+            return response()->json($data, 200);
+        }
+
+
+
+        // Запускаем первый батч (попытка #0)
+        $this->dispatchChangeBatch($params, $params['code'], $global_uuid, $pins,  auth()->user()->realty_key, 0);
+
+
+        return response()->json(['job_id' => $global_uuid->job_id, 'status' => true, 'locks_count' => count($pins)], 200);
+    }
+
+
+
+
 
     private function dispatchBatch(array $options, $code, $global_uuid, $locks, $token, int $attempt = 0): void
     {
@@ -188,6 +236,80 @@ class JobsService
             ->withOption('attempt', $attempt)   // <--- Номер попытки
             ->then(fn(Batch $b) => $this->handleBatchThen($b))
             ->catch(fn(Batch $b, Throwable $e) => $this->handleBatchCatch($b, $e))
+            ->onQueue('default')
+            ->dispatch();
+    }
+
+
+
+
+    private function dispatchDelBatch(array $options, $pins, $global_uuid,  $token, int $attempt = 0): void
+    {
+        $jobs = [];
+        $uuids = [];
+
+        foreach ($pins as $pin) {
+            $uuid  = $this->startLockJob('delKeyFromLock', $params['tag'] ?? null, $global_uuid->id);
+            $uuids[] = $uuid->id;
+
+
+            $jobs[] = (new DeleteKeyJob(
+                $uuid->id,
+                $pin->lock->id,
+                $pin->pin_code_id,
+                $options['rent_id'],
+            ))->delay($this->getDelay());
+        }
+
+
+        $batch = Bus::batch($jobs)
+            ->withOption('uuids', $uuids)
+            ->withOption('params', $options)
+            ->withOption('token', $token)
+            ->withOption('pins', $pins)
+            ->withOption('global_uuid', $global_uuid)
+            ->withOption('attempt', $attempt)   // <--- Номер попытки
+            ->then(fn(Batch $b) => $this->handleBatchThenDel($b))
+            ->catch(fn(Batch $b, Throwable $e) => $this->handleBatchCatchDel($b, $e))
+            ->onQueue('default')
+            ->dispatch();
+    }
+
+
+    private function dispatchChangeBatch(array $options, $code, $global_uuid, $pins, $token, int $attempt = 0): void
+    {
+        $jobs = [];
+        $uuids = [];
+
+        foreach ($pins as $pin) {
+            $uuid  = $this->startLockJob('addKeyToLock', $params['tag'] ?? null, $global_uuid->id);
+            $uuids[] = $uuid->id;
+
+
+            $jobs[] = (new ChangeCodeJob(
+                $uuid->id,
+                $pin->lock->id,
+                $pin->pin_code_id,
+
+                $options['begin_date'] . ' ' . $options['arrival_time'],
+                $options['end_date'] . ' ' . $options['departure_time'],
+                $options['utc'] ?? null,
+                $options['rent_id']
+
+            ))->delay($this->getDelay());
+        }
+
+
+        $batch = Bus::batch($jobs)
+            ->withOption('uuids', $uuids)
+            ->withOption('params', $options)
+            ->withOption('token', $token)
+            ->withOption('pins', $pins)
+            ->withOption('code', $code)
+            ->withOption('global_uuid', $global_uuid)
+            ->withOption('attempt', $attempt)   // <--- Номер попытки
+            ->then(fn(Batch $b) => $this->handleBatchThenChange($b))
+            ->catch(fn(Batch $b, Throwable $e) => $this->handleBatchCatchChange($b, $e))
             ->onQueue('default')
             ->dispatch();
     }
@@ -235,7 +357,7 @@ class JobsService
 
             $options['params']['code'] = $newCode;
             // Рекурсивный запуск следующего батча
-            $this->dispatchBatch($options['params'], $newCode, $options['global_uuid'],  $options['locks'],$options['token'], $attempt + 1);
+            $this->dispatchBatch($options['params'], $newCode, $options['global_uuid'],  $options['locks'], $options['token'], $attempt + 1);
 
             $this->cleanupCache($operationId);
             return;
@@ -248,7 +370,24 @@ class JobsService
         }
 
 
-        $this->sendSuccessResponse($options);
+        $this->sendSuccessResponse($options, 'Ключ успешно записан');
+        $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
+    }
+
+
+    private function handleBatchThenDel(Batch $batch): void
+    {
+        $options = $batch->options;
+        $operationId = $batch->id;
+        $this->sendSuccessResponse($options, 'Ключ успешно удален');
+        $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
+    }
+
+        private function handleBatchThenChange(Batch $batch): void
+    {
+        $options = $batch->options;
+        $operationId = $batch->id;
+        $this->sendSuccessResponse($options, 'Ключ успешно обновлен');
         $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
     }
 
@@ -276,13 +415,46 @@ class JobsService
     }
 
 
+    private function handleBatchCatchDel(Batch $batch, Throwable $e): void
+    {
+        $options = $batch->options;
+        $operationId = $batch->id;;
 
-    private function sendSuccessResponse(array $options): void
+        // Настоящая ошибка (сеть, таймаут, исчерпаны $tries)
+        info("Batch failed", [
+            'operation_id' => $operationId,
+            'error' => $e->getMessage(),
+            'batch_id' => $batch->id,
+        ]);
+
+        $this->sendFinalError($options, "Не удалось удалить ключ: {$e->getMessage()}");
+        $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
+    }
+
+
+        private function handleBatchCatchChange(Batch $batch, Throwable $e): void
+    {
+        $options = $batch->options;
+        $operationId = $batch->id;;
+
+        // Настоящая ошибка (сеть, таймаут, исчерпаны $tries)
+        info("Batch failed", [
+            'operation_id' => $operationId,
+            'error' => $e->getMessage(),
+            'batch_id' => $batch->id,
+        ]);
+
+        $this->sendFinalError($options, "Не удалось обновить ключ: {$e->getMessage()}");
+        $this->cleanupCache($operationId, $options['global_uuid']['job_id']);
+    }
+
+
+    private function sendSuccessResponse(array $options, string $msg): void
     {
         $data = [
             'job' => $options['global_uuid']['job_id'],
             'status' => true,
-            'message' => 'Ключ успешно записан',
+            'message' => $msg,
             'code' => $options['code'],
             'rent_id' => $options['params']['rent_id'],
             'method' => 'createBooking',
@@ -290,7 +462,7 @@ class JobsService
 
         $this->dispatchStatusJobs($options['uuids'] ?? [], true);
         info('Batch success', $data);
-        $this->sendToApi($data,$options['token']);
+        $this->sendToApi($data, $options['token']);
     }
 
     private function sendFinalError(array $options, string $error): void
@@ -306,7 +478,7 @@ class JobsService
         ];
 
         $this->dispatchStatusJobs($options['uuids'], false);
-        $this->sendToApi($data,$options['token']);
+        $this->sendToApi($data, $options['token']);
     }
 
 
@@ -338,17 +510,6 @@ class JobsService
         Cache::forget("regenerate_lock:{$operationId}");
     }
 
-    public function changeBooking(/*$lock_id, $code, $code_name, $begin, $end, $tag, $utc*/$tag)
-    {
-        $uuid = $this->startLockJob('addKeyToLock', $tag);
-        //$lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
-
-        /* AddKeyToLockJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code, $code_name, $begin, $end, $utc)->onQueue('default')->chain([
-            new SetStatusJob($uuid->id,  $lock ? true : false)
-        ])->delay($this->getDelay());*/
-
-        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
-    }
 
 
 
@@ -371,12 +532,12 @@ class JobsService
 
 
 
-    public function changeCode($lock_id, $code_id, $begin, $end, $tag)
+    public function changeCode($lock_id, $code_id, $begin, $end, $tag, $utc)
     {
-        $uuid = $this->startLockJob('addKeyToLock', $tag);
+        $uuid = $this->startLockJob('ChangeCode', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
 
-        ChangeCodeJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $code_id,  $begin, $end)->onQueue('default')->chain([
+        ChangeCodeJob::dispatch($uuid->id, $lock ? $lock?->id : 0, $code_id,  $begin, $end, $utc)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
@@ -412,7 +573,7 @@ class JobsService
     {
         $uuid = $this->startLockJob('deleteKey', $tag);
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
-        DeleteKeyJob::dispatch(1, $uuid->id, $lock ? $lock?->id : 0, $pwdID)->onQueue('default')->chain([
+        DeleteKeyJob::dispatch($uuid->id, $lock ? $lock?->id : 0, $pwdID)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
         ])->delay($this->getDelay());
 
@@ -508,7 +669,7 @@ class JobsService
         else $code_packet->count = $code_packet->count + $codes_count;
         $code_packet->end = $expired_at;
         $code_packet->save();
-        return ['status' => true, 'msg' => "Пакет кодов успешно добавлен", 'codes_count' => $code_packet->count, 'expired_at' => $code_packet->end];
+        return ['status' => true, 'msg' => "Пакет ключей успешно добавлен", 'codes_count' => $code_packet->count, 'expired_at' => $code_packet->end];
     }
 
 
@@ -521,7 +682,7 @@ class JobsService
         if ($codes_count == -1) $code_packet->count = -100;
         else $code_packet->count = $codes_count;
         $code_packet->save();
-        return ['status' => true,  'msg' => "Пакет кодов успешно установлен", 'codes_count' => $code_packet->count, 'expired_at' => $code_packet->end];
+        return ['status' => true,  'msg' => "Пакет ключей успешно установлен", 'codes_count' => $code_packet->count, 'expired_at' => $code_packet->end];
     }
 
 

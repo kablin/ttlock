@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\CodePacket;
 use App\Models\LockApiLog;
+use App\Models\LockPinCode;
 use App\Models\LocksCredential;
 use App\Services\JobsService;
 use Illuminate\Support\Facades\Hash;
@@ -91,7 +92,7 @@ class CallbackApiController extends Controller
                 return response()->json([
                     'status' => false,
                     'msg' => Arr::toCssClasses($validator->errors()->all()),
-                     'error' => Arr::toCssClasses($validator->errors()->all())
+                    'error' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
 
@@ -102,6 +103,7 @@ class CallbackApiController extends Controller
             return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
+
 
 
 
@@ -133,15 +135,7 @@ class CallbackApiController extends Controller
                 'realty_id' => 'required|integer',
                 'rent_id' => 'required|integer',
 
-            ]/*, [
-                'utc.integer' => 'utc не число.',
-
-                'rent_id.required' => 'Не указан rent_id.',
-                'rent_id.integer' => 'rent_id не число.',
-
-                'realty_id.required' => 'Не указан realty_id.',
-                'realty_id.integer' => 'realty_id не число.',
-            ]*/);
+            ]);
 
             if ($validator->fails()) {
                 return response()->json([
@@ -162,7 +156,7 @@ class CallbackApiController extends Controller
 
 
 
-    public function changeBooking(Request $request)
+    public function changeBooking(Request $request, $rent_id)
     {
         try {
             //2025-08-28 15:43
@@ -177,35 +171,39 @@ class CallbackApiController extends Controller
 
 
             $validator = Validator::make($request->all(), [
-                //    'begin' => 'date_format:Y-m-d H:i',
-                //  'end' => 'date_format:Y-m-d H:i',
-                //  'code' => 'nullable|integer',
-                //  'code_name' => 'nullable|string',
+                'begin_date'       => 'required|date|date_format:Y-m-d',
+                'end_date'         => 'required|date|date_format:Y-m-d|after_or_equal:begin_date',
+                'arrival_time'     => 'required|date_format:H:i',
+                'departure_time'   => 'required|date_format:H:i',
+                'code' => 'nullable|integer',
+                'code_name' => 'nullable|string',
                 'tag' => 'nullable',
-                // 'utc' => 'nullable|integer',
-                //'lock_id' => 'required|integer',
+                'utc' => 'nullable|integer',
+                'realty_id' => 'required|integer',
+                'rent_id' => 'required|integer',
+                'status' => 'required|string',
 
-            ], [
-                //  'begin.date_format' => 'Не верный формат даты -  "2025-07-23 18:07".',
-                //  'end.date_format' => 'Не верный формат даты -  "2025-07-23 18:07". ',
-                // 'lock_id.integer' => 'lock_id не число.',
-                // 'code.integer' => 'code не число.',
-                // 'lock_id.required' => 'Не указан lock_id.',
-                // 'code.required' => 'Не указан code.',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
-                    'error' => Arr::toCssClasses($validator->errors()->all()),
-                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                    'error' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
 
-            $validated = $validator->safe()->only(['tag',]);
-            if (!$validated['code']) $validated['code'] =  random_int(1000, 9999);
+            $validated = $validator->safe()->only(['status', 'tag', 'utc', 'code_name', 'code', 'realty_id', 'rent_id', 'begin_date', 'end_date', 'arrival_time', 'departure_time']);
+            if (!isset($validated['code'])) {
+                $pin = LockPinCode::where('rent_id', $validated['rent_id'])->fisrt();
+                $validated['code'] = $pin?->pin_code ?? random_int(1000, 9999);
+            }
 
-            return (new JobsService(auth()->user()->id))->changeBooking(/*$validated['lock_id'], $validated['code'], $validated['code_name'] ??  'Ключ от Renty api', $validated['begin'] ?? null, $validated['end'] ?? null, ,$validated['utc'] ?? 0*/$validated['tag'] ?? '');
+            if ($validated['status'] = 'canceled')
+                return (new JobsService(auth()->user()->id))->cancelBooking($validated);
+
+            else return (new JobsService(auth()->user()->id))->changeBooking($validated);
+
+
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
@@ -283,6 +281,7 @@ class CallbackApiController extends Controller
                 'end' => 'date_format:Y-m-d H:i',
                 'code_id' => 'required|integer',
                 'lock_id' => 'required|integer',
+                'utc' => 'nullable|integer',
                 'tag' => 'nullable',
 
             ], [
@@ -302,9 +301,9 @@ class CallbackApiController extends Controller
                 ], 200);
             }
 
-            $validated = $validator->safe()->only(['code_id', 'lock_id', 'begin', 'end',  'tag']);
+            $validated = $validator->safe()->only(['code_id', 'lock_id', 'begin', 'end',  'tag', 'utc']);
 
-            return (new JobsService(auth()->user()->id))->changeCode($validated['lock_id'], $validated['code_id'],  $validated['begin'] ?? null, $validated['end'] ?? null, $validated['tag'] ?? '');
+            return (new JobsService(auth()->user()->id))->changeCode($validated['lock_id'], $validated['code_id'],  $validated['begin'] ?? null, $validated['end'] ?? null, $validated['tag'] ?? '', $validated['utc'] ?? 0);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
@@ -336,7 +335,7 @@ class CallbackApiController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
-                     'error' => Arr::toCssClasses($validator->errors()->all()),
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
                     'msg' => Arr::toCssClasses($validator->errors()->all())
                 ], 200);
             }
@@ -384,7 +383,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->setPassageModeOff($validated['lock_id'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка','msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 
@@ -422,7 +421,7 @@ class CallbackApiController extends Controller
 
             return (new JobsService(auth()->user()->id))->openLock($validated['lock_id'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
-            return response()->json(['status' => false,  'error' => 'Неизвестная ошибка','msg' => 'Неизвестная ошибка'], 200);
+            return response()->json(['status' => false,  'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
 

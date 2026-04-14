@@ -194,6 +194,7 @@ onMounted(async () => {
     const sub_delkey = centrifuge.newSubscription('api:delete_code_from_lock-' + page.props.auth.user.id)
 
     const sub_addkey = centrifuge.newSubscription('api:add_code_to_lock-' + page.props.auth.user.id)
+    const sub_changekey = centrifuge.newSubscription('api:change_code-' + page.props.auth.user.id)
 
 
     //получение сообщений по веб.сокет
@@ -240,6 +241,17 @@ onMounted(async () => {
     })
 
 
+    sub_changekey.on('publication', (ctx) => {
+
+        refreshKeysList(selectedLock.value)
+        waitApiAddKey.value = false
+        isOpenLockDialogOpen.value = true
+        lockTitle.value = "Ключ изменен"
+        lockMessage.value = ctx?.data?.msg
+
+    })
+
+
     centrifuge.on('error', function (ctx) {
         console.log('ERROR: ', ctx);
         waitApiOpenLock.value = false
@@ -255,6 +267,7 @@ onMounted(async () => {
     sub.subscribe()
     sub_codes.subscribe()
     sub_addkey.subscribe()
+    sub_changekey.subscribe()
     sub_delkey.subscribe()
 })
 
@@ -320,35 +333,35 @@ const addKey = () => {
 const openLockfn = async (lock) => {
 
 
-   /* const response = await axios.post(test().url, {
-        'realty_id': '67',
-        'rent_id': '100',
-        'begin_date': '2026-03-28',
-        'end_date': '2026-03-28',
-        'arrival_time': '13:00',
-        'departure_time': "18:15"
-    }, {
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })*/
+    /* const response = await axios.post(test().url, {
+         'realty_id': '67',
+         'rent_id': '100',
+         'begin_date': '2026-03-28',
+         'end_date': '2026-03-28',
+         'arrival_time': '13:00',
+         'departure_time': "18:15"
+     }, {
+         headers: {
+             'Content-Type': 'application/json',
+         }
+     })*/
 
 
-    
-        waitApiOpenLock.value = true
-        try {
-            const response = await axios.post(openLock().url, {
-                'lock_id': lock.lock_id
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-        } catch (error) {
-            console.error('Error:', error)
-        } finally {
-            // loading.value = false
-        }
+
+    waitApiOpenLock.value = true
+    try {
+        const response = await axios.post(openLock().url, {
+            'lock_id': lock.lock_id
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+    } catch (error) {
+        console.error('Error:', error)
+    } finally {
+        // loading.value = false
+    }
 }
 
 
@@ -666,7 +679,7 @@ const goToLogPage = async (page) => {
                                         Ид
                                     </TableHead>
                                     <TableHead>Имя</TableHead>
-                                    <TableHead>Код</TableHead>
+                                    <TableHead>Ключ</TableHead>
                                     <TableHead>Действует с</TableHead>
                                     <TableHead>Действует до</TableHead>
                                     <TableHead>Загружен в замок</TableHead>
@@ -750,7 +763,7 @@ const goToLogPage = async (page) => {
                                     <TableHead>Тип</TableHead>
                                     <TableHead>Успех </TableHead>
                                     <TableHead>Пользователь</TableHead>
-                                    <TableHead>Код</TableHead>
+                                    <TableHead>Ключ</TableHead>
                                     <TableHead>
                                         Дата
                                     </TableHead>

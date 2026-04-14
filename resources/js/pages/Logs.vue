@@ -96,7 +96,7 @@ const goToLogPage = async (page) => {
                                 <TableHead>Тип</TableHead>
                                 <TableHead>Успех с</TableHead>
                                 <TableHead>Пользователь</TableHead>
-                                <TableHead>Код</TableHead>
+                                <TableHead>Ключ</TableHead>
                                 <TableHead>
                                     Дата
                                 </TableHead>
