@@ -464,4 +464,41 @@ class CallbackApiController extends Controller
             return response()->json(['status' => false,  'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
     }
+
+
+
+
+
+    public function chatPush(Request $request)
+    {
+        try {
+            LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'chatPush',
+                'user_id' => auth()->user()->id,
+                'ip' => json_encode($request->ip()),
+                'params' => json_encode($request->all()),
+            ]);
+
+
+            $validator = Validator::make($request->all(), [
+                'message' => 'required|string',
+                'tag' => 'nullable',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'error' => Arr::toCssClasses($validator->errors()->all()),
+                    'msg' => Arr::toCssClasses($validator->errors()->all())
+                ], 200);
+            }
+
+            $validated = $validator->safe()->only(['message', 'tag']);
+
+            return (new JobsService(auth()->user()->id))->chatPush($validated['message'],  $validated['tag'] ?? '');
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
+        }
+    }
 }

@@ -17,6 +17,7 @@ use App\Jobs\GetLockListJob;
 use App\Jobs\GetCodesListJob;
 use App\Jobs\CreateCredentialJob;
 use App\Jobs\SetStatusJob;
+use App\Jobs\ChatPushJob;
 use App\Jobs\ChangeCodeJob;
 use App\Jobs\SetPassageModeOffJob;
 use App\Jobs\SetPassageModeOnJob;
@@ -701,6 +702,18 @@ class JobsService
         $lock = auth()->user()->locks->where('lock_id', $lock_id)->first();
         OpenLockJob::dispatch($uuid->id, $lock ? $lock?->id : 0)->onQueue('default')->chain([
             new SetStatusJob($uuid->id,  $lock ? true : false)
+        ])->delay($this->getDelay());
+
+        return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);
+    }
+
+
+    public function chatPush($message, $tag)
+    {
+        $uuid = $this->startLockJob('chatPush', $tag);
+      
+        ChatPusJob::dispatch($uuid->id, $message)->onQueue('default')->chain([
+            new SetStatusJob($uuid->id, true )
         ])->delay($this->getDelay());
 
         return response()->json(['job_id' => $uuid->job_id, 'status' => true,], 200);

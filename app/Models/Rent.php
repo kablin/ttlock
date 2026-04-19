@@ -31,7 +31,8 @@ class Rent extends Model
 
     public function locks()
     {
-        return $this->belongsToMany(Lock::class);
+        //return $this->belongsToMany(Lock::class);
+        return $this->hasMany(Lock::class,'rent_id');
     }
 
     public function children()
