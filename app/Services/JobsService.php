@@ -456,7 +456,7 @@ class JobsService
             'job' => $options['global_uuid']['job_id'],
             'status' => true,
             'message' => $msg,
-            'code' => $options['code'],
+            'code' => $options['code'] ?? '',
             'rent_id' => $options['params']['rent_id'],
             'method' => 'createBooking',
         ];
@@ -473,7 +473,7 @@ class JobsService
             'job' => $options['global_uuid']['job_id'],
             'status' => false,
             'error' => $error,
-            'code' => $options['code'],
+            'code' => $options['code'] ?? '',
             'rent_id' => $options['params']['rent_id'],
             'method' => 'createBooking',
         ];
