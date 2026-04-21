@@ -482,7 +482,7 @@ class CallbackApiController extends Controller
 
 
             $validator = Validator::make($request->all(), [
-                'message' => 'required|string',
+                'message' => 'required|string|max:150',
                 'tag' => 'nullable',
             ]);
 
