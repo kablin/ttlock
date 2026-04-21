@@ -76,7 +76,7 @@ Route::middleware(['throttle:50,1'])->group(function () {
 
 
          Route::post('/lock_codes', [CallbackApiController::class, 'createBooking'])->middleware('auth:sanctum');
-         Route::post('/lock_codes/{rent_id}', [CallbackApiController::class, 'changeBooking'])->middleware('auth:sanctum');
+         Route::put('/lock_codes/{rent_id}', [CallbackApiController::class, 'changeBooking'])->middleware('auth:sanctum');
 
     });
 
