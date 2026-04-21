@@ -89,6 +89,10 @@ Route::middleware(['throttle:50,1'])->group(function () {
 
 
 
+    Route::post('/v1/send_message', [CallbackApiController::class, 'chatPush'])->middleware('auth:sanctum');
+
+
+
     Route::post('/callback', function (Request $request) {
         info('callback', $request->all());
     });
