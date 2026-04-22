@@ -122,13 +122,13 @@ class TTLockService
 
 	public function getLockList()
 	{
-		$data = $this->request('/v1/lock/list', [
+		$data = $this->request('/v3/lock/list', [
 			'pageNo' => 1,
 			'pageSize' => 10000,
 		]);
 
 		LockApiLog::create([
-			'api_method' => '/v1/lock/list',
+			'api_method' => '/v3/lock/list',
 			'params' => json_encode($data),
 			'user_id' => $this->user?->id,
 		]);
@@ -139,12 +139,12 @@ class TTLockService
 
 	public function getLockDetails(Lock $lock)
 	{
-		$data = $this->request('/v1/lock/detail', [
+		$data = $this->request('/v3/lock/detail', [
 			'lockId' => $lock->lock_id,
 		]);
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/lock/detail',
+			'api_method' => '/v3/lock/detail',
 			'params' => json_encode($data),
 			'user_id' => $this->user?->id,
 		]);
@@ -154,12 +154,12 @@ class TTLockService
 
 	public function getLockElectricQuantity(Lock $lock)
 	{
-		$data = $this->request('/v1/lock/queryElectricQuantity', [
+		$data = $this->request('/v3/lock/queryElectricQuantity', [
 			'lockId' => $lock->lock_id,
 		]);
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/lock/queryElectricQuantity',
+			'api_method' => '/v3/lock/queryElectricQuantity',
 			'params' => json_encode($data),
 			'user_id' => $this->user?->id,
 		]);
@@ -169,12 +169,12 @@ class TTLockService
 
 	public function getLockOpenState(Lock $lock)
 	{
-		$data = $this->request('/v1/lock/queryOpenState', [
+		$data = $this->request('/v3/lock/queryOpenState', [
 			'lockId' => $lock->lock_id,
 		]);
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/lock/queryOpenState',
+			'api_method' => '/v3/lock/queryOpenState',
 			'params' => json_encode($data),
 			'user_id' => $this->user?->id,
 		]);
@@ -184,14 +184,14 @@ class TTLockService
 
 	public function getKeyList(Lock $lock, $pageNo, $pagSize)
 	{
-		$data = $this->request('/v1/lock/listKeyboardPwd', [
+		$data = $this->request('/v3/lock/listKeyboardPwd', [
 			'lockId' => $lock->lock_id,
 			'pageNo' => $pageNo,
 			'pageSize' => $pagSize,
 		]);
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/lock/listKeyboardPwd',
+			'api_method' => '/v3/lock/listKeyboardPwd',
 			'params' => json_encode($data),
 			'user_id' => $this->user?->id,
 		]);
@@ -209,10 +209,10 @@ class TTLockService
 			'pageSize' => $count,
 		];
 
-		$request =   $this->request('/v1/lockRecord/list', $data);
+		$request =   $this->request('/v3/lockRecord/list', $data);
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/lockRecord/list',
+			'api_method' => '/v3/lockRecord/list',
 			'params' => json_encode($request),
 		]);
 
@@ -223,12 +223,12 @@ class TTLockService
 
 	public function openLock(Lock $lock)
 	{
-		$result =  $this->request('/v1/lock/unlock', [
+		$result =  $this->request('/v3/lock/unlock', [
 			'lockId' => $lock->lock_id,
 		]);
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/lock/unlock',
+			'api_method' => '/v3/lock/unlock',
 			'params' => json_encode($result)
 		]);
 
@@ -241,7 +241,7 @@ class TTLockService
 
 	public function changeOpenTime($time = 10)
 	{
-		return $this->request('/v1/lock/setAutoLockTime', [
+		return $this->request('/v3/lock/setAutoLockTime', [
 			'lockId' => $this->lock_id,
 			'seconds' => $time,
 			'type' => 2,
@@ -251,7 +251,7 @@ class TTLockService
 	//Системное время замка
 	public function changeTimeInLock()
 	{
-		return $this->request('/v1/lock/updateDate', [
+		return $this->request('/v3/lock/updateDate', [
 			'lockId' => $this->lock_id,
 		]);
 	}
@@ -262,7 +262,7 @@ class TTLockService
 	public function setPassageModeOn(Lock $lock)
 	{
 
-		$result = $this->request('/v1/lock/configPassageMode', [
+		$result = $this->request('/v3/lock/configPassageMode', [
 			'lockId' => $lock->lock_id,
 			'passageMode' => 1,
 			'isAllDay' => 1,
@@ -272,7 +272,7 @@ class TTLockService
 		]);
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/lock/configPassageMode',
+			'api_method' => '/v3/lock/configPassageMode',
 			'params' => json_encode($result),
 		]);
 
@@ -284,14 +284,14 @@ class TTLockService
 
 	public function setPassageModeOff(Lock $lock)
 	{
-		$result = $this->request('/v1/lock/configPassageMode', [
+		$result = $this->request('/v3/lock/configPassageMode', [
 			'lockId' => $lock->lock_id,
 			'passageMode' => 2,
 			'type' => 2,
 		]);
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/lock/configPassageMode',
+			'api_method' => '/v3/lock/configPassageMode',
 			'params' => json_encode($result),
 		]);
 		return  $result;
@@ -320,7 +320,7 @@ class TTLockService
 			$end = Carbon::parse($end)->unix();
 		}
 
-		$request = $this->request('/v1/keyboardPwd/add', [
+		$request = $this->request('/v3/keyboardPwd/add', [
 			'lockId' => $lock->lock_id,
 			'keyboardPwd' => $code,
 			'addType' => 2,
@@ -331,7 +331,7 @@ class TTLockService
 
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/keyboardPwd/add',
+			'api_method' => '/v3/keyboardPwd/add',
 			'params' => json_encode($request),
 			'user_id' => $this->user?->id,
 		]);
@@ -369,7 +369,7 @@ class TTLockService
 			$end = Carbon::parse($end)->unix();
 		}
 
-		$request = $this->request('/v1/key/changePeriod', [
+		$request = $this->request('/v3/key/changePeriod', [
 			'keyId' => $keyId,
 			'startDate' => $begin * 1000,
 			'endDate' => $end * 1000,
@@ -407,7 +407,7 @@ class TTLockService
 			$end = Carbon::parse($end)->unix();
 		}
 
-		$request = $this->request('/v1/keyboardPwd/change', [
+		$request = $this->request('/v3/keyboardPwd/change', [
 			'lockId' => $lock->lock_id,
 			'keyboardPwdId' => $pwdID,
 			'changeType' => 2,
@@ -417,7 +417,7 @@ class TTLockService
 
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/keyboardPwd/change',
+			'api_method' => '/v3/keyboardPwd/change',
 			'params' => json_encode($request),
 			'user_id' => $this->user?->id,
 		]);
@@ -441,7 +441,7 @@ class TTLockService
 	public function deleteKey(Lock $lock, $pwdID)
 	{
 
-		$request = $this->request('/v1/keyboardPwd/delete', [
+		$request = $this->request('/v3/keyboardPwd/delete', [
 			'lockId' => $lock->lock_id,
 			'deleteType' => 2,
 			'keyboardPwdId' => $pwdID,
@@ -449,7 +449,7 @@ class TTLockService
 
 
 		$lock->api_logs()->create([
-			'api_method' => '/v1/keyboardPwd/delete',
+			'api_method' => '/v3/keyboardPwd/delete',
 			'params' => json_encode($request),
 			'user_id' => $this->user?->id,
 		]);
@@ -473,7 +473,7 @@ class TTLockService
 	/*
 	public function gatewayStatus()
 	{
-		$request = $this->request('/v1/lock/queryOpenState', [
+		$request = $this->request('/v3/lock/queryOpenState', [
 			'lockId' => $this->lock_id,
 		]);
 
@@ -517,7 +517,7 @@ class TTLockService
 
 	public function getWifiLockDetails()
 	{
-		return $this->request('/v1/wifiLock/detail', [
+		return $this->request('/v3/wifiLock/detail', [
 			'lockId' => $this->lock_id,
 		]);
 	}
@@ -564,6 +564,7 @@ class TTLockService
 */
 			$status = false;
 			$data = json_decode($request->body(), true);
+			            info($this->api_url . $url);
 			if (isset($data['errcode']) && $data['errcode'] != 0) {
 				$text = "у замка";
 
@@ -754,7 +755,7 @@ class TTLockService
 
 	/*	public function deleteLock()
 	{
-		$request = $this->request('/v1/lock/delete', [
+		$request = $this->request('/v3/lock/delete', [
 			'lockId' => $this->lock_id,
 		]);
 
