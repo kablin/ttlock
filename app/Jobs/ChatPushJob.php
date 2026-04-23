@@ -37,7 +37,7 @@ class ChatPushJob implements ShouldQueue
 
         if ($job = LockJob::find($this->job_id)) {
 
-            $token = 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6NTExOTIsImRhdGV0aW1lIjoxNzc2NTc4NDc3fQ.DHJfkrmIX0Q-re_pZdwtsh-tkY-HED5JCnwa478Rhzg';
+            $token = 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6NDgwNzcsImRhdGV0aW1lIjoxNzY5Njc0NzM4fQ.jR0Po2vf7VEhIgmHeeydLhk7Ttw_HXCw_LpXA58NHQ4';
             //$job->user->callback
 
 
@@ -55,7 +55,23 @@ class ChatPushJob implements ShouldQueue
             */
 
 
-            Http::withToken($token)->withBody(json_encode($req), 'application/json')->post('https://api.chatpush.ru/api/v1/delivery');
+            $response = Http::withToken($token)->withBody(json_encode($req), 'application/json')->post('https://api.chatpush.ru/api/v1/delivery');
+            $xmlString = '';
+            if (!$response->successful()) {
+                $data['status'] = false;
+            } else {
+                $data['status'] = true;
+            }
+
+            $xmlString = $response->body();
+            $data['method'] = 'open_lock';
+            $data['data'] =   $xmlString;
+
+
+            if ($job->user->callback) {
+                Http::withBody(json_encode($data), 'application/json')
+                    ->post($job->user->callback);
+            }
         }
     }
 }
