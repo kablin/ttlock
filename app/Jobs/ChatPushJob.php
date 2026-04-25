@@ -27,7 +27,7 @@ class ChatPushJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $job_id, private string $message) {}
+    public function __construct( private int $job_id, private  $phone, private string $message) {}
 
     /**
      * Execute the job.
@@ -46,7 +46,7 @@ class ChatPushJob implements ShouldQueue
             $data['method'] = 'chat_push';
 
             $req['text'] = $this->message;
-            $req['phone'] = $job->user->phone;
+            $req['phone'] = $this->phone;
 
             /*
              $req['text'] = 'test from api';
@@ -62,9 +62,8 @@ class ChatPushJob implements ShouldQueue
             } else {
                 $data['status'] = true;
             }
-
-            $xmlString = $response->body();
-            $data['method'] = 'open_lock';
+info ($response->body());
+            $xmlString = json_decode($response->body());
             $data['data'] =   $xmlString;
 
 

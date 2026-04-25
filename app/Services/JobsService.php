@@ -27,6 +27,7 @@ use App\Jobs\DeleteKeyJob;
 use App\Models\Rent;
 use App\Jobs\OpenLockJob;
 use App\Models\LockEvent;
+use App\Jobs\ChatPusJob;
 use App\Models\LockPinCode;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
@@ -708,11 +709,11 @@ class JobsService
     }
 
 
-    public function chatPush($message, $tag)
+    public function chatPush($phone,$message, $tag)
     {
         $uuid = $this->startLockJob('chatPush', $tag);
-      
-        ChatPusJob::dispatch($uuid->id, $message)->onQueue('default')->chain([
+       
+        ChatPushJob::dispatch($uuid->id,$phone, $message)->onQueue('default')->chain([
             new SetStatusJob($uuid->id, true )
         ])->delay($this->getDelay());
 

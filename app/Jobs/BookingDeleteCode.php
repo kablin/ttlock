@@ -13,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Queue\Middleware\RateLimited;
+use App\Models\LockApiLog;
 
 class BookingDeleteCode implements ShouldQueue
 {
@@ -34,6 +35,14 @@ class BookingDeleteCode implements ShouldQueue
 
 	public function delete()
 	{
+
+	  LockApiLog::create([
+                'is_ttlock_result' => false,
+                'api_method' => 'shedule_delete',
+                'ip' => '',
+                'params' => json_encode(['pin_code_id' => $this->pincode->pin_code_id]),
+            ]);
+
 		$key = (new TTLockService())->deleteKey($this->pincode->lock,  $this->pincode->pin_code_id);
 
 		if ($key['status']) {

@@ -482,6 +482,7 @@ class CallbackApiController extends Controller
 
 
             $validator = Validator::make($request->all(), [
+                'phone' => 'required|string|max:150',
                 'message' => 'required|string|max:150',
                 'tag' => 'nullable',
             ]);
@@ -494,9 +495,9 @@ class CallbackApiController extends Controller
                 ], 200);
             }
 
-            $validated = $validator->safe()->only(['message', 'tag']);
+            $validated = $validator->safe()->only(['phone','message', 'tag']);
 
-            return (new JobsService(auth()->user()->id))->chatPush($validated['message'],  $validated['tag'] ?? '');
+            return (new JobsService(auth()->user()->id))->chatPush($validated['phone'], $validated['message'],  $validated['tag'] ?? '');
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'error' => 'Неизвестная ошибка', 'msg' => 'Неизвестная ошибка'], 200);
         }
