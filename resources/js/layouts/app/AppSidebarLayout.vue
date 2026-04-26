@@ -99,14 +99,14 @@ const navigate = (href) => {
                     <div class="flex items-center gap-3">
 
                         <!-- 💳 Тариф (только не в визарде) -->
-                        <div v-if="!isWizardPage"
+                        <!--div v-if="!isWizardPage"
                             class="hidden md:flex items-center gap-3 px-3 py-2 border border-slate-200 rounded-lg">
                             <Badge class="bg-emerald-100 text-emerald-700 text-sm px-3 py-1">Free</Badge>
                             <Button size="sm" class="bg-indigo-600 hover:bg-indigo-700 h-8 text-xs"
                                 @click="navigate('/billing')">
                                 Изменить тариф
                             </Button>
-                        </div>
+                        </div-->
 
                         <!-- 💬 Поддержка -->
                         <DropdownMenu>

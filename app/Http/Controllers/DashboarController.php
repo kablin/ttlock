@@ -17,6 +17,7 @@ class DashboarController extends Controller
     public function index(Request $request)
     {
         $rents = auth()->user()->rents()->with('locks')->orderBy('id')->get();
+        $locks = auth()->user()->locks()->get();
 
         $centrifugo =  resolve(Centrifugo::class);
         $token = $centrifugo->generateConnectionToken((string)Auth::id(), 0, [
@@ -32,6 +33,7 @@ class DashboarController extends Controller
 
         $params = [
             'rents' => $rents,
+            'locks' => $locks,
             'locks_count' =>  auth()->user()->locks->count(),
             'token' => $token,
             'success' => session('success')

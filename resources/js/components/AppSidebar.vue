@@ -35,7 +35,7 @@ const icons = {
 const defaultNavigation = [
   { id: 'dashboard', name: 'Обзор', href: dashboard().url, icon: 'Home' },
   { id: 'locks', name: 'Управление замками', href: lockList().url, icon: 'Lock' },
-  { id: 'billing', name: 'Тариф и оплата', href: tarifs().url, icon: 'CreditCard' },
+  /*{ id: 'billing', name: 'Тариф и оплата', href: tarifs().url, icon: 'CreditCard' },*/
   { id: 'mapping', name: 'Привязка замков', href: mapping().url, icon: 'Link2' },
   { id: 'settings', name: 'Мастер настройки', href: wizard_step1().url, icon: 'Settings' },
 ]
