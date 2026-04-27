@@ -24,7 +24,7 @@ const handleRemove = (event) => {
   if (props.onRemove) {
     props.onRemove()
   }
-  emit('remove')
+  
 }
 </script>
 

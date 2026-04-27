@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Search, X, Lock, Building2, Check, GripVertical, RefreshCw } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
@@ -13,6 +13,7 @@ import SetupNavigation from '@/components/setup/SetupNavigation.vue'
 import AppLayout from '@/layouts/AppLayout.vue';
 import { wizard_map, wizard_unmap } from '@/routes';
 import axios from 'axios';
+import { Centrifuge } from 'centrifuge'
 
 
 const props = defineProps({
@@ -24,6 +25,7 @@ const props = defineProps({
     type: Object,
     default: true
   },
+
 })
 
 
@@ -148,6 +150,17 @@ const handleDragEnd = () => {
 onMounted(() => {
   loadData()
 })
+
+
+watch(() => props.all_locks, (newVal) => {
+    if (newVal) loadData()
+
+})
+
+watch(() => props.rents, (newVal) => {
+    if (newVal) loadData()
+
+})
 </script>
 
 <template>
@@ -171,7 +184,7 @@ onMounted(() => {
         <div class="flex items-center gap-4 text-xs text-slate-500 pt-1">
           <span class="flex items-center gap-1">
             <div class="w-2 h-2 rounded-full bg-green-500" />
-            Привязано: {{ totalMappings }} замков
+            Привязано замков: {{ totalMappings }}
           </span>
           <span class="flex items-center gap-1">
             <div class="w-2 h-2 rounded-full bg-slate-300" />
@@ -193,7 +206,7 @@ onMounted(() => {
             <Building2 class="w-4 h-4 text-slate-500" />
             Объекты
           </h3>
-          <span class="text-xs text-slate-500">{{ properties.length }} объектов</span>
+          <span class="text-xs text-slate-500">{{ properties.length }} всего</span>
         </div>
         <div class="relative">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -208,8 +221,8 @@ onMounted(() => {
             ? 'border-indigo-500 bg-indigo-50/50'
             : 'border-slate-200 hover:border-slate-300 bg-white',
           draggedLock && 'border-dashed border-indigo-300 bg-indigo-50/30'
-        )" @click="selectedProperty = selectedProperty === property.id ? null : property.id"
-          @dragover="handleDragOver" @drop="(e) => handleDrop(e, property.id)">
+        )" @click="selectedProperty = selectedProperty === property.id ? null : property.id" @dragover="handleDragOver"
+          @drop="(e) => handleDrop(e, property.id)">
           <div class="flex items-start justify-between gap-3 mb-2">
             <div class="flex-1 min-w-0">
               <h4 class="font-semibold text-slate-900 text-base">{{ property.name }}</h4>
@@ -254,6 +267,7 @@ onMounted(() => {
             <Lock class="w-4 h-4 text-slate-500" />
             Замки
           </h3>
+          <span class="text-xs text-slate-500">{{ locks.length }} всего</span>
         </div>
         <div class="relative mb-2">
           <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />

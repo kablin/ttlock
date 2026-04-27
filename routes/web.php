@@ -148,6 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('/v1/get_codes_list', [\App\Http\Controllers\CallbackApiController::class, 'getCodesList'])->name('getCodesList');
   Route::post('/v1/delete_code_from_lock', [\App\Http\Controllers\CallbackApiController::class, 'deleteCode'])->name('deleteKey');
   Route::post('/v1/add_code_to_lock', [\App\Http\Controllers\CallbackApiController::class, 'addCodeToLock'])->name('addCodeToLock');
+  Route::post('/v1/change_code', [\App\Http\Controllers\CallbackApiController::class, 'changeCode'])->name('changeCode');
 
 
   Route::post('/lock_codes', [\App\Http\Controllers\CallbackApiController::class, 'createBooking'])->name('test');

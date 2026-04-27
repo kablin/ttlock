@@ -73,8 +73,8 @@ const copyToClipboard = async (text) => {
           <td class="py-3">
             <div class="flex items-center justify-center">
 
-              <Checkbox class="h-4 w-4" :checked="selectedCodes.includes(g.id)"
-                @update:checked="emit('toggle-code-selection', g.id)" />
+              <Checkbox class="h-4 w-4" :model-value="selectedCodes.includes(g.id)"
+                @click="emit('toggle-code-selection', g.id)" />
             </div>
           </td>
           <td class="py-3 text-slate-500 font-mono text-[9px] text-center">{{ g.pin_code_id }}</td>

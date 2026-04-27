@@ -17,18 +17,7 @@ import { usePage } from '@inertiajs/vue3';
 import { test, dashboard, openLock, pincodes_list, getCodesList, deleteKey, addCodeToLock, pincodes_page, lockevents_lock_page } from '@/routes';
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from "@/lib/utils"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-
+import AddCodeDialog from '@/components/dashboard/AddCodeDialog.vue'
 
 // 🔥 Импорты API (замените на ваши реальные вызовы)
 // import { base44 } from '@/api/base44Client'
@@ -39,6 +28,8 @@ const page = usePage();
 const isRefreshing = ref(false)
 const selectedProperty = ref(null)
 const selectedLock = ref()
+const selectedCode = ref()
+
 
 // Видимость виджетов
 const visibleWidgets = ref({
@@ -85,10 +76,19 @@ const waitApiOpenLock = ref(false)
 const waitApiDeleteKey = ref(false)
 const waitApiSyncKeys = ref(false)
 const waitApiAddKey = ref(false)
-const isDeleteDialogOpen = ref(false)
+
 const lockMessage = ref('')
 const lockTitle = ref('')
 const openLockResult = ref({})
+
+const isAddKeyDialogOpen = ref(false)
+
+const addKeyfn = async () => {
+    selectedCode.value = null
+    if (!selectedLock.value) return
+    isAddKeyDialogOpen.value = true
+
+}
 
 
 const refreshKeysList = (lock) => {
@@ -102,6 +102,11 @@ const refreshKeysList = (lock) => {
         .finally(() => {
 
         });
+}
+
+
+const onOpenChange = (state) => {
+    isAddKeyDialogOpen.value = state
 }
 
 
@@ -138,36 +143,11 @@ const goToLogPage = async (page) => {
 
 
 
-// Загрузка данных
-/*const loadData = async () => {
-    try {
-        // 🔥 Замените на реальные вызовы:
-        // properties.value = await base44.entities.Property.list()
-        // locks.value = await base44.entities.Lock.list()
-        // accessGrants.value = await base44.entities.AccessGrant.list('-created_date', 100)
-        // accessLogs.value = await base44.entities.AccessLog.list('-timestamp', 100)
-
-        // 🔹 Заглушки для примера:
-        properties.value = []
-        locks.value = []
-        accessGrants.value = []
-        accessLogs.value = []
-    } catch (error) {
-        console.error('Ошибка загрузки данных дашборда:', error)
-    }
-}
-*/
-// Обновление данных
-const handleRefresh = async () => {
-    /* isRefreshing.value = true
-     await loadData() // Перезагружаем данные
-     setTimeout(() => {
-         isRefreshing.value = false
-     }, 1000)*/
-}
-
 // Переключение видимости виджета
 const toggleWidget = (widgetKey) => {
+    
+      console.log(visibleWidgets.value[widgetKey])
+     
     visibleWidgets.value[widgetKey] = !visibleWidgets.value[widgetKey]
 }
 
@@ -175,8 +155,9 @@ const toggleWidget = (widgetKey) => {
 const handleSelectionChange = (property, lock) => {
     selectedProperty.value = property
     selectedLock.value = lock
+
     refreshKeysList(selectedLock.value)
-        goToLogPage(1)
+    goToLogPage(1)
 }
 
 // Загрузка при монтировании
@@ -229,7 +210,7 @@ onMounted(() => {
         console.log(ctx)
         refreshKeysList(selectedLock.value)
         waitApiDeleteKey.value = false
-        isOpenLockDialogOpen.value = true
+        //isOpenLockDialogOpen.value = true
         lockTitle.value = "Ключ удален"
         lockMessage.value = ctx?.data?.msg
 
@@ -257,9 +238,15 @@ onMounted(() => {
 
         refreshKeysList(selectedLock.value)
         waitApiAddKey.value = false
-        isOpenLockDialogOpen.value = true
+        //isOpenLockDialogOpen.value = true
         lockTitle.value = "Ключ изменен"
         lockMessage.value = ctx?.data?.msg
+
+         openLockResult.value.success = true
+        openLockResult.value.msg = "Ключ изменен"
+        setTimeout(() => {
+            openLockResult.value = {}
+        }, 15000)
 
     })
 
@@ -309,10 +296,22 @@ const openLockfn = async (lock) => {
 }
 
 
+
+
+const editCodefn = async (code) => {
+    selectedCode.value = code
+    isAddKeyDialogOpen.value = true
+
+
+}
+
+
+
+
 const refreshPinsfn = async (lock) => {
     openLockResult.value = {}
     waitApiSyncKeys.value = true
-     try {
+    try {
         const response = await axios.post(getCodesList().url, {
             'lock_id': lock.lock_id,
             'page_number': 1,
@@ -342,7 +341,6 @@ const refreshPinsfn = async (lock) => {
                 <div class="flex items-center justify-between">
                     <h1 class="text-2xl font-semibold text-slate-900">Обзор</h1>
                 </div>
-
                 <!-- Widgets Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
@@ -377,69 +375,24 @@ const refreshPinsfn = async (lock) => {
                     class="border-2 border-indigo-200 ring-1 ring-indigo-100 shadow-md shadow-indigo-50">
                     <QuickLockActions :locks="locks" :properties="rents" @open-lock="openLockfn"
                         @refresh-pins="refreshPinsfn" @selection-change="handleSelectionChange"
-                          :keysLoading="waitApiSyncKeys"   :openLockLoading="waitApiOpenLock" 
-                        :openLockResult="openLockResult" />
+                        :keysLoading="waitApiSyncKeys" :openLockLoading="waitApiOpenLock"
+                        :openLockResult="openLockResult" @add-code="addKeyfn" />
                 </WidgetContainer>
 
                 <!-- Коды и журнал событий -->
-                <TabbedLogsSection v-if="visibleWidgets.eventLog && selectedLock"  @key-page="goToKeyPage"
-                   :selected-property="selectedProperty"
-                   :selected-lock="selectedLock" :keys="keyList"  :logs="logList"   @log-page="goToLogPage"/>
+                <TabbedLogsSection v-if="visibleWidgets.eventLog && selectedLock" @key-page="goToKeyPage"
+                    @refresh="goToKeyPage(1)" :selected-property="selectedProperty" @edit-code="editCodefn"
+                    @start-delete="waitApiDeleteKey = true" :isDeleting="waitApiDeleteKey" :selected-lock="selectedLock"
+                    :keys="keyList" :logs="logList" @log-page="goToLogPage" />
             </div>
         </AppLayout>
+
+
+        <!-- Диалог добавления кода -->
+
+        <AddCodeDialog v-model:open="isAddKeyDialogOpen" 
+            :selected-lock="selectedLock" :onOpenChange="onOpenChange"  :code="selectedCode" />
+
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <AlertDialog v-model:open="isOpenLockDialogOpen">
-
-        <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle> {{ lockTitle }}</AlertDialogTitle>
-                <AlertDialogDescription>
-                    {{ lockMessage }}
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>Закрыть</AlertDialogCancel>
-
-            </AlertDialogFooter>
-        </AlertDialogContent>
-    </AlertDialog>
-
-
-
-
-    <AlertDialog v-model:open="isDeleteDialogOpen">
-
-        <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Удалить пинкод {{ selectedKey?.pin_code }}?</AlertDialogTitle>
-                <AlertDialogDescription>
-                    Пинкод {{ selectedKey?.pin_code }} будет удален.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>Отменить</AlertDialogCancel>
-                <AlertDialogAction :class="cn(buttonVariants({ variant: 'destructive2' }))" @click="deleteKeyfn()">
-                    Удалить</AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-    </AlertDialog>
-
-
 
 </template>

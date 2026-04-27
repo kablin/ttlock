@@ -8,10 +8,16 @@ import axios from 'axios';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { RefreshCw } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
+import { usePage } from '@inertiajs/vue3';
 import { cn } from '@/lib/utils'
-import { wizard_lock_list, wizard_sync_rents } from '@/routes';
+import { lockList, getLockList, lockList_refresh, wizard_lock_list, wizard_sync_rents } from '@/routes';
+import { Centrifuge } from 'centrifuge'
 
 const isSyncing = ref(false)
+
+const page = usePage();
+
+
 const props = defineProps({
   all_locks: {
     type: Object,
@@ -21,22 +27,77 @@ const props = defineProps({
     type: Object,
     default: true
   },
+
+  token: {
+    type: String
+  },
+  centrifugo_listener:
+  {
+    type: String,
+    required: true,
+  }
+
+
 })
 
 // Синхронизация (перезагрузка данных)
 const handleSync = async () => {
   isSyncing.value = true
-  let response = await axios.post(wizard_lock_list().url, {})
-  if (response.data.status) {
-    response = await axios.post(wizard_sync_rents().url, {})
-  }
-  if (response.data.status) {
-    window.location.reload()
+  try {
+    axios.post(wizard_sync_rents().url, {})
+    const response = await axios.post(getLockList().url, {
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+  } catch (error) {
+    console.error('Error:', error)
+  } finally {
+    // loading.value = false
   }
 
-  isSyncing.value = false
+
 }
 
+
+
+
+onMounted(async () => {
+  const centrifuge = new Centrifuge(props.centrifugo_listener, {
+    token: props.token
+  })
+  const sub = centrifuge.newSubscription('api:get_lock_list-' + page.props.auth.user.id)
+  //получение сообщений по веб.сокет
+  sub.on('publication', (ctx) => {
+    isSyncing.value = false
+    console.log('11112')
+    router.reload({
+    
+      preserveState: false,
+      preserveScroll: true
+    });
+
+    /*  axios.post(lockList_refresh().url).then((response) => {
+        console.log('get from centrifugo')
+        locks_data.value = response.data
+      })
+        .catch((error) => {
+          console.log(error);
+  
+        })
+        .finally(() => {
+  
+        });*/
+  })
+
+  centrifuge.on('error', function (ctx) {
+    console.log('ERROR: ', ctx);
+  })
+
+  centrifuge.connect()
+  sub.subscribe()
+})
 
 
 </script>
@@ -61,11 +122,7 @@ const handleSync = async () => {
               Синхронизация
             </Button>
           </div>
-
-
         </div>
-
-
 
         <Mapping :all_locks="all_locks" :rents="rents" />
 

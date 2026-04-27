@@ -1,7 +1,7 @@
 <script setup>
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
+import { parse, format, isValid } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import {
   Pagination,
@@ -19,6 +19,21 @@ defineProps({
 
 })
 const emit = defineEmits(['log-page'])
+
+
+
+const formatCustomDate = (dateStr, time = false) => {
+  if (!dateStr) return ''
+  // Парсим строку "26.04.2026 00:00:00" в валидную JS Date
+
+  const parsed = parse(dateStr, 'dd.MM.yyyy, HH:mm:ss', new Date())
+  if (!time)
+    return isValid(parsed) ? format(parsed, 'dd.MM.yyyy', { locale: ru }) : ''
+  else
+    return isValid(parsed) ? format(parsed, 'HH:mm', { locale: ru }) : ''
+}
+
+
 
 const getEventLabelFull = (eventType) => {
   const labels = {
@@ -190,7 +205,7 @@ const getActionLabelFull = (actionType) => {
 
 <template>
 
-  <div    class="overflow-x-auto">
+  <div class="overflow-x-auto">
     <table class="w-full text-xs">
       <thead>
         <tr class="border-b border-slate-100">
@@ -209,19 +224,24 @@ const getActionLabelFull = (actionType) => {
         <tr v-if="!logs.data.length">
           <td colspan="7" class="py-8 text-center text-slate-500">Нет событий</td>
         </tr>
-        <tr v-for="log in logs.data" :key="log.id" class="border-b border-slate-50 hover:bg-slate-50/50">
+        <tr v-for="log in logs.data" :key="log.id" class="border-b border-slate-50 hover:bg-slate-50/50 gap-3">
 
-          <td class="py-2.5 text-slate-900">{{ log.id }}</td>
+          <td class="p-2.5  text-slate-900">{{ log.id }}</td>
 
-          <td class="py-2.5 whitespace-nowrap">
-            {{ new Date(log.created_at).toLocaleString('ru-RU') }}
+          <td class="p-2.5 whitespace-nowrap">
+            <div class="flex flex-col items-center">
+              <span class="font-medium">{{ formatCustomDate(new Date(log.created_at).toLocaleString('ru-RU')) }}</span>
+              <span class="text-[10px] text-slate-400">{{ formatCustomDate(new
+                Date(log.created_at).toLocaleString('ru-RU'), true)
+                }}</span>
+            </div>
           </td>
-          <td class="py-2.5 text-slate-900">{{ getEventLabelFull(log.record_type_from_lock) }}</td>
-          <td class="py-2.5  text-slate-900">
+          <td class="p-2.5 text-slate-900">{{ getEventLabelFull(log.record_type_from_lock) }}</td>
+          <td class="p-2.5  text-slate-900">
             {{ getActionLabelFull(log.record_type) }}
           </td>
 
-          <td class="py-2.5">
+          <td class="p-2.5">
             <Badge v-if="log.success" class="bg-green-100 text-green-700">
               Успешно
             </Badge>
@@ -231,14 +251,14 @@ const getActionLabelFull = (actionType) => {
 
           </td>
 
-          <td class="py-2.5">
+          <td class="p-2.5">
             <template v-if="log.username">
               <div class="flex flex-col gap-0.5">
                 <span class="font-medium text-slate-900">{{ log.username }}</span>
               </div>
             </template><span v-else class="text-slate-400">—</span>
           </td>
-          <td class="py-2.5">
+          <td class="p-2.5">
             {{ log.keyboard_pwd }}
           </td>
         </tr>
@@ -253,7 +273,8 @@ const getActionLabelFull = (actionType) => {
           <PaginationPrevious v-if="index == 0" @click.prevent="emit('log-page', item.page)" />
           <PaginationNext v-else-if="index == (logs.links.length - 1)" @click.prevent="emit('log-page', item.page)" />
           <PaginationItem v-else-if="(logs.current_page - 2 <= item.page) && (logs.current_page + 2 >= item.page)"
-            :value="item.page" :is-active="item.page === logs.current_page" @click.prevent="emit('log-page', item.page)">
+            :value="item.page" :is-active="item.page === logs.current_page"
+            @click.prevent="emit('log-page', item.page)">
             {{ item.page }}
           </PaginationItem>
         </template>

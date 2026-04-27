@@ -15,9 +15,9 @@ import {
     SelectValue
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import AddCodeDialog from '@/components/dashboard/AddCodeDialog.vue'
 
-const isAddKeyDialogOpen = ref(false)
+
+
 
 const props = defineProps({
     locks: {
@@ -45,22 +45,7 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['selection-change', 'open-lock', 'refresh-pins',])
-
-
-
-const addKeyfn = async (lock) => {
-
-    isAddKeyDialogOpen.value = true
-
-}
-
-
-const onOpenChange = (state) => {
-    isAddKeyDialogOpen.value = state
-}
-
-
+const emit = defineEmits(['selection-change', 'open-lock', 'refresh-pins','add-code'])
 
 
 
@@ -85,14 +70,6 @@ const handleRefreshPins = async () => {
     emit('refresh-pins', selectedLock.value)
 }
 
-
-
-const addCode = async () => {
-    if (!selectedLock.value) return
-    addKeyfn(selectedLock.value)
-
-
-}
 
 // Фильтруем только замки с привязкой к объектам
 const mappedLocks = computed(() => props.locks.filter(l => l.rent_id > 0))
@@ -224,7 +201,7 @@ const onBlurSearch = () => {
                     class="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
                     <button v-for="item in suggestions"
                         :key="item.type === 'property' ? `property-${item.property.id}` : `lock-${item.property.id}`"
-                        @click="item.type === 'property' ? handleSelectProperty(item) : handleSelectLock(item, item.property)"
+                        @click="item.type === 'property' ? handleSelectProperty(item) : handleSelectLock(item.lock, item.property)"
                         class="w-full px-4 py-3 text-left hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors">
                         <div class="flex items-center gap-3">
                             <Building2 v-if="item.type === 'property'" class="w-4 h-4 text-slate-400 flex-shrink-0" />
@@ -334,7 +311,7 @@ const onBlurSearch = () => {
 
         <!-- Кнопки действий -->
         <div class="flex flex-wrap gap-2">
-            <Button size="sm" class="bg-green-600 hover:bg-green-700" :disabled="!selectedLock" @click="addCode">
+            <Button size="sm" class="bg-green-600 hover:bg-green-700" :disabled="!selectedLock" @click="emit('add-code')">
                 <Plus class="w-4 h-4 mr-1.5" />
                 Добавить код
             </Button>
@@ -362,9 +339,5 @@ const onBlurSearch = () => {
             {{ openLockResult.msg }}
         </div>
 
-        <!-- Диалог добавления кода -->
-
-        <AddCodeDialog v-model:open="isAddKeyDialogOpen" :lock-ids="selectedLock ? [selectedLock.id] : []"
-            :selected-lock="selectedLock" :onOpenChange="onOpenChange" />
     </div>
 </template>

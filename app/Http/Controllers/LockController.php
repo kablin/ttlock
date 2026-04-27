@@ -42,7 +42,12 @@ class LockController extends Controller
     {
         $locks = auth()->user()->locks()->get();
         $rents = auth()->user()->rents()->get();
-        return Inertia::render('Mapping', ['all_locks' => $locks, 'rents' => $rents]);
+           $centrifugo =  resolve(Centrifugo::class);
+        $token = $centrifugo->generateConnectionToken((string)Auth::id(), 0, [
+            'name' => Auth::user()->name,
+        ], ['api:get_lock_list-' . (string)Auth::id()]);
+
+        return Inertia::render('Mapping', ['all_locks' => $locks, 'rents' => $rents,'token' => $token]);
     }
 
     public function getLockList(Request $request)

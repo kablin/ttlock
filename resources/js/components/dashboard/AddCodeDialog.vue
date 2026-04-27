@@ -3,15 +3,16 @@ import { ref, computed, watch } from 'vue'
 import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
 import { Calendar as CalendarIcon, Copy, Shuffle, KeyRound, Clock } from 'lucide-vue-next'
 import axios from 'axios';
-
-import { addCodeToLock, } from '@/routes';
-
+import { parse, format, isValid } from 'date-fns'
+import { addCodeToLock, changeCode} from '@/routes';
+import { ru } from 'date-fns/locale'
 
 import {
     Dialog,
     DialogContent,
     DialogFooter,
     DialogHeader,
+    DialogTrigger,
     DialogTitle,
     DialogClose,
 } from '@/components/ui/dialog'
@@ -30,7 +31,7 @@ import { cn } from '@/lib/utils'
 const props = defineProps({
     open: { type: Boolean, default: false },
     onOpenChange: { type: Function, required: true },
-    lockIds: { type: Array, default: () => [] },
+    code: { type: Object, default: null },
     selectedLock: { type: Object, default: null }
 })
 
@@ -74,16 +75,52 @@ const refreshPreviewCode = () => {
     }
 }
 
+
+const formatCustomDate = (dateStr, time = false) => {
+    if (!dateStr) return ''
+    // Парсим строку "26.04.2026 00:00:00" в валидную JS Date
+    const parsed = parse(dateStr, 'dd.MM.yyyy HH:mm:ss', new Date())
+    if (!time)
+        return isValid(parsed) ? format(parsed, 'dd.MM.yyyy', { locale: ru }) : ''
+    else
+        return isValid(parsed) ? format(parsed, 'HH:mm', { locale: ru }) : ''
+}
+
+
 // Инициализация при открытии
 const initForm = () => {
     guestName.value = ''
-    keyType.value = 'Клиент'
+    keyType.value = props.code?.code_name ?? 'Клиент'
     isPermanent.value = false
-    dateFrom.value = new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate())
-    dateTo.value = new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate() + 1)
-    timeFrom.value = '00:00'
-    timeTo.value = '23:59'
+
+
+    const parsedDate = props.code
+        ? parse(props.code.start_local, 'dd.MM.yyyy HH:mm:ss', new Date())
+        : new Date();
+    const safeDate = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+
+    dateFrom.value = new CalendarDate(
+        safeDate.getFullYear(),
+        safeDate.getMonth() + 1, // CalendarDate ожидает месяц 1–12
+        safeDate.getDate()
+    );
+
+    timeFrom.value = format(safeDate, 'HH:mm', { locale: ru })
+
+
+    const parsedDateto = props.code
+        ? parse(props.code.end_local, 'dd.MM.yyyy HH:mm:ss', new Date())
+        : new Date(today(getLocalTimeZone()).add({ days: 2 }));
+    const safeDateto = isNaN(parsedDateto.getTime()) ? new Date() : parsedDateto;
+
+    dateTo.value = new CalendarDate(
+        safeDateto.getFullYear(),
+        safeDateto.getMonth() + 1, // CalendarDate ожидает месяц 1–12
+        safeDateto.getDate()
+    );
+    timeTo.value = format(safeDateto, 'HH:mm', { locale: ru })
     useRandomCode.value = true
+
     refreshPreviewCode()
 }
 
@@ -113,43 +150,50 @@ const isFormValid = computed(() => {
     return true //guestName.value.trim().length > 0 && previewCode.value
 })
 
+
+
+
+
+
 // Отправка формы
 const handleSubmit = async () => {
     if (!isFormValid.value) return
 
     try {
-        if (isPermanent) {
+        if (isPermanent.value) {
             dateTo.value = today(getLocalTimeZone()).add({ years: 5 });
-            console.log(dateTo.value)
         }
-        const response = await axios.post(addCodeToLock().url, {
-            'lock_id': props.selectedLock.lock_id,
-            'code': null,
-            'utc': '-3',
-            'code_name': keyType.value,
-            'begin': (dateFrom.value && timeFrom.value) ? dateFrom.value + ' ' + timeFrom.value : null,
-            'end': (dateTo.value && timeTo.value) ? dateTo.value + ' ' + timeTo.value : null,
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
 
+        if (props.code) {
+            const response = await axios.post(changeCode().url, {
+                'lock_id': props.selectedLock.lock_id,
+                'code_id': props.code.pin_code_id,
+                'utc': '-3',
+                'begin': (dateFrom.value && timeFrom.value) ? dateFrom.value + ' ' + timeFrom.value : null,
+                'end': (dateTo.value && timeTo.value) ? dateTo.value + ' ' + timeTo.value : null,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
 
-        // 🔥 Замените на ваш реальный API-вызов
-        // const payload = {
-        //   property_id: props.propertyId,
-        //   lock_ids: props.lockIds.length > 0 ? props.lockIds : [props.selectedLock?.id],
-        //   guest_name: guestName.value,
-        //   type: keyType.value === 'staff' ? 'staff' : 'passcode',
-        //   passcode: previewCode.value,
-        //   valid_from: combineDateTime(dateFrom.value, timeFrom.value),
-        //   valid_until: isPermanent.value ? new Date('2099-12-31').toISOString() : combineDateTime(dateTo.value, timeTo.value),
-        // }
-        // await base44.entities.AccessGrant.create(payload)
+        }
+        else {
+            const response = await axios.post(addCodeToLock().url, {
+                'lock_id': props.selectedLock.lock_id,
+                'code': null,
+                'utc': '-3',
+                'code_name': keyType.value,
+                'begin': (dateFrom.value && timeFrom.value) ? dateFrom.value + ' ' + timeFrom.value : null,
+                'end': (dateTo.value && timeTo.value) ? dateTo.value + ' ' + timeTo.value : null,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
 
-        // Имитация запроса
-        await new Promise(resolve => setTimeout(resolve, 500))
+        }
+
 
         emit('success', { code: previewCode.value, name: guestName.value })
         props.onOpenChange(false)
@@ -176,12 +220,12 @@ watch(() => props.open, (newVal) => {
 </script>
 
 <template>
-    <Dialog :open="open">
-        <DialogContent class="sm:max-w-[475px]">
+    <Dialog :open="open" @update:open="onOpenChange">
+        <DialogContent class="sm:max-w-[600px]">
             <form @submit.prevent="handleSubmit">
                 <DialogHeader>
                     <DialogTitle>
-                        Добавить ключ
+                      {{ code ? 'Изменить ключ':'Добавить ключ' }}  
                         <span v-if="selectedLock?.lock_alias" class="text-slate-500 font-normal">
                             для {{ selectedLock.lock_alias }}
                         </span>
@@ -191,7 +235,7 @@ watch(() => props.open, (newVal) => {
                 <div class="space-y-5 py-4">
 
                     <!-- Тип ключа: визуальные кнопки -->
-                    <div>
+                    <div v-if="!code">
                         <Label class="text-sm font-medium">Тип ключа</Label>
                         <div class="flex gap-2 mt-2">
                             <button v-for="type in keyTypes" :key="type.value" type="button"
@@ -272,19 +316,19 @@ watch(() => props.open, (newVal) => {
               </Button>
             </div>
           </div-->
-
                     <!-- Переключатель бессрочного доступа -->
                     <div class="flex items-center justify-between p-3 border rounded-lg bg-slate-50">
                         <div>
                             <Label for="isPermanent" class="text-sm font-medium">Бессрочный доступ</Label>
                             <p class="text-xs text-slate-500 mt-0.5">Без ограничения по дате окончания</p>
                         </div>
+
                         <Switch id="isPermanent" v-model="isPermanent" />
                     </div>
 
                     <!-- Период действия -->
                     <template v-if="!isPermanent">
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-3 max-lg:grid-cols-1">
                             <!-- Начало -->
                             <div class="space-y-2">
                                 <Label class="text-xs text-slate-600">Начало</Label>
@@ -353,12 +397,11 @@ watch(() => props.open, (newVal) => {
 
                 <DialogFooter class="gap-2 sm:gap-2">
                     <DialogClose as-child>
-                        
+
                         <Button type="button" variant="design_outline" @click="onOpenChange(false)">Отмена</Button>
                     </DialogClose>
-                    <Button type="submit"  :disabled="!isFormValid"
-                        class="bg-indigo-600 hover:bg-indigo-700">
-                        Создать ключ
+                    <Button type="submit" :disabled="!isFormValid" class="bg-indigo-600 hover:bg-indigo-700">
+                      {{ code ? 'Изменить ключ':'Создать ключ' }}  
                     </Button>
                 </DialogFooter>
             </form>

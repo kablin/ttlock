@@ -54,7 +54,7 @@ class ChangeCodeJob implements ShouldQueue
                 ->post($this->current_job->user->callback);
         }
         $centrifugo =  resolve(Centrifugo::class);
-        $centrifugo->publish('api:change-code-' . $this->current_job->user->id, ['msg' => $this->data['msg'], 'method' => $this->data['method'], 'job' =>  $this->data['job'], 'status' => $this->data['status']]);
+        $centrifugo->publish('api:change_code-' . $this->current_job->user->id, ['msg' => $this->data['msg'], 'method' => $this->data['method'], 'job' =>  $this->data['job'], 'status' => $this->data['status']]);
     }
 
 
