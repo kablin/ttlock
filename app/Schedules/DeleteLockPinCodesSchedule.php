@@ -11,9 +11,11 @@ class DeleteLockPinCodesSchedule
 	public function __invoke()
 	{
 		info('start delete shedule');
-		LockPinCode::query()->get()->each(function ($l) {
+		$index = 1;
+		LockPinCode::query()->get()->each(function ($l) use ($index) {
 			if ($l->end) {
-				BookingDeleteCode::dispatch($l);
+				BookingDeleteCode::dispatch($l)->delay(now()->addSeconds($index * 10));
+				$index++;
 			}
 		});
 	}

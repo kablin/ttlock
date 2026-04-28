@@ -22,22 +22,20 @@ class BookingDeleteCode implements ShouldQueue
 	public $user;
 	public $pincode;
 
-	public $maxAttempts = 20;
+	 // Сколько раз пробовать
+    public $tries = 20; 
 
-	public function backoff(): array
-	{
-		return [10, 15, 20];
-	}
+    public $backoff = 5;
 
 	public function __construct($pincode)
 	{
 		$this->pincode = $pincode;
 	}
 
-	public function middleware(): array
+	/*public function middleware(): array
 	{
 		return [new RateLimited('delete_key')];
-	}
+	}*/
 
 
 	public function delete()
