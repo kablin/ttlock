@@ -167,6 +167,16 @@ Route::get('/test', [\App\Http\Controllers\LockController::class, 'test'])->name
 Route::get('/testdel', [\App\Http\Controllers\LockController::class, 'testdel'])->name('testdel');
 Route::get('/testlist', [\App\Http\Controllers\LockController::class, 'testlist'])->name('testlist');
 
+
+
+Route::get('/vpr', function () {
+  return Inertia::render('VPR');
+})->name('vpr');
+
+
+
+
+
 /*
 
 Route::get('/test', function ()
