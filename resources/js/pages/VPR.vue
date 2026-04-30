@@ -22,6 +22,11 @@
                     class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition shadow-sm">
                     Начать тестирование
                 </button>
+
+                <button @click="exportToWord('all')"
+                    class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition shadow-sm">
+                    📄 Экспорт всех вопросов в Word
+                </button>
             </div>
 
             <!-- === СПИСОК ВОПРОСОВ === -->
@@ -36,7 +41,8 @@
                 <div class="space-y-4">
                     <div v-for="(q, index) in activeQuestions" :key="q.id" class="bg-white p-5 rounded-xl shadow">
                         <h3 class="font-semibold text-lg text-gray-800 mb-3">{{ index + 1 }}. &nbsp; {{ q.name }}</h3>
-                        <h3 v-if="q.info && phase != 'test'" class="font-semibold text-sm text-gray-800 mb-3">{{ q.info }}</h3>
+                        <h3 v-if="q.info && phase != 'test'" class="font-semibold text-sm text-gray-800 mb-3">{{ q.info
+                            }}</h3>
 
                         <div class="space-y-2">
                             <label v-for="resp in q.responses" :key="resp.id"
@@ -84,7 +90,7 @@
                 <div class="text-5xl font-extrabold text-blue-600 mb-2">{{ results.correct }} / {{ results.total }}
                 </div>
                 <p class="text-gray-600 mb-4">Правильных ответов: {{ Math.round(results.correct / results.total * 100)
-                }}%</p>
+                    }}%</p>
                 <div class="w-full bg-gray-200 rounded-full h-4 mb-2 overflow-hidden">
                     <div class="bg-green-500 h-4 rounded-full transition-all duration-500"
                         :style="{ width: `${(results.correct / results.total) * 100}%` }"></div>
@@ -115,6 +121,89 @@ const activeQuestions = computed(() => {
 const answeredCount = computed(() => {
     return Object.values(answers.value).filter(arr => arr?.length > 0).length
 })
+
+
+
+
+
+const exportToWord = (source) => {
+  const questionsToExport = source === 'all' ? QUESTIONS : selectedQuestions.value
+  const title = source === 'all' ? 'Все вопросы теста' : 'Вопросы для тестирования'
+  const date = new Date().toLocaleDateString('ru-RU')
+  
+  let html = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
+    <head>
+      <meta charset='utf-8'>
+      <title>${title}</title>
+      <style>
+        body { font-family: 'Times New Roman', Times, serif; font-size: 14pt; line-height: 1.5; }
+        h1 { font-size: 18pt; margin-bottom: 20px; }
+        .meta { color: #666; margin-bottom: 30px; font-size: 12pt; }
+        .question { margin-bottom: 25px; page-break-inside: avoid; }
+        .question-number { font-weight: bold; color: #1e40af; margin-right: 8px; }
+        .question-text { font-weight: bold; margin-bottom: 10px; display: inline; }
+        .answers { margin-left: 30px; }
+        .answer { margin-bottom: 8px; }
+        .answer-letter { font-weight: bold; margin-right: 8px; }
+        @page { size: A4; margin: 2cm; }
+      </style>
+    </head>
+    <body>
+      <h1>${title}</h1>
+      <div class="meta">Дата формирования: ${date}<br>Всего вопросов: ${questionsToExport.length}</div>
+  `
+  
+  questionsToExport.forEach((q, index) => {
+    html += `
+      <div class="question">
+        <div><span class="question-number">${index + 1}.</span> <span class="question-text">${q.name}</span></div>
+        <div class="answers">
+    `
+    
+    q.responses.forEach((resp, respIndex) => {
+      const letter = respIndex+1+'. ' // A, B, C, D...
+      if (resp.correct)
+      html += `
+        <div class="answer">
+          <span class="answer-letter">${letter} ${resp.name}</span> 
+        </div>
+      `
+      else 
+            html += `
+        <div class="answer">
+          <span class="answer-letter">${letter}</span> ${resp.name}
+        </div>
+      `
+    })
+    
+    html += `
+        </div>
+      </div>
+    `
+  })
+  
+  html += `
+    </body>
+    </html>
+  `
+  
+  const blob = new Blob(['\ufeff', html], {
+    type: 'application/msword'
+  })
+  
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `Тест_${title.replace(/\s+/g, '_')}_${date.replace(/\./g, '-')}.doc`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+
+
 
 // ==========================================
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -316,7 +405,7 @@ const QUESTIONS = [
         "name": "Укажите особенности представления проектной документации (результатов инженерных изысканий) для проведения повторной экспертизы: ",
         "link": null,
         "answerIds": [],
-         "info": "Три самых длинных",
+        "info": "Три самых длинных",
         "correctly": false,
         "parent_id": null,
         "responses": [
@@ -356,7 +445,7 @@ const QUESTIONS = [
         "id": "438058",
         "name": "Каковы последствия непредставления правоустанавливающих документов на земельный участок при направлении проектной документации на экспертизу? ",
         "link": null,
-         "info": "Все с не. Ни на что не влияет",
+        "info": "Все с не. Ни на что не влияет",
         "answerIds": [],
         "correctly": false,
         "parent_id": null,
@@ -397,7 +486,7 @@ const QUESTIONS = [
         "id": "438084",
         "name": "Какие факторы определяют необходимость проведения в отношении проектной документации государственной экспертизы?",
         "link": null,
-         "info": "Ну тут вообще все просто. Вертикаль. Либо космос либо под землю. Ебать-копать, в смысле копать-летать",
+        "info": "Ну тут вообще все просто. Вертикаль. Либо космос либо под землю. Ебать-копать, в смысле копать-летать",
         "answerIds": [],
         "correctly": false,
         "parent_id": null,
@@ -438,7 +527,7 @@ const QUESTIONS = [
         "id": "438072",
         "name": "В отношении какой документации проведение экспертизы проектной документации не предусмотрено?",
         "link": null,
-         "info": "От обратного - предусмотрено только на капремонт!",
+        "info": "От обратного - предусмотрено только на капремонт!",
         "answerIds": [],
         "correctly": false,
         "parent_id": null,
@@ -476,7 +565,7 @@ const QUESTIONS = [
         "link": null,
         "answerIds": [],
         "correctly": false,
-          "info": "Все начинается с 'необходимо учитывать'",
+        "info": "Все начинается с 'необходимо учитывать'",
         "parent_id": null,
         "responses": [
             {
@@ -669,7 +758,7 @@ const QUESTIONS = [
         "id": "437776",
         "name": "В каких случаях при подготовке проектной документации не требуется членство в саморегулируемых организациях в области архитектурно-строительного проектирования?",
         "link": null,
-               "info": "СРО не надо если это государство, а государство это муниципалы и коммерция с БОЛЬШЕ 50%",
+        "info": "СРО не надо если это государство, а государство это муниципалы и коммерция с БОЛЬШЕ 50%",
         "answerIds": [],
         "correctly": false,
         "parent_id": null,
@@ -710,7 +799,7 @@ const QUESTIONS = [
         "id": "437713",
         "name": "Перечислите документы, в результате применения которых обеспечивается соблюдение требований Федерального закона от 30 декабря 2009 г. № 384-ФЗ \"Технический регламент о безопасности зданий и сооружений\"",
         "link": null,
-               "info": "Выучть наизусть. Отрасль не нужна",
+        "info": "Выучть наизусть. Отрасль не нужна",
         "answerIds": [],
         "correctly": false,
         "parent_id": null,
@@ -751,7 +840,7 @@ const QUESTIONS = [
         "id": "437706",
         "name": "Какие функции выполняет орган по сертификации?",
         "link": null,
-               "info": "Орган это член. А когда член очень короткий или очень длинный - плохо, хорошо когда член нормальный. Исключаем короткий и длинный ответы",
+        "info": "Орган это член. А когда член очень короткий или очень длинный - плохо, хорошо когда член нормальный. Исключаем короткий и длинный ответы",
         "answerIds": [],
         "correctly": false,
         "parent_id": null,
@@ -792,7 +881,7 @@ const QUESTIONS = [
         "id": "437625",
         "name": "В какой форме осуществляется обязательная оценка соответствия зданий, сооружений, процессов, осуществляемых на всех этапах их жизненного цикла, за исключением эксплуатации зданий, сооружений",
         "link": null,
-               "info": "Зубрить",
+        "info": "Зубрить",
         "answerIds": [],
         "correctly": false,
         "parent_id": null,
@@ -833,7 +922,7 @@ const QUESTIONS = [
         "id": "437520",
         "name": "Каким из перечисленных требований должен\nсоответствовать эксперт для переаттестации на право\nподготовки заключений экспертизы проектной \nдокументации и (или) результатов инженерных \nизысканий?",
         "link": null,
-               "info": "Русский несудимый и все знать. Какой он эксперт если не знает. В неправильный ответах ничего про знать нет",
+        "info": "Русский несудимый и все знать. Какой он эксперт если не знает. В неправильный ответах ничего про знать нет",
         "answerIds": [],
         "correctly": false,
         "parent_id": null,
@@ -875,7 +964,7 @@ const QUESTIONS = [
         "name": "Какие сведения содержит раздел проектной документации \"Проект организации строительства\" (на объекты капитального строительства производственного\nи непроизводственного назначения)?",
         "link": null,
         "answerIds": [],
-               "info": "Учить",
+        "info": "Учить",
         "correctly": false,
         "parent_id": null,
         "responses": [
@@ -911,7 +1000,7 @@ const QUESTIONS = [
         "name": "Какие сведения должно содержать заключение в отношении подписавших его экспертов?",
         "link": null,
         "answerIds": [],
-               "info": "Сложно...Заключение это результат. Зачем эксперта привлекали - не нужно, плоздно уже, раньше надо было думать, уже результтат есть, должность тоже не надо, какая разница кто он там, галвное что эксперт",
+        "info": "Сложно...Заключение это результат. Зачем эксперта привлекали - не нужно, плоздно уже, раньше надо было думать, уже результтат есть, должность тоже не надо, какая разница кто он там, галвное что эксперт",
         "correctly": false,
         "parent_id": null,
         "responses": [
@@ -1022,7 +1111,7 @@ const QUESTIONS = [
             }
         ]
     },
-    
+
     {
         "id": "438144",
         "name": "В каких случаях и в каком порядке допускается оперативное внесение изменений в ходе проведения оценки соответствия?",
@@ -9309,3 +9398,39 @@ const QUESTIONS = [
 
 
 </script>
+
+
+
+<style>
+@media print {
+  body { 
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print\\:hidden {
+    display: none !important;
+  }
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+  .print\\:border {
+    border: 1px solid #d1d5db !important;
+  }
+  .print\\:border-gray-300 {
+    border-color: #d1d5db !important;
+  }
+  .print\\:flex {
+    display: flex !important;
+  }
+  .print\\:hover\\:bg-white:hover {
+    background-color: white !important;
+  }
+  .print\\:bg-gray-100 {
+    background-color: #f3f4f6 !important;
+  }
+  .print\\:text-gray-700 {
+    color: #374151 !important;
+  }
+}
+</style>
