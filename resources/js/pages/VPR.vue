@@ -42,14 +42,14 @@
                     <div v-for="(q, index) in activeQuestions" :key="q.id" class="bg-white p-5 rounded-xl shadow">
                         <h3 class="font-semibold text-lg text-gray-800 mb-3">{{ index + 1 }}. &nbsp; {{ q.name }}</h3>
                         <h3 v-if="q.info && phase != 'test'" class="font-semibold text-sm text-gray-800 mb-3">{{ q.info
-                            }}</h3>
+                        }}</h3>
 
                         <div class="space-y-2">
                             <label v-for="resp in q.responses" :key="resp.id"
                                 class="flex items-center p-3 border rounded-lg cursor-pointer transition hover:bg-gray-50"
                                 :class="getOptionClasses(q, resp)">
                                 <input type="checkbox" :name="'question-' + q.id" :value="resp.id"
-                                    v-model="answers[q.id]" :disabled="phase === 'results'"
+                                    v-model="answers[q.id]" :disabled="phase !== 'test'" 
                                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
                                 <span class="ml-3 text-gray-700">{{ resp.name }}</span>
 
@@ -90,7 +90,7 @@
                 <div class="text-5xl font-extrabold text-blue-600 mb-2">{{ results.correct }} / {{ results.total }}
                 </div>
                 <p class="text-gray-600 mb-4">Правильных ответов: {{ Math.round(results.correct / results.total * 100)
-                    }}%</p>
+                }}%</p>
                 <div class="w-full bg-gray-200 rounded-full h-4 mb-2 overflow-hidden">
                     <div class="bg-green-500 h-4 rounded-full transition-all duration-500"
                         :style="{ width: `${(results.correct / results.total) * 100}%` }"></div>
@@ -127,11 +127,11 @@ const answeredCount = computed(() => {
 
 
 const exportToWord = (source) => {
-  const questionsToExport = source === 'all' ? QUESTIONS : selectedQuestions.value
-  const title = source === 'all' ? 'Все вопросы теста' : 'Вопросы для тестирования'
-  const date = new Date().toLocaleDateString('ru-RU')
-  
-  let html = `
+    const questionsToExport = source === 'all' ? QUESTIONS : selectedQuestions.value
+    const title = source === 'all' ? 'Все вопросы теста' : 'Вопросы для тестирования'
+    const date = new Date().toLocaleDateString('ru-RU')
+
+    let html = `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
     <head>
       <meta charset='utf-8'>
@@ -144,8 +144,9 @@ const exportToWord = (source) => {
         .question-number { font-weight: bold; color: #1e40af; margin-right: 8px; }
         .question-text { font-weight: bold; margin-bottom: 10px; display: inline; }
         .answers { margin-left: 30px; }
-        .answer { margin-bottom: 8px; }
+        .answer { margin-bottom: 18px; }
         .answer-letter { font-weight: bold; margin-right: 8px; }
+        .answer-letter1 { font-weight: bold; margin-right: 8px;font-size: 16pt }
         @page { size: A4; margin: 2cm; }
       </style>
     </head>
@@ -153,53 +154,53 @@ const exportToWord = (source) => {
       <h1>${title}</h1>
       <div class="meta">Дата формирования: ${date}<br>Всего вопросов: ${questionsToExport.length}</div>
   `
-  
-  questionsToExport.forEach((q, index) => {
-    html += `
+
+    questionsToExport.forEach((q, index) => {
+        html += `
       <div class="question">
         <div><span class="question-number">${index + 1}.</span> <span class="question-text">${q.name}</span></div>
         <div class="answers">
     `
-    
-    q.responses.forEach((resp, respIndex) => {
-      const letter = respIndex+1+'. ' // A, B, C, D...
-      if (resp.correct)
-      html += `
+
+        q.responses.forEach((resp, respIndex) => {
+            const letter = respIndex + 1 + '. ' // A, B, C, D...
+            if (resp.correct)
+                html += `
         <div class="answer">
-          <span class="answer-letter">${letter} ${resp.name}</span> 
+          <span class="answer-letter1">${letter} ${resp.name}</span> 
         </div>
       `
-      else 
-            html += `
+            else
+                html += `
         <div class="answer">
           <span class="answer-letter">${letter}</span> ${resp.name}
         </div>
       `
-    })
-    
-    html += `
+        })
+
+        html += `
         </div>
       </div>
     `
-  })
-  
-  html += `
+    })
+
+    html += `
     </body>
     </html>
   `
-  
-  const blob = new Blob(['\ufeff', html], {
-    type: 'application/msword'
-  })
-  
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `Тест_${title.replace(/\s+/g, '_')}_${date.replace(/\./g, '-')}.doc`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+
+    const blob = new Blob(['\ufeff', html], {
+        type: 'application/msword'
+    })
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `Тест_${title.replace(/\s+/g, '_')}_${date.replace(/\./g, '-')}.doc`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
 }
 
 
@@ -231,9 +232,13 @@ const isQuestionCorrect = (question) => {
 
 const getOptionClasses = (question, response) => {
     if (phase.value !== 'results') {
-        let d = answers.value[question.id]?.includes(response.id)
-            ? 'bg-blue-50 border-blue-400'
-            : 'border-gray-200'
+        let d = 'border-gray-200'
+        if (phase.value == 'test') {
+            d = answers.value[question.id]?.includes(response.id)
+                ? 'bg-blue-50 border-blue-400'
+                : 'border-gray-200'
+        }
+
         if (response.correct && phase.value == 'setup') d = d + ' font-bold'
         return d
     }
@@ -9403,34 +9408,42 @@ const QUESTIONS = [
 
 <style>
 @media print {
-  body { 
-    background: white !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print\\:hidden {
-    display: none !important;
-  }
-  .print\\:shadow-none {
-    box-shadow: none !important;
-  }
-  .print\\:border {
-    border: 1px solid #d1d5db !important;
-  }
-  .print\\:border-gray-300 {
-    border-color: #d1d5db !important;
-  }
-  .print\\:flex {
-    display: flex !important;
-  }
-  .print\\:hover\\:bg-white:hover {
-    background-color: white !important;
-  }
-  .print\\:bg-gray-100 {
-    background-color: #f3f4f6 !important;
-  }
-  .print\\:text-gray-700 {
-    color: #374151 !important;
-  }
+    body {
+        background: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .print\\:hidden {
+        display: none !important;
+    }
+
+    .print\\:shadow-none {
+        box-shadow: none !important;
+    }
+
+    .print\\:border {
+        border: 1px solid #d1d5db !important;
+    }
+
+    .print\\:border-gray-300 {
+        border-color: #d1d5db !important;
+    }
+
+    .print\\:flex {
+        display: flex !important;
+    }
+
+    .print\\:hover\\:bg-white:hover {
+        background-color: white !important;
+    }
+
+    .print\\:bg-gray-100 {
+        background-color: #f3f4f6 !important;
+    }
+
+    .print\\:text-gray-700 {
+        color: #374151 !important;
+    }
 }
 </style>
