@@ -226,7 +226,7 @@ onMounted(() => {
         lockMessage.value = ctx?.data?.msg
 
         openLockResult.value.success = true
-        openLockResult.value.msg = "Ключ добавлен"
+        openLockResult.value.msg = ctx?.data?.msg
         setTimeout(() => {
             openLockResult.value = {}
         }, 15000)
@@ -243,7 +243,7 @@ onMounted(() => {
         lockMessage.value = ctx?.data?.msg
 
          openLockResult.value.success = true
-        openLockResult.value.msg = "Ключ изменен"
+        openLockResult.value.msg =  ctx?.data?.msg
         setTimeout(() => {
             openLockResult.value = {}
         }, 15000)

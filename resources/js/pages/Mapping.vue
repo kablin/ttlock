@@ -71,7 +71,6 @@ onMounted(async () => {
   //получение сообщений по веб.сокет
   sub.on('publication', (ctx) => {
     isSyncing.value = false
-    console.log('11112')
     router.reload({
     
       preserveState: false,

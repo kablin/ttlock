@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
+use App\Http\Middleware\CodesCounter;
 Route::get('/', function () {
   return Inertia::render('Welcome');
 })->name('home');
@@ -142,20 +142,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
   //  api
-
-  Route::post('/v1/get_lock_list', [\App\Http\Controllers\CallbackApiController::class, 'getLockList'])->name('getLockList');
-  Route::post('/v1/open_lock', [\App\Http\Controllers\CallbackApiController::class, 'openLock'])->name('openLock');
-  Route::post('/v1/get_codes_list', [\App\Http\Controllers\CallbackApiController::class, 'getCodesList'])->name('getCodesList');
-  Route::post('/v1/delete_code_from_lock', [\App\Http\Controllers\CallbackApiController::class, 'deleteCode'])->name('deleteKey');
-  Route::post('/v1/add_code_to_lock', [\App\Http\Controllers\CallbackApiController::class, 'addCodeToLock'])->name('addCodeToLock');
-  Route::post('/v1/change_code', [\App\Http\Controllers\CallbackApiController::class, 'changeCode'])->name('changeCode');
-
-
+  Route::middleware([CodesCounter::class])->group(function () {
+    Route::post('/v1/get_lock_list', [\App\Http\Controllers\CallbackApiController::class, 'getLockList'])->name('getLockList');
+    Route::post('/v1/open_lock', [\App\Http\Controllers\CallbackApiController::class, 'openLock'])->name('openLock');
+    Route::post('/v1/get_codes_list', [\App\Http\Controllers\CallbackApiController::class, 'getCodesList'])->name('getCodesList');
+    Route::post('/v1/delete_code_from_lock', [\App\Http\Controllers\CallbackApiController::class, 'deleteCode'])->name('deleteKey');
+    Route::post('/v1/add_code_to_lock', [\App\Http\Controllers\CallbackApiController::class, 'addCodeToLock'])->name('addCodeToLock');
+    Route::post('/v1/change_code', [\App\Http\Controllers\CallbackApiController::class, 'changeCode'])->name('changeCode');
+  });
   Route::post('/lock_codes', [\App\Http\Controllers\CallbackApiController::class, 'createBooking'])->name('test');
 
 
 
-  
+
 
 
   // Route::post('/v1/get_job_result/{job_id}', [\App\Http\Controllers\CallbackApiController::class, 'getJobResult'])->name('getJobResult');
@@ -168,10 +167,6 @@ Route::get('/testdel', [\App\Http\Controllers\LockController::class, 'testdel'])
 Route::get('/testlist', [\App\Http\Controllers\LockController::class, 'testlist'])->name('testlist');
 
 
-
-Route::get('/vpr', function () {
-  return Inertia::render('VPR');
-})->name('vpr');
 
 
 
