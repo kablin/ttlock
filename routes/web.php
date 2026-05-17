@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Middleware\CodesCounter;
+use Illuminate\Http\Request;
 Route::get('/', function () {
   return Inertia::render('Welcome');
 })->name('home');
@@ -161,14 +162,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 
-
+/*
 Route::get('/test', [\App\Http\Controllers\LockController::class, 'test'])->name('test2');
 Route::get('/testdel', [\App\Http\Controllers\LockController::class, 'testdel'])->name('testdel');
 Route::get('/testlist', [\App\Http\Controllers\LockController::class, 'testlist'])->name('testlist');
+*/
 
 
+Route::get('/session/refresh', function (Request $request) {
+     $request->session()->regenerateToken();
 
-
+    return response()->json();
+})->middleware('web'); 
 
 
 
