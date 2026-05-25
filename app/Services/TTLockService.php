@@ -544,7 +544,7 @@ class TTLockService
 				$data = json_decode($r->body(), true);
 				// если ошибка токена, то пробуем его обновить
 				if (isset($data['errcode']) && $data['errcode'] != 0) {
-					if ($data['errcode'] == 10003) {
+					if ($data['errcode'] == 10003 || $data['errcode'] == 10004) {
 						if ($credential = $this->user?->credential)
 							// обновляем
 							updateRefreshToken($credential);
