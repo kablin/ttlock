@@ -35,7 +35,7 @@ class UserForm
                 TextInput::make('callback')
                     ->required()
                     ->default(''),
-                DateTimePicker::make('last_query'),
+                DateTimePicker::make('last_query')->required(),
                 TextInput::make('source')
                     ->default('bitrix'),
                 Textarea::make('two_factor_secret')
