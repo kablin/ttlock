@@ -7,6 +7,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 
+use Illuminate\Validation\Rules\Password;
+
 class UserForm
 {
     public static function configure(Schema $schema): Schema
@@ -20,9 +22,16 @@ class UserForm
                     ->email()
                     ->required(),
                 DateTimePicker::make('email_verified_at'),
-               /* TextInput::make('password')
-                    ->password(),*/
-       
+                TextInput::make('password')
+                    ->password()
+                    ->label('Пароль')
+                    ->required(fn(string $operation): bool => $operation === 'create')
+                    ->rule(Password::default())
+                    ->autocomplete(false)
+                    ->dehydrated(fn(?string $state): bool => filled($state))
+                    ->helperText('Оставьте пустым, чтобы сохранить текущий пароль')
+                    ->maxLength(255),
+
                 TextInput::make('callback')
                     ->required()
                     ->default(''),
