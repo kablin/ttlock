@@ -133,7 +133,11 @@ class AddKeyToLockJob implements ShouldQueue
             $service =  new TTLockService($this->current_job->user);
             $_begin = $this->begin;
             $_end = $this->end;
-            if ($this->utc) {
+
+            if ($this->current_job->user->utc) {
+                $_begin = (new DateTime($this->begin))->modify($this->current_job->user->utc . ' hours')->format('Y-m-d H:i');
+                $_end = (new DateTime($this->end))->modify($this->current_job->user->utc . ' hours')->format('Y-m-d H:i');
+            } else if ($this->utc) {
                 $_begin = (new DateTime($this->begin))->modify($this->utc . ' hours')->format('Y-m-d H:i');
                 $_end = (new DateTime($this->end))->modify($this->utc . ' hours')->format('Y-m-d H:i');
             }

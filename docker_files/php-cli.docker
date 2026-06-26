@@ -3,13 +3,16 @@ FROM php:8.2-cli
 ARG USER_ID
 ARG GROUP_ID
 
-RUN apt-get update &&   apt-get install -y libxml2-dev  libpng-dev  libgd-dev  
+RUN apt-get update &&   apt-get install -y libxml2-dev  libpng-dev  libgd-dev  libicu-dev
 RUN apt-get update && apt-get install -y libzip-dev zip unzip libpq-dev libjpeg-dev
 RUN php -r "copy ('https://getcomposer.org/installer', '/var/composer-setup.php');" && php /var/composer-setup.php --install-dir=/usr/bin/ --filename=composer
 RUN docker-php-ext-install soap
 RUN docker-php-ext-configure pgsql -with-pgsql
 RUN docker-php-ext-install  pdo pdo_pgsql  pgsql zip
 
+RUN docker-php-ext-configure intl 
+RUN docker-php-ext-install intl 
+RUN docker-php-ext-enable intl
 
 RUN   docker-php-ext-configure gd \
         --with-jpeg 
