@@ -228,7 +228,7 @@ class CallbackApiController extends Controller
             $validator = Validator::make($request->all(), [
                 'begin' => 'date_format:Y-m-d H:i',
                 'end' => 'date_format:Y-m-d H:i',
-                'code' => 'nullable|integer',
+                'code' => 'nullable|min_digits:3',
                 'code_name' => 'nullable|string',
                 'tag' => 'nullable',
                 'utc' => 'nullable|integer',
