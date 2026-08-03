@@ -27,13 +27,28 @@ class AddKeyToLockJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, Batchable, SerializesModels;
 
 
-    public $tries = 1500;       // Лимит попыток (вместо вашего ручного счетчика)
-    public $backoff = 180;    // Задержка 3 минуты между попытками
+    public $tries = 24;         // Было 1500: при паузе 3 мин это 75 часов долбёжки TTLock по одному замку
     public $timeout = 120;
+
+    // Ошибки TTLock, которые повтором не лечатся: код нужной длины сам не появится,
+    // неверный параметр тоже. Их ретраить бессмысленно — только жжём квоту API.
+    private const PERMANENT_ERRORS = [-3006, -3];
+
+    /**
+     * Растущая пауза между попытками: 3 мин → 10 мин → 30 мин → 1 час.
+     * 24 попытки покрывают ~17 часов (замок успеет ожить за ночь),
+     * но стоят 24 вызова к TTLock вместо 480 в сутки при фиксированных 3 минутах.
+     */
+    public function backoff(): array
+    {
+        return [180, 180, 180, 600, 600, 600, 1800, 1800, 1800, 3600];
+    }
 
     private $data = [];
     private $parent_job;
     private $current_job;
+
+    private $_code;
 
     protected $dontReport = [\RuntimeException::class, \Exception::class];
     /**
@@ -82,6 +97,13 @@ class AddKeyToLockJob implements ShouldQueue
 
     public function handle(): void
     {
+
+
+        $this->_code = (string)$this->code;
+        if (strlen($this->_code) == 3)  $this->_code = '0' . $this->_code;
+        else  if (strlen($this->_code) == 2)  $this->_code = '00' . $this->_code;
+        else  if (strlen($this->_code) == 1)  $this->_code = '000' . $this->_code;
+
 
         if ($this->current_job) {
 
@@ -143,7 +165,7 @@ class AddKeyToLockJob implements ShouldQueue
             }
 
             // === ПРОВЕРКА: не изменился ли код в процессе? ===
-            $this->batchId ?    $finalCode = Cache::get("final_code:{$this->batchId}", $this->code) : $finalCode = $this->code;
+            $this->batchId ?    $finalCode = Cache::get("final_code:{$this->batchId}", $this->_code) : $finalCode = $this->_code;
 
             $this->data['code'] = $finalCode;
             $key = $service->newKey($finalCode, $lock, $this->code_name, $_begin, $_end);
@@ -176,7 +198,19 @@ class AddKeyToLockJob implements ShouldQueue
                 $this->data['msg'] = "Ключ в замок " . $lock->lock_alias . " успешно загружен :" . $finalCode . "#";
             } else if ($key['error_code'] != -3007) {
                 $this->data['status'] = false;
-                $this->data['msg'] = "Ошибка загрузки ключа в замок {$lock->lock_alias}. " . $key['msg'] . '. Следующая попытка загрузки ключа через 3 минуты';
+
+                // Неустранимая ошибка — сдаёмся сразу, без повторов.
+                if (in_array((int) $key['error_code'], self::PERMANENT_ERRORS, true)) {
+                    $this->data['msg'] = "Ошибка загрузки ключа в замок {$lock->lock_alias}. " . $key['msg'];
+                    $this->callback();
+                    $this->sendToRC();
+                    $this->fail(new \RuntimeException(
+                        "Неустранимая ошибка TTLock ({$key['error_code']}) на замке {$this->lock_id}: {$key['msg']}"
+                    ));
+                    return;
+                }
+
+                $this->data['msg'] = "Ошибка загрузки ключа в замок {$lock->lock_alias}. " . $key['msg'] . '. Следующая попытка загрузки ключа позже';
 
                 $this->callback();
 
